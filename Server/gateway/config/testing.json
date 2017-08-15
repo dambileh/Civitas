@@ -1,0 +1,18 @@
+{
+  "debug": false,
+  "mongo": {
+    //todo host to be updated
+
+    "database_host" : "",
+    "options" : {
+      "config":{"autoIndex": true}
+    }
+  },
+  "logging" : [
+    {
+      "name": "file",
+      "level": "debug",
+      "filename": "/var/log/pat/test.log"
+    }
+  ]
+}
