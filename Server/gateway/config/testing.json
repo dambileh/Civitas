@@ -1,18 +1,13 @@
 {
-  "debug": false,
-  "mongo": {
-    //todo host to be updated
-
-    "database_host" : "",
-    "options" : {
-      "config":{"autoIndex": true}
+  "mounteBank": {
+    "host": "127.0.0.1",
+    "port": 2525,
+    "http_verb": {
+      "post": "POST",
+      "delete": "DELETE",
+      "head": "HEAD",
+      "put": "PUT",
+      "get": "GET"
     }
-  },
-  "logging" : [
-    {
-      "name": "file",
-      "level": "debug",
-      "filename": "/var/log/pat/test.log"
-    }
-  ]
+  }
 }

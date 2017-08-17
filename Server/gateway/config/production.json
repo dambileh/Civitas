@@ -1,36 +1,8 @@
 {
-    "gelf": {
-        "facility": "PatProduction",
-        "logging_level": 6
+    "server": {
+        "port": 4000
     },
-    "mongo": {
-        //todo host to be updated
-
-        "database_host" : "",
-        "options" : {
-            //Todo rs_name to be added
-            "replset": { "rs_name": "" },
-            "config":{"autoIndex": false}
-        }
-    },
-    "logging" : [
-        {
-            "name": "gelf",
-            "level": "info",
-            "handleExceptions": true,
-            "graylog": {
-                "servers": [{"host": "127.0.0.1", "port": 12201}],
-                "facility": "Pat",
-                "bufferSize": 1400
-            }
-        }
-    ],
-    "amqp": {
-        "connection": {
-            "details": {
-                //todo host to be updated
-                "host" : ""
-            }
-        }
+    "exposedServer": {
+        "host": "localhost"
     }
 }

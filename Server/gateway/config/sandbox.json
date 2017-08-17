@@ -1,22 +1,3 @@
 {
-    "gelf": {
-        "facility": "PatSandbox"
-    },
-    "mongo": {
-        //todo host to be updated
 
-        "database_host" : "",
-        "options" : {
-            "replset": { "rs_name": "BetaReplica001" }
-        }
-    },
-    "amqp" : {
-        "connection" : {
-            "details" : {
-                //todo host to be updated
-
-                "host" : ""
-            }
-        }
-    }
 }

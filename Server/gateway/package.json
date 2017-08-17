@@ -9,18 +9,13 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "amqplib": "^0.4.2",
     "async": "2.0.0-rc.5",
     "config": "^1.21.0",
     "connect": "^3.2.0",
-    "gelf": "1.0.x",
     "js-yaml": "^3.3.0",
     "lodash": "^4.17.4",
-    "mongoose": "4.4.13",
     "newrelic": "1.28.0",
     "swagger-tools": "0.9.*",
-    "winston": "^2.2.0",
-    "winston-graylog2": "^0.4.3",
     "z-schema": "3.17.0"
   },
   "devDependencies": {
