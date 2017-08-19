@@ -1,0 +1,12 @@
+{
+    "server": {
+        "port": 3045
+    },
+    "exposedServer": {
+        "host": "localhost"
+    },
+    "getListExposedServer": {
+        "host": "localhost",
+        "port": 3045
+    }
+}
