@@ -1,10 +1,10 @@
 'use strict';
 
-var ValidationError = require('../libs/error/ValidationError');
-var ResourceNotFoundError = require('../libs/error/ResourceNotFoundError');
-var AuthorizationError = require('../libs/error/AuthorizationError');
-var RuntimeError = require('../libs/error/RuntimeError');
-var AppUtil = require('../libs/AppUtil');
+var ValidationError = require('./error/ValidationError');
+var ResourceNotFoundError = require('./error/ResourceNotFoundError');
+var AuthorizationError = require('./error/AuthorizationError');
+var RuntimeError = require('./error/RuntimeError');
+var AppUtil = require('./AppUtil');
 
 /**
  * An instance of the service helper

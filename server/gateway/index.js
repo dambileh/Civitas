@@ -7,8 +7,7 @@ var jsyaml = require('js-yaml');
 var fs = require('fs');
 var serverPort = 4000;
 var config = require('config');
-var ErrorHandler = require('./libs/error/ErrorHandler');
-var SubscriptionManager = require('./managers/SubscriptionManager');
+var ErrorHandler = require('../libs/error/ErrorHandler');
 
 // swaggerRouter configuration
 var options = {

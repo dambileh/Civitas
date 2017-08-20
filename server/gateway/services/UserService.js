@@ -1,13 +1,13 @@
 'use strict';
 
-var ErrorCodes = require('../libs/error/ErrorCodes');
-var ValidationError = require('../libs/error/ValidationError');
-var ResourceNotFoundError = require('../libs/error/ResourceNotFoundError');
-var AppUtil = require('../libs/AppUtil');
-var Logging = require('../libs/Logging');
+var ErrorCodes = require('../../libs/error/ErrorCodes');
+var ValidationError = require('../../libs/error/ValidationError');
+var ResourceNotFoundError = require('../../libs/error/ResourceNotFoundError');
+var AppUtil = require('../../libs/AppUtil');
+var Logging = require('../utilities/Logging');
 var config = require('config');
 var _ = require('lodash');
-var redis = require('redis');
+var PubSub = require('../../libs/PubSubAdapter');
 
 /**
  * The User Service module
@@ -23,51 +23,25 @@ module.exports = {
    */
   createUser: function(args, response, next) {
 
-    var sub = redis.createClient();
-    var pub = redis.createClient();
-
     var noteRequest = args.user.value;
 
     var request = {
-      "topic": "UserEvent",
+      "channel": "UserEvent",
       "type": "crud",
       "action": "create",
       "payload": noteRequest
     };
 
-    sub.subscribe("UserCompletedEvent");
-    
-    pub.publish("UserEvent", JSON.stringify(request));
-
-    // sub.subscribe("UserEvent");
-
-
-    var waiting = true;
-    var responseBody = null;
-    sub.on('message', function(channel, message) {
-
-      responseBody = JSON.parse(message);
-      console.log("waiting is over");
-      waiting = false;
-    });
-
-    var returnResponse = function () {
-
-      response.statusCode = 201;
-      response.setHeader('Content-Type', 'application/json');
-      return response.end(JSON.stringify(responseBody));
-    };
-
-    var interval = setInterval(
-      function(){
-        if (!waiting) {
-          clearInterval(interval);
-          returnResponse();
+    PubSub
+      .publish("UserEvent", JSON.stringify(request))
+      .subscribe("UserCompletedEvent", true, function handleCompleted(err, completed) {
+        if (err) {
+          return next(err);
         }
-      },
-      100
-    );
-
+        response.statusCode = 201;
+        response.setHeader('Content-Type', 'application/json');
+        return response.end(JSON.stringify(completed));
+      });
   },
   
   // /**

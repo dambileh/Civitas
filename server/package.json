@@ -1,0 +1,17 @@
+{
+  "name": "Civitas-Gateway-Service",
+  "version": "1.0.0",
+  "description": "Micro service responsible for sending messages to mobile applications",
+  "main": "index.js",
+  "keywords": [
+    "swagger"
+  ],
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "redis": "^2.1.0"
+  },
+  "devDependencies": {
+
+  }
+}

@@ -1,9 +1,8 @@
 'use strict';
 
-var ServiceHelper = require('../libs/ServiceHelper');
-var AppUtil = require('../libs/AppUtil');
-var Logger = require('../libs/Logging');
-var ObjectHelper = require('../libs/ObjectHelper');
+var ServiceHelper = require('./ServiceHelper');
+var AppUtil = require('./AppUtil');
+var ObjectHelper = require('./ObjectHelper');
 
 /**
  * The Service Driver module
@@ -99,11 +98,6 @@ ServiceDriver.prototype.makeBasicCall = function makeBasicCall(funcHandleRespons
           responseData = JSON.parse(data);
         } catch (exception) {
           var hostname = (request && request._headers && request._headers.host) ? request._headers.host : 'not_found';
-          Logger.logAction(
-            Logger.logLevels.ERROR,
-            'Could not parse response for call ' + hostname + request.path,
-            data
-          );
           var parseError = {
             message: 'An error occurred while parsing the response: ' + exception.message,
             statusCode: -1
@@ -111,12 +105,6 @@ ServiceDriver.prototype.makeBasicCall = function makeBasicCall(funcHandleRespons
           return callback(parseError, null, null);
         }
       }
-      Logger.logAction(
-        Logger.logLevels.INFO,
-        'The end of the response from Triage for route [' + request.path + '] as a '
-        + request.method + ' with the following response: ' + data + ' And response Headers: '
-        + JSON.stringify(request._headers)
-      );
       return funcHandleResponse(response, responseData, callback);
     });
   });
@@ -126,11 +114,6 @@ ServiceDriver.prototype.makeBasicCall = function makeBasicCall(funcHandleRespons
     // Set the flag for when there is a timeout.
     didTimeout = true;
     var hostname = (request && request._headers && request._headers.host) ? request._headers.host : 'not_found';
-    Logger.logAction(
-      Logger.logLevels.ERROR,
-      'Time out when making call ' + hostname + request.path + '. Time out value set as '
-      + config.request_timeout
-    );
 
     // Abort the request due to having reached the timeout limit.
     request.abort();
@@ -139,11 +122,6 @@ ServiceDriver.prototype.makeBasicCall = function makeBasicCall(funcHandleRespons
   request.on('error', function requestOnErrorCallback(error) {
 
     var hostname = (request && request._headers && request._headers.host) ? request._headers.host : 'not_found';
-    Logger.logAction(
-      Logger.logLevels.ERROR,
-      'Failure when making call ' + hostname + request.path,
-      error
-    );
 
     var message = 'RequestError';
 
@@ -160,7 +138,6 @@ ServiceDriver.prototype.makeBasicCall = function makeBasicCall(funcHandleRespons
     var reqError = {
       message: message
     };
-1 February 2017
     return callback(reqError, null, null);
   });
   request.end();
@@ -196,11 +173,6 @@ ServiceDriver.prototype.post = function post(payload, funcHandleResponse, callba
           responseData = JSON.parse(data);
         } catch (exception) {
           var hostname = (request && request._headers && request._headers.host) ? request._headers.host : 'not_found';
-          Logger.logAction(
-            Logger.logLevels.ERROR,
-            'Could not parse response for call ' + hostname + request.path,
-            data
-          );
           var parseError = {
             message: 'An error occurred while parsing the response: ' + exception.message,
             statusCode: -1
@@ -208,12 +180,6 @@ ServiceDriver.prototype.post = function post(payload, funcHandleResponse, callba
           return callback(parseError, null, null);
         }
       }
-      Logger.logAction(
-        Logger.logLevels.INFO,
-        'The end of the response from Triage for route [' + request.path + '] as a '
-        + request.method + ' with the following response: ' + data + ' And response Headers: '
-        + JSON.stringify(request._headers)
-      );
       return funcHandleResponse(response, responseData, callback);
 
     });
@@ -223,11 +189,6 @@ ServiceDriver.prototype.post = function post(payload, funcHandleResponse, callba
     // Set the flag for when there is a timeout.
     didTimeout = true;
     var hostname = (request && request._headers && request._headers.host) ? request._headers.host : 'not_found';
-    Logger.logAction(
-      Logger.logLevels.ERROR,
-      'Time out when making call ' + hostname + request.path + '. Time out value set as '
-      + config.request_timeout
-    );
 
     // Abort the request due to having reached the timeout limit.
     request.abort();
@@ -235,11 +196,6 @@ ServiceDriver.prototype.post = function post(payload, funcHandleResponse, callba
 
   request.on('error', function requestOnErrorCallback(error) {
     var hostname = (request && request._headers && request._headers.host) ? request._headers.host : 'not_found';
-    Logger.logAction(
-      Logger.logLevels.ERROR,
-      'Failure when making call ' + hostname + request.path,
-      error
-    );
 
     var message = 'RequestError';
 
@@ -265,11 +221,6 @@ ServiceDriver.prototype.post = function post(payload, funcHandleResponse, callba
   if (typeof payload != 'string') {
     payload = JSON.stringify(payload);
   }
-
-  Logger.logAction(
-    Logger.logLevels.DEBUG,
-    'Calling Triage as a POST with the following payload body: ' + payload
-  );
 
   request.end(payload);
 };

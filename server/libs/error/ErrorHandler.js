@@ -1,8 +1,7 @@
 'use strict';
 
 var ServerError = require('./ServerError');
-var logging = require('../Logging');
-var AppUtil = require('../../libs/AppUtil');
+var AppUtil = require('../AppUtil');
 
 /**
  * The module used for building and formatting the applications http error responses
@@ -36,7 +35,6 @@ module.exports = {
       // this means that it is not a validation or customs error so it has to be an internal server error
       error = _prepareServerErrorForDisplay(error, response);
     }
-    logging.logAction(logging.logLevels.ERROR, 'An error occurred', error);
     response.setHeader('Content-Type', 'application/json');
     response.end(JSON.stringify(error));
   }

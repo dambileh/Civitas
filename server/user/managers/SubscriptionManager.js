@@ -1,109 +1,70 @@
 'use strict';
 
-var logging = require('../libs//Logging');
-var AppUtil = require('../libs/AppUtil');
-var redis = require('redis');
+var logging = require('../utilities/Logging');
+var AppUtil = require('../../libs/AppUtil');
 var events = require('events');
 var internalEmitter = new events.EventEmitter();
+var PubSub = require('../../libs/PubSubAdapter');
 
 module.exports = {
-  initialize: function (topics) {
-    if (AppUtil.isUndefined(topics)) {
-      throw new Error("Subscription topics were not set");
+  initialize: function (channels) {
+    if (AppUtil.isUndefined(channels)) {
+      throw new Error("Subscription channels were not set");
     }
-    _subscribeToTopic(topics.User);
-
+    _subscribeToChannel(channels.User);
   },
   internalEmitter: internalEmitter
 };
 
-function _subscribeToTopic(topic) {
-  if (AppUtil.isUndefined(topic)) {
-    throw new Error("[topic] is required");
+function _subscribeToChannel(channel) {
+  if (AppUtil.isUndefined(channel)) {
+    throw new Error("[channel] is not set");
   }
 
-  var sub = redis.createClient();
-  var pub = redis.createClient();
+  var handleMessage = function handleMessage(err, response) {
+    if (err) {
+      return;
+    }
 
-  sub.subscribe(topic.External.Event);
-  
-  sub.on('message', function(channel, message) {
-    
-    message = JSON.parse(message);
+    var message = JSON.parse(response);
 
-    if(!_tryValidateMessage(message)) {
+    if(!_tryValidateMessage(message, channel.External.Event)) {
       return;
     }
 
     logging.logAction(
       logging.logLevels.INFO,
-      "Message [" + JSON.stringify(message) + "] was published on channel [" + channel + "]"
+      "Message [" + JSON.stringify(message) + "] was published on channel [" + channel.External.Event + "]"
     );
 
-    internalEmitter.on(topic.Internal.CreateCompletedEvent, function(response) {
-      pub.publish(topic.External.CompletedEvent, response);
-    });
-
-    internalEmitter.on(topic.Internal.UpdateCompletedEvent, function(response) {
-      pub.publish(topic.External.CompletedEvent, response);
-    });
-
-    internalEmitter.on(topic.Internal.DeleteCompletedEvent, function(response) {
-      pub.publish(topic.External.CompletedEvent, response);
-    });
-
-    internalEmitter.on(topic.Internal.GetSingleCompletedEvent, function(response) {
-      pub.publish(topic.External.CompletedEvent, response);
-    });
-
-    internalEmitter.on(topic.Internal.GetAllCompletedEvent, function(response) {
-      pub.publish(topic.External.CompletedEvent, response);
-    });
-
-    if (message.topic == topic.External.Event) {
+    if (message.channel == channel.External.Event) {
       switch (message.type) {
         case "crud":
-          switch (message.action) {
-            case "create":
-              internalEmitter.emit(topic.Internal.CreateEvent, message);
-              break;
-            case "update":
-              internalEmitter.emit(topic.Internal.UpdateEvent, message);
-              break;
-            case "delete":
-              internalEmitter.emit(topic.Internal.DeleteEvent, message);
-              break;
-            case "getSingle":
-              internalEmitter.emit(topic.Internal.GetSingleEvent, message);
-              break;
-            case "getAll":
-              internalEmitter.emit(topic.Internal.GetAllEvent, message);
-              break;
-            default:
-              logging.logAction(logging.logLevels.ERROR, "Type [%s] is not supported", message.type)
-          }
+          _emitCRUDEvents(message, channel, internalEmitter);
           break;
         default:
           logging.logAction(logging.logLevels.ERROR, "Type [%s] is not supported", message.type)
       }
     }
 
-  });
+  };
+
+  PubSub.subscribe(channel.External.Event, false, handleMessage);
 }
 
-function _tryValidateMessage(message) {
+function _tryValidateMessage(message, channel) {
   var errors = [];
 
   if (AppUtil.isUndefined(message)) {
     logging.logAction(
       logging.logLevels.ERROR,
-      "The message [" + message + "] received on channel [" + channel  + "] could not be parsed to JSON"
+      "The message [" + message + "] received from the channel [" + channel+ "] is null or undefined"
     );
     return false;
   }
 
-  if (AppUtil.isUndefined(message.topic)) {
-    errors.push("[topic] property is required");
+  if (AppUtil.isUndefined(message.channel)) {
+    errors.push("[channel] property is required");
   }
 
   if (AppUtil.isUndefined(message.type)) {
@@ -132,4 +93,70 @@ function _tryValidateMessage(message) {
   }
 
   return true;
+}
+
+function _emitCRUDEvents(message, channel, internalEmitter) {
+
+  var handleCreateCompletedEvent = function(response) {
+    PubSub.publish(channel.External.CompletedEvent, response);
+    _removeAllCRUDListeners(channel, internalEmitter);
+  };
+
+  internalEmitter.on(channel.Internal.CreateCompletedEvent, handleCreateCompletedEvent);
+
+  var handleUpdateCompletedEvent = function(response) {
+    PubSub.publish(channel.External.CompletedEvent, response);
+    _removeAllCRUDListeners(channel, internalEmitter);
+  };
+
+  internalEmitter.on(channel.Internal.UpdateCompletedEvent, handleUpdateCompletedEvent);
+
+  var handleDeleteCompletedEvent = function(response) {
+    PubSub.publish(channel.External.CompletedEvent, response);
+    _removeAllCRUDListeners(channel, internalEmitter);
+  };
+
+  internalEmitter.on(channel.Internal.DeleteCompletedEvent, handleDeleteCompletedEvent);
+
+  var handleGetSingleCompletedEvent = function(response) {
+    PubSub.publish(channel.External.CompletedEvent, response);
+    _removeAllCRUDListeners(channel, internalEmitter);
+  };
+
+  internalEmitter.on(channel.Internal.GetSingleCompletedEvent, handleGetSingleCompletedEvent);
+
+  var handleGetAllCompletedEvent = function(response) {
+    PubSub.publish(channel.External.CompletedEvent, response);
+    _removeAllCRUDListeners(channel, internalEmitter);
+  };
+
+  internalEmitter.on(channel.Internal.GetAllCompletedEvent, handleGetAllCompletedEvent);
+
+  switch (message.action) {
+    case "create":
+      internalEmitter.emit(channel.Internal.CreateEvent, message);
+      break;
+    case "update":
+      internalEmitter.emit(channel.Internal.UpdateEvent, message);
+      break;
+    case "delete":
+      internalEmitter.emit(channel.Internal.DeleteEvent, message);
+      break;
+    case "getSingle":
+      internalEmitter.emit(channel.Internal.GetSingleEvent, message);
+      break;
+    case "getAll":
+      internalEmitter.emit(channel.Internal.GetAllEvent, message);
+      break;
+    default:
+      logging.logAction(logging.logLevels.ERROR, "Type [%s] is not supported", message.type)
+  }
+}
+
+function _removeAllCRUDListeners(channel, internalEmitter) {
+  internalEmitter.removeAllListeners(channel.Internal.CreateCompletedEvent);
+  internalEmitter.removeAllListeners(channel.Internal.UpdateCompletedEvent);
+  internalEmitter.removeAllListeners(channel.Internal.DeleteCompletedEvent);
+  internalEmitter.removeAllListeners(channel.Internal.GetSingleCompletedEvent);
+  internalEmitter.removeAllListeners(channel.Internal.GetAllCompletedEvent);
 }
