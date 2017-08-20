@@ -1,0 +1,19 @@
+{
+    "server": {
+        "port": 3045
+    },
+    "exposedServer": {
+        "host": "localhost"
+    },
+    "getListExposedServer": {
+        "host": "localhost",
+        "port": 3045
+    },
+    "logging" : [
+        {
+            "name": "file",
+            "level": "debug",
+            "filename": "/var/log/civitas/user/application.log"
+        }
+    ]
+}

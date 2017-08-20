@@ -1,0 +1,4 @@
+server/gateway/node_modules/
+server/user/node_modules/
+
+.idea/

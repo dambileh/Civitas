@@ -1,14 +1,14 @@
 ---
 swagger: "2.0"
 info:
-  description: "Gateway to Civitas"
+  description: "Civitas User Service"
   version: "1.0.0"
-  title: "Civitas Gateway"
-host: "localhost:4000"
+  title: "Civitas User Service"
+host: "localhost:4001"
 basePath: "/v1"
 tags:
-- name: "note"
-  description: "Operations related to note entity"
+- name: "user"
+  description: "Operations related to user entity"
   externalDocs:
     description: "Find out more"
     url: "http://swagger.io"

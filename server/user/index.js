@@ -1,22 +1,15 @@
 'use strict';
 
-// get new relic as the first require
-// if (process.env.NODE_ENV === 'production') {
-//   var nr = require('newrelic');
-//   nr.addNamingRule('/v1/message', 'v1/message');
-//   nr.addNamingRule('/v1/status', 'v1/status');
-//   nr.addNamingRule('/v1/user/.*/register-device', 'v1/user/:user/register-device');
-// }
-
 var app = require('connect')();
 var http = require('http');
 var swaggerTools = require('swagger-tools');
 var jsyaml = require('js-yaml');
 var fs = require('fs');
-var serverPort = 4000;
+var serverPort = 4001;
 var config = require('config');
 var ErrorHandler = require('./libs/error/ErrorHandler');
 var Logging = require('./libs/Logging');
+var SubscriptionManager = require('./managers/SubscriptionManager');
 
 // swaggerRouter configuration
 var options = {
@@ -55,7 +48,9 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
 
   app.use(ErrorHandler.onError);
 
-  //TODO this is a hack, remove it
+  var topics = fs.readFileSync('../topics.json', 'utf8');
+  SubscriptionManager.initialize(JSON.parse(topics));
+
   // Start the server
   if (process.argv[2]) {
     serverPort = process.argv[2];

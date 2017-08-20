@@ -1,5 +1,5 @@
-# Note
-Service to create notes
+# Gateway
+Civitas gateway
 
 ### Running the server
 To run the server, follow these simple steps:

@@ -1,5 +1,4 @@
 var winston = require('winston');
-var WinstonGraylog2 = require('winston-graylog2');
 var config = require('config');
 
 /**
@@ -47,9 +46,6 @@ module.exports = {
       // Here we will add logging based on the names given.
       // With the correctly configured options.
       for (var i = 0; i < config.logging.length; i++) {
-        if (config.logging[i].name == 'gelf') {
-          arrTransporters.push(new (WinstonGraylog2)(config.logging[i]));
-        }
         if (config.logging[i].name == 'file') {
           arrTransporters.push(new (winston.transports.File)(config.logging[i]));
         }

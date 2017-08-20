@@ -1,0 +1,317 @@
+---
+swagger: "2.0"
+info:
+  description: "Gateway to Civitas"
+  version: "1.0.0"
+  title: "Civitas Gateway"
+host: "localhost:4000"
+basePath: "/v1"
+tags:
+- name: "gateway"
+  description: "Operations related to gateway entity"
+  externalDocs:
+    description: "Find out more"
+    url: "http://swagger.io"
+schemes:
+- "http"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+paths:
+  /user:
+    get:
+        tags:
+        - "user"
+        description: "returns all the usere records"
+        operationId: "getAllUsers"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters: []
+        responses:
+          200:
+            description: "An array of users"
+            schema:
+              type: "array"
+              items:
+                $ref: "#/definitions/userResponse"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "User"
+    post:
+      tags:
+      - "user"
+      description: "Creates a user"
+      operationId: "createUser"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "user"
+        description: "The user entity details"
+        required: true
+        schema:
+          $ref: "#/definitions/userRequest"
+      responses:
+        201:
+          description: "success response that the user has been added"
+          schema:
+            $ref: "#/definitions/userResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "User"
+  /user/{id}:
+    put:
+      tags:
+      - "user"
+      description: "Updates a user"
+      operationId: "updateUser"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "The id of user entity that will be updated"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "note"
+        description: "The user entity details"
+        required: true
+        schema:
+          $ref: "#/definitions/userRequest"
+      responses:
+        201:
+          description: "success response that the user has been added"
+          schema:
+            $ref: "#/definitions/userResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "User"
+    delete:
+        tags:
+        - "user"
+        description: "Deletes a user"
+        operationId: "deleteUser"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "path"
+          name: "id"
+          description: "The id of user entity that will be deleted"
+          required: true
+          type: "string"
+        responses:
+          200:
+            description: "An array of users"
+            schema:
+              type: "array"
+              items:
+                $ref: "#/definitions/userResponse"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "User"
+    get:
+        tags:
+        - "user"
+        description: "Returns a user"
+        operationId: "getSingleUser"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "path"
+          name: "id"
+          description: "The id of user entity that will be returned"
+          required: true
+          type: "string"
+        responses:
+          200:
+            description: "An array of users"
+            schema:
+              type: "array"
+              items:
+                $ref: "#/definitions/userResponse"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "User"
+  /status:
+    get:
+      tags:
+      - "status"
+      description: "gets the status of the messaging service"
+      operationId: "getSystemStatus"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "The server status will be returned"
+          schema:
+            $ref: "#/definitions/serverStatusResponse"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "Status"
+definitions:
+  userRequest:
+    type: "object"
+    required:
+    - "name"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the user"
+
+  userResponse:
+    type: "object"
+    required:
+    - "name"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the user"
+
+  serverStatusResponse:
+    type: "object"
+    required:
+    - "up_time"
+    properties:
+      up_time:
+        type: "integer"
+
+  serverErrorModel:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    properties:
+      code:
+        type: "string"
+      message:
+        type: "string"
+      stack:
+        type: "string"
+  clientErrorModel:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    properties:
+      code:
+        type: "string"
+      message:
+        type: "string"
+      stack:
+        type: "string"
+  validationErrorModel:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    properties:
+      code:
+        type: "string"
+      message:
+        type: "string"
+      errors:
+        type: "array"
+        items:
+          $ref: "#/definitions/validationErrorSingleModel"
+  validationErrorSingleModel:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    - "path"
+    properties:
+      code:
+        type: "string"
+      message:
+        type: "string"
+      path:
+        type: "array"
+        items:
+          type: "string"
+      description:
+        type: "string"
