@@ -2,7 +2,7 @@
  * Created by hossein on 2016/05/17.
  */
 module.exports = {
-  isUndefined: function (data) {
+  isNullOrUndefined: function (data) {
     return typeof data === 'undefined' || data == undefined || data === null;
   },
 

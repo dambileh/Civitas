@@ -7,7 +7,10 @@ var AppUtil = require('../../libs/AppUtil');
 var Logging = require('../utilities/Logging');
 var config = require('config');
 var _ = require('lodash');
-var PubSub = require('../../libs/PubSubAdapter');
+var PubSub = require('../../libs/PubSub/PubSubAdapter');
+var Message = require('../../libs/PubSub/Message');
+var constants = require('../../constants');
+var pubsub_channels = require('../../pubsub_channels');
 
 /**
  * The User Service module
@@ -25,15 +28,15 @@ module.exports = {
 
     var noteRequest = args.user.value;
 
-    var request = {
-      "channel": "UserEvent",
-      "type": "crud",
-      "action": "create",
-      "payload": noteRequest
-    };
+    var request = new Message(
+      pubsub_channels.User.External.Event,
+      constants.pub_sub.message_type.crud,
+      constants.pub_sub.message_action.create,
+      noteRequest
+    );
 
     PubSub
-      .publish("UserEvent", JSON.stringify(request))
+      .publish("UserEvent", request)
       .subscribe("UserCompletedEvent", true, function handleCompleted(err, completed) {
         if (err) {
           return next(err);
@@ -59,7 +62,7 @@ module.exports = {
   //         return next(err);
   //       }
   //
-  //       if (AppUtil.isUndefined(note)) {
+  //       if (AppUtil.isNullOrUndefined(note)) {
   //         var modelValidationError = new ValidationError(
   //           'Some validation errors occurred.',
   //           [
@@ -113,7 +116,7 @@ module.exports = {
   //         return next(err);
   //       }
   //
-  //       if (AppUtil.isUndefined(note)) {
+  //       if (AppUtil.isNullOrUndefined(note)) {
   //         var notFoundError = new ResourceNotFoundError(
   //           'Resource not found.',
   //           'No note with id [' + args.id.value + '] could be found'
@@ -146,7 +149,7 @@ module.exports = {
   //         return next(err);
   //       }
   //
-  //       if (AppUtil.isUndefined(note)) {
+  //       if (AppUtil.isNullOrUndefined(note)) {
   //         var notFoundError = new ResourceNotFoundError(
   //           'Resource not found.',
   //           'No note with id [' + args.id.value + '] could be found'
@@ -161,7 +164,7 @@ module.exports = {
   //           return;
   //         }
   //
-  //         if (!AppUtil.isUndefined(noteTitleCheck) && (String(note._id) != String(noteTitleCheck._id))) {
+  //         if (!AppUtil.isNullOrUndefined(noteTitleCheck) && (String(note._id) != String(noteTitleCheck._id))) {
   //           var modelValidationError = new ValidationError(
   //             'Some validation errors occurred.',
   //             [

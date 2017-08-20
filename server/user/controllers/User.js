@@ -15,11 +15,6 @@ var SubscriptionManager = require('../managers/SubscriptionManager');
  * @since  14 Aug 2017
  */
 SubscriptionManager.internalEmitter.on("UserCreateEvent", function(event){
-  console.log(
-    "### handled the event in service: ",
-    event
-  );
-
   var response = {
     statusCode: 200,
     body: {
@@ -29,7 +24,7 @@ SubscriptionManager.internalEmitter.on("UserCreateEvent", function(event){
 
   SubscriptionManager.internalEmitter.emit(
     "UserCreateCompletedEvent",
-    JSON.stringify(response)
+    response
   );
 });
 

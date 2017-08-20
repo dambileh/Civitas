@@ -1,6 +1,7 @@
 'use strict';
 
 var redis = require('redis');
+var Message = require('./Message');
 
 /**
  * An instance of the service helper
@@ -22,9 +23,11 @@ module.exports = {
    */
   publish: function publish(channel, message) {
     var pub = redis.createClient();
+    if (!message.tryValidate()) {
+      throw new Error("[Message] did not pass the validation checks: [" + message.getValidationErrors() + "]");
+    }
 
-    // TODO: validate that the message to conforms to our message structure
-    pub.publish(channel, message);
+    pub.publish(channel, JSON.stringify(message));
     return this;
   },
 
@@ -41,7 +44,9 @@ module.exports = {
     var sub = redis.createClient();
     sub.subscribe(channel);
     return sub.on('message', function(channel, message) {
-      message = JSON.parse(message);
+
+      message = new Message().createFromString(message);
+
       callback(null, message);
       if (unsubscribe) {
         sub.unsubscribe(channel);

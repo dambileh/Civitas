@@ -59,7 +59,7 @@ module.exports = {
 function _prepareError(error, response, statusCode) {
 
   // This is to change the status code to 406 since it has been incorrectly set to 400 by the lib we are using
-  if (!AppUtil.isUndefined(error.message) && error.message.indexOf('Invalid content type') >= 0) {
+  if (!AppUtil.isNullOrUndefined(error.message) && error.message.indexOf('Invalid content type') >= 0) {
     statusCode = 406;
   }
   switch (statusCode) {

@@ -80,7 +80,7 @@ var dropDatabase = function () {
   mongoose.connection.close();
 };
 
-if (AppUtil.isUndefined(customDir) || customDir.length === 0) {
+if (AppUtil.isNullOrUndefined(customDir) || customDir.length === 0) {
   dropDatabase();
   // Read all files/dirs recursively from the specified testing directory
   readTestDir(testDir);

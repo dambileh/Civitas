@@ -5,7 +5,7 @@ var http = require('http');
 var swaggerTools = require('swagger-tools');
 var jsyaml = require('js-yaml');
 var fs = require('fs');
-var serverPort = 4001;
+var serverPort = 4010;
 var config = require('config');
 var ErrorHandler = require('../libs/error/ErrorHandler');
 var SubscriptionManager = require('./managers/SubscriptionManager');
@@ -47,8 +47,7 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
 
   app.use(ErrorHandler.onError);
 
-  var topics = fs.readFileSync('../pubsub-channels.json', 'utf8');
-  SubscriptionManager.initialize(JSON.parse(topics));
+  SubscriptionManager.initialize();
 
   // Start the server
   if (process.argv[2]) {

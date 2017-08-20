@@ -33,7 +33,7 @@
 //           return;
 //         }
 //
-//         if (!AppUtil.isUndefined(note)) {
+//         if (!AppUtil.isNullOrUndefined(note)) {
 //           var modelValidationError = new ValidationError(
 //             'Some validation errors occurred.',
 //             [
@@ -92,7 +92,7 @@
 //           return next(err);
 //         }
 //
-//         if (AppUtil.isUndefined(note)) {
+//         if (AppUtil.isNullOrUndefined(note)) {
 //           var modelValidationError = new ValidationError(
 //             'Some validation errors occurred.',
 //             [
@@ -146,7 +146,7 @@
 //           return next(err);
 //         }
 //
-//         if (AppUtil.isUndefined(note)) {
+//         if (AppUtil.isNullOrUndefined(note)) {
 //           var notFoundError = new ResourceNotFoundError(
 //             'Resource not found.',
 //             'No note with id [' + args.id.value + '] could be found'
@@ -179,7 +179,7 @@
 //           return next(err);
 //         }
 //
-//         if (AppUtil.isUndefined(note)) {
+//         if (AppUtil.isNullOrUndefined(note)) {
 //           var notFoundError = new ResourceNotFoundError(
 //             'Resource not found.',
 //             'No note with id [' + args.id.value + '] could be found'
@@ -194,7 +194,7 @@
 //             return;
 //           }
 //
-//           if (!AppUtil.isUndefined(noteTitleCheck) && (String(note._id) != String(noteTitleCheck._id))) {
+//           if (!AppUtil.isNullOrUndefined(noteTitleCheck) && (String(note._id) != String(noteTitleCheck._id))) {
 //             var modelValidationError = new ValidationError(
 //               'Some validation errors occurred.',
 //               [

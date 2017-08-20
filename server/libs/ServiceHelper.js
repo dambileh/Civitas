@@ -62,9 +62,9 @@ module.exports = {
         return new AuthorizationError(triageErrorResponse.message);
       default:
         if (
-          !AppUtil.isUndefined(triageErrorResponse) &&
-          !AppUtil.isUndefined(triageErrorResponse.message) &&
-          !AppUtil.isUndefined(triageErrorResponse.exception)
+          !AppUtil.isNullOrUndefined(triageErrorResponse) &&
+          !AppUtil.isNullOrUndefined(triageErrorResponse.message) &&
+          !AppUtil.isNullOrUndefined(triageErrorResponse.exception)
         ) {
           return new RuntimeError(triageErrorResponse.message, triageErrorResponse.exception);
         }
@@ -82,7 +82,7 @@ module.exports = {
    * @return {Error} Return error that will be shown to user
    */
   handleTriageGetListResponseErrors: function handleTriageGetListResponseErrors(resError) {
-    if (resError.statusCode == 404 && !AppUtil.isUndefined(resError) && !AppUtil.isUndefined(resError.body)) {
+    if (resError.statusCode == 404 && !AppUtil.isNullOrUndefined(resError) && !AppUtil.isNullOrUndefined(resError.body)) {
       var triageErrorResponse = resError.body;
       return new ResourceNotFoundError(
         triageErrorResponse.message,

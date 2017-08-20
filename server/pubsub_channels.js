@@ -1,4 +1,4 @@
-{
+module.exports = {
     "User": {
         "External": {
             "Event": "UserEvent",
@@ -17,4 +17,4 @@
             "GetAllCompletedEvent": "UserGetAllCompletedEvent"
         }
     }
-}
+};

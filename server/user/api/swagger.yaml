@@ -4,7 +4,7 @@ info:
   description: "Civitas User Service"
   version: "1.0.0"
   title: "Civitas User Service"
-host: "localhost:4001"
+host: "localhost:4010"
 basePath: "/v1"
 tags:
 - name: "user"

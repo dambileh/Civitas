@@ -48,7 +48,7 @@ ServiceDriver.prototype.setPath = function (path) {
 
   var urlPath = path;
   var message = null;
-  if (AppUtil.isUndefined(urlPath)) {
+  if (AppUtil.isNullOrUndefined(urlPath)) {
     message = 'Required Path Not Set';
   }
   if (message != null) {
@@ -131,7 +131,7 @@ ServiceDriver.prototype.makeBasicCall = function makeBasicCall(funcHandleRespons
       // Reset the flag.
       didTimeout = false;
     } else {
-      if (!AppUtil.isUndefined(error.message)) {
+      if (!AppUtil.isNullOrUndefined(error.message)) {
         message = error.message;
       }
     }
@@ -205,7 +205,7 @@ ServiceDriver.prototype.post = function post(payload, funcHandleResponse, callba
       // Reset the flag.
       didTimeout = false;
     } else {
-      if (!AppUtil.isUndefined(error.message)) {
+      if (!AppUtil.isNullOrUndefined(error.message)) {
         message = error.message;
       }
     }
