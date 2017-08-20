@@ -33,7 +33,7 @@ var swaggerDoc = jsyaml.safeLoad(spec);
  */
 swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
   // Interpret Swagger resources and attach metadata to request - must be first in swagger-tools middleware chain
-  app.use(middleware.swaggerMetadata());
+  app.use(middleware.swaggerMetadata()); 
 
   // Validate Swagger requests
   app.use(middleware.swaggerValidator());
