@@ -1,16 +1,13 @@
 'use strict';
 
-var ErrorCodes = require('../../libs/error/ErrorCodes');
-var ValidationError = require('../../libs/error/ValidationError');
-var ResourceNotFoundError = require('../../libs/error/ResourceNotFoundError');
 var AppUtil = require('../../libs/AppUtil');
 var Logging = require('../utilities/Logging');
 var config = require('config');
 var _ = require('lodash');
 var PubSub = require('../../libs/PubSub/PubSubAdapter');
 var Message = require('../../libs/PubSub/Message');
-var constants = require('../../constants');
-var pubsub_channels = require('../../pubsub_channels');
+var constants = require('../../Constants');
+var PubSubChannels = require('../../PubSubChannels');
 
 /**
  * The User Service module
@@ -29,21 +26,21 @@ module.exports = {
     var noteRequest = args.user.value;
 
     var request = new Message(
-      pubsub_channels.User.External.Event,
+      PubSubChannels.User.External.Event,
       constants.pub_sub.message_type.crud,
       constants.pub_sub.message_action.create,
       noteRequest
     );
 
     PubSub
-      .publish("UserEvent", request)
-      .subscribe("UserCompletedEvent", true, function handleCompleted(err, completed) {
+      .publish(request, "UserEvent")
+      .subscribe("UserCompletedEvent", { unsubscribe: true }, function handleCompleted(err, completed) {
         if (err) {
           return next(err);
         }
-        response.statusCode = 201;
+        response.statusCode = completed.payload.statusCode;
         response.setHeader('Content-Type', 'application/json');
-        return response.end(JSON.stringify(completed));
+        return response.end(JSON.stringify(completed.payload.body));
       });
   },
   

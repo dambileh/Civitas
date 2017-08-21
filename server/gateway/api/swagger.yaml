@@ -46,7 +46,7 @@ paths:
             description: "unexpected error"
             schema:
               $ref: "#/definitions/serverErrorModel"
-        x-swagger-router-controller: "User"
+        x-swagger-router-controller: "UserController"
     post:
       tags:
       - "user"
@@ -91,7 +91,7 @@ paths:
           description: "unexpected error"
           schema:
             $ref: "#/definitions/serverErrorModel"
-      x-swagger-router-controller: "User"
+      x-swagger-router-controller: "UserController"
   /user/{id}:
     put:
       tags:
@@ -142,7 +142,7 @@ paths:
           description: "unexpected error"
           schema:
             $ref: "#/definitions/serverErrorModel"
-      x-swagger-router-controller: "User"
+      x-swagger-router-controller: "UserController"
     delete:
         tags:
         - "user"
@@ -174,7 +174,7 @@ paths:
             description: "unexpected error"
             schema:
               $ref: "#/definitions/serverErrorModel"
-        x-swagger-router-controller: "User"
+        x-swagger-router-controller: "UserController"
     get:
         tags:
         - "user"
@@ -206,7 +206,7 @@ paths:
             description: "unexpected error"
             schema:
               $ref: "#/definitions/serverErrorModel"
-        x-swagger-router-controller: "User"
+        x-swagger-router-controller: "UserController"
   /status:
     get:
       tags:
@@ -232,7 +232,7 @@ paths:
           description: "unexpected error"
           schema:
             $ref: "#/definitions/serverErrorModel"
-      x-swagger-router-controller: "Status"
+      x-swagger-router-controller: "StatusController"
 definitions:
   userRequest:
     type: "object"

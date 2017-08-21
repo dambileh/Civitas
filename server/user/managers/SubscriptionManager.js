@@ -6,8 +6,8 @@ var events = require('events');
 var internalEmitter = new events.EventEmitter();
 var PubSub = require('../../libs/PubSub/PubSubAdapter');
 var SubscriptionHelper = require('../../libs/PubSub/SubscriptionHelper');
-var UserChannels = require('../../pubsub_channels').User;
-var constants = require('../../constants');
+var UserChannels = require('../../PubSubChannels').User;
+var constants = require('../../Constants');
 
 module.exports = {
   initialize: function () {
@@ -42,7 +42,7 @@ module.exports = {
 
     };
 
-    PubSub.subscribe(UserChannels.External.Event, false, handleMessage);
+    PubSub.subscribe(UserChannels.External.Event, { unsubscribe: false }, handleMessage);
   },
   internalEmitter: internalEmitter
 };

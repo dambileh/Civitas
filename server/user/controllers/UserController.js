@@ -1,8 +1,8 @@
 'use strict';
 
-var url = require('url');
 var UserService = require('../services/UserService');
 var SubscriptionManager = require('../managers/SubscriptionManager');
+var UserChannels = require('../../PubSubChannels').User;
 
 /**
  * Calls the corresponding service layer method to get system status
@@ -14,17 +14,7 @@ var SubscriptionManager = require('../managers/SubscriptionManager');
  * @author Hadi Shayesteh <Hadishayesteh@gmail.com>
  * @since  14 Aug 2017
  */
-SubscriptionManager.internalEmitter.on("UserCreateEvent", function(event){
-  var response = {
-    statusCode: 200,
-    body: {
-      status: "successful"
-    }
-  };
-
-  SubscriptionManager.internalEmitter.emit(
-    "UserCreateCompletedEvent",
-    response
-  );
+SubscriptionManager.internalEmitter.on(UserChannels.Internal.CreateEvent, function(event){
+  UserService.createUser(event);
 });
 

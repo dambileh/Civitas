@@ -6,9 +6,11 @@ var swaggerTools = require('swagger-tools');
 var jsyaml = require('js-yaml');
 var fs = require('fs');
 var serverPort = 4010;
+var mongoose = require('mongoose');
 var config = require('config');
 var ErrorHandler = require('../libs/error/ErrorHandler');
 var SubscriptionManager = require('./managers/SubscriptionManager');
+var Logging = require('./utilities/Logging');
 
 // swaggerRouter configuration
 var options = {
@@ -16,6 +18,14 @@ var options = {
   controllers: './controllers',
   useStubs: process.env.NODE_ENV === 'development' ? true : false // Conditionally turn on stubs (mock mode)
 };
+
+mongoose.connect(config.mongo.database_host, config.mongo.options);
+mongoose.connection.on(
+  'error',
+  function (error) {
+    Logging.logAction(Logging.logLevels.ERROR, 'MongoDB connection error', error.stack);
+  }
+);
 
 // The Swagger document (require it, build it programmatically, fetch it from a URL, ...)
 var spec = fs.readFileSync('./api/swagger.yaml', 'utf8');

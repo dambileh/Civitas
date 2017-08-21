@@ -1,4 +1,4 @@
-var constants = require('../../constants');
+var constants = require('../../Constants');
 var Message = require('../../libs/PubSub/Message');
 var PubSub = require('../../libs/PubSub/PubSubAdapter');
 
@@ -26,19 +26,19 @@ function _emitCRUDEvents(message, channel, internalEmitter) {
 
   switch (message.action) {
     case "create":
-      internalEmitter.emit(channel.Internal.CreateEvent, message);
+      internalEmitter.emit(channel.Internal.CreateEvent, message.payload);
       break;
     case "update":
-      internalEmitter.emit(channel.Internal.UpdateEvent, message);
+      internalEmitter.emit(channel.Internal.UpdateEvent, message.payload);
       break;
     case "delete":
-      internalEmitter.emit(channel.Internal.DeleteEvent, message);
+      internalEmitter.emit(channel.Internal.DeleteEvent, message.payload);
       break;
     case "getSingle":
-      internalEmitter.emit(channel.Internal.GetSingleEvent, message);
+      internalEmitter.emit(channel.Internal.GetSingleEvent, message.payload);
       break;
     case "getAll":
-      internalEmitter.emit(channel.Internal.GetAllEvent, message);
+      internalEmitter.emit(channel.Internal.GetAllEvent, message.payload);
       break;
     default:
       logging.logAction(logging.logLevels.ERROR, "Type [%s] is not supported", message.type)
@@ -52,7 +52,7 @@ function _sendCrudCompleted(response, channel, action, internalEmitter) {
     action,
     response
   );
-  PubSub.publish(channel.External.CompletedEvent, completedResponse);
+  PubSub.publish(completedResponse, channel.External.CompletedEvent);
   _removeAllCRUDListeners(channel, internalEmitter);
 }
 
