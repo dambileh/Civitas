@@ -2,7 +2,7 @@ var constants = require('../../Constants');
 var Message = require('../../libs/PubSub/Message');
 var PubSub = require('../../libs/PubSub/PubSubAdapter');
 
-function _emitCRUDEvents(message, channel, internalEmitter) {
+function emitCRUDEvents(message, channel, internalEmitter) {
 
   internalEmitter.on(channel.Internal.CreateCompletedEvent, function(response){
     _sendCrudCompleted(response, channel, constants.pub_sub.message_action.create, internalEmitter);
@@ -65,5 +65,5 @@ function _removeAllCRUDListeners(channel, internalEmitter) {
 }
 
 module.exports = {
-  emitCRUDEvents: _emitCRUDEvents
+  emitCRUDEvents: emitCRUDEvents
 };

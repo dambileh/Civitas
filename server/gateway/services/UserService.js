@@ -39,6 +39,7 @@ module.exports = {
             if (err) {
               return next(err);
             }
+
             response.statusCode = completed.payload.statusCode;
             response.setHeader('Content-Type', 'application/json');
             return response.end(JSON.stringify(completed.payload.body));
