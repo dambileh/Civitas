@@ -1,5 +1,6 @@
 module.exports = {
   UserService: {
-    NAME_ALREADY_EXISTS: 100001
+    NUMBER_ALREADY_EXISTS: 100001,
+    USER_NOT_FOUND: 100002
   }
 };

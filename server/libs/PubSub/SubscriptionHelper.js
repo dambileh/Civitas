@@ -50,6 +50,7 @@ function _sendCrudCompleted(response, channel, action, internalEmitter) {
     channel.External.CompletedEvent,
     constants.pub_sub.message_type.crud,
     action,
+    constants.pub_sub.recipients.gateway,
     response
   );
   PubSub.publish(completedResponse, channel.External.CompletedEvent);

@@ -9,6 +9,10 @@ module.exports = {
       delete: "delete",
       getSingle: "getSingle",
       getAll: "getAll"
+    },
+    recipients: {
+      gateway: "gateway",
+      user: "user"
     }
   }
 };
