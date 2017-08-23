@@ -207,6 +207,57 @@ paths:
             schema:
               $ref: "#/definitions/serverErrorModel"
         x-swagger-router-controller: "UserController"
+  /user/{id}/contact:
+    post:
+      tags:
+      - "user contacts"
+      description: "Creates a contact for user user"
+      operationId: "createContact"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "The id of user entity"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "contact"
+        description: "The user contact entity details"
+        required: true
+        schema:
+          $ref: "#/definitions/contactRequest"
+      responses:
+        201:
+          description: "success response that the user contact has been added"
+          schema:
+            $ref: "#/definitions/contactResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "ContactController"
   /status:
     get:
       tags:
@@ -234,6 +285,26 @@ paths:
             $ref: "#/definitions/serverErrorModel"
       x-swagger-router-controller: "StatusController"
 definitions:
+  contactRequest:
+    type: "object"
+    required:
+    - "number"
+    properties:
+      number:
+        type: "string"
+        description: "The user's contact's number"
+  contactResponse:
+    type: "object"
+    required:
+    - "number"
+    - "user-id"
+    properties:
+      number:
+        type: "string"
+        description: "The user's contact's number"
+      user-id:
+        type: "string"
+        description: "The id of the user"
   userRequest:
     type: "object"
     required:

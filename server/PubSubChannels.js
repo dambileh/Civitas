@@ -16,5 +16,23 @@ module.exports = {
             "GetAllEvent": "UserGetAllEvent",
             "GetAllCompletedEvent": "UserGetAllCompletedEvent"
         }
+    },
+    "Contact": {
+        "External": {
+            "Event": "ContactEvent",
+            "CompletedEvent": "ContactCompletedEvent"
+        },
+        "Internal": {
+            "CreateEvent": "ContactCreateEvent",
+            "CreateCompletedEvent": "ContactCreateCompletedEvent",
+            "UpdateEvent": "ContactUpdateEvent",
+            "UpdateCompletedEvent": "ContactUpdateCompletedEvent",
+            "DeleteEvent": "ContactDeleteEvent",
+            "DeleteCompletedEvent": "ContactDeleteCompletedEvent",
+            "GetSingleEvent": "ContactGetSingleEvent",
+            "GetSingleCompletedEvent": "ContactGetSingleCompletedEvent",
+            "GetAllEvent": "ContactGetAllEvent",
+            "GetAllCompletedEvent": "ContactGetAllCompletedEvent"
+        }
     }
 };
