@@ -1,13 +1,14 @@
 'use strict';
 var AppUtil = require('../AppUtil');
 
-module.exports = function Message(channel, type, action, payload) {
+module.exports = function Message(channel, type, action, recipient, payload) {
   var that = this;
 
   this.channel = channel;
   this.type = type;
   this.action = action;
   this.payload = payload;
+  this.recipient = recipient;
   this.validationErrors = [];
 
   this.create = function cast(object) {
@@ -15,6 +16,7 @@ module.exports = function Message(channel, type, action, payload) {
     that.type = object.type;
     that.action = object.action;
     that.payload = object.payload;
+    that.recipient = object.recipient;
     return that;
   };
 
@@ -35,6 +37,10 @@ module.exports = function Message(channel, type, action, payload) {
 
     if (AppUtil.isNullOrUndefined(that.action)) {
       errors.push("[action] property is required");
+    }
+
+    if (AppUtil.isNullOrUndefined(that.recipient)) {
+      errors.push("[recipient] property is required");
     }
 
     if (AppUtil.isNullOrUndefined(that.payload)) {

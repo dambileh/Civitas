@@ -19,6 +19,6 @@ module.exports = {
    * @return {boolean} will return true of the given array is empty otherwise false
    */
   isArrayEmpty: function (data) {
-    return this.isUndefined(data) || data.length === 0;
+    return this.isNullOrUndefined(data) || data.length === 0;
   }
 };
