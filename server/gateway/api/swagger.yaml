@@ -210,7 +210,7 @@ paths:
   /user/{id}/contact:
     post:
       tags:
-      - "user contacts"
+      - "user"
       description: "Creates a contact for user user"
       operationId: "createContact"
       consumes:
@@ -223,6 +223,7 @@ paths:
         description: "The id of user entity"
         required: true
         type: "string"
+        pattern: "^[0-9a-fA-F]{24}$"
       - in: "body"
         name: "contact"
         description: "The user contact entity details"
@@ -258,6 +259,58 @@ paths:
           schema:
             $ref: "#/definitions/serverErrorModel"
       x-swagger-router-controller: "ContactController"
+  /user/{id}/invite-user:
+    post:
+      tags:
+      - "user"
+      description: "Allows user to invite another user"
+      operationId: "inviteUser"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "The id of user"
+        required: true
+        type: "string"
+        pattern: "^[0-9a-fA-F]{24}$"
+      - in: "body"
+        name: "invite"
+        description: "The user invitation details"
+        required: true
+        schema:
+          $ref: "#/definitions/inviteUserRequest"
+      responses:
+        200:
+          description: "success response that the user's invitation has been sent"
+          schema:
+            $ref: "#/definitions/inviteUserResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "UserController"
   /status:
     get:
       tags:
@@ -285,6 +338,30 @@ paths:
             $ref: "#/definitions/serverErrorModel"
       x-swagger-router-controller: "StatusController"
 definitions:
+  inviteUserRequest:
+    type: "object"
+    required:
+    - "number"
+    properties:
+      number:
+        type: "string"
+        pattern: "^0((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
+        maxLength: 128
+        description: "The invited user's contact number"
+
+  inviteUserResponse:
+    type: "object"
+    required:
+    - "number"
+    - "user-id"
+    properties:
+      number:
+        type: "string"
+        description: "The invited user's contact number"
+      user-id:
+        type: "string"
+        description: "The id of the user"
+
   contactRequest:
     type: "object"
     required:
@@ -293,6 +370,7 @@ definitions:
       number:
         type: "string"
         description: "The user's contact's number"
+        pattern: "^[0-9]{1,255}$"
   contactResponse:
     type: "object"
     required:

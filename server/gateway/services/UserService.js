@@ -35,13 +35,53 @@ module.exports = {
     PubSub
       .publish(request, PubSubChannels.User.External.Event)
       .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true },
-          function handleCompleted(err, completed) {
-            if (err) {
-              return next(err);
-            }
-            response.statusCode = completed.payload.statusCode;
-            response.setHeader('Content-Type', 'application/json');
-            return response.end(JSON.stringify(completed.payload.body));
-          });
+        function handleCompleted(err, completed) {
+          if (err) {
+            return next(err);
+          }
+          response.statusCode = completed.payload.statusCode;
+          response.setHeader('Content-Type', 'application/json');
+          return response.end(JSON.stringify(completed.payload.body));
+        });
+  },
+
+  /**
+   * Allows users to invite other users
+   *
+   * @param {object} args - The request arguments passed in from the controller
+   * @param {IncomingMessage} response - The http response object
+   * @param {function} next - The callback used to pass control to the next action/middleware
+   *
+   * @ author hadi shayesteh <hadishayesteh@gmail.com>
+   * @ since  24 Aug 2017
+   */
+  inviteUser: function(args, response, next) {
+
+    var invitePayload = args.invite.value;
+    var userId = args.id.value;
+
+    var payload = {
+      "user-id": userId,
+      "number": invitePayload
+    };
+
+    var request = new Message(
+      PubSubChannels.User.External.Event,
+      constants.pub_sub.message_type.crud,
+      constants.pub_sub.message_action.create,
+      payload
+    );
+
+    PubSub
+      .publish(request, PubSubChannels.User.External.Event)
+      .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true },
+        function handleCompleted(err, completed) {
+          if (err) {
+            return next(err);
+          }
+          response.statusCode = completed.payload.statusCode;
+          response.setHeader('Content-Type', 'application/json');
+          return response.end(JSON.stringify(completed.payload.body));
+        });
   }
 };
