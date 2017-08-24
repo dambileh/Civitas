@@ -27,10 +27,14 @@ module.exports = {
 
       logging.logAction(
         logging.logLevels.INFO,
-        "Message [" + JSON.stringify(message) + "] was published on channel [" + UserChannels.External.Event + "]"
+        "Message [" + JSON.stringify(message) + "] was received on channel [" + UserChannels.External.Event + "]" +
+          " for recipient [" + message.recipient + "]"
       );
 
-      if (message.channel == UserChannels.External.Event) {
+      if (
+        message.channel == UserChannels.External.Event &&
+        message.recipient == constants.pub_sub.recipients.user
+      ) {
         switch (message.type) {
           case "crud":
             SubscriptionHelper.emitCRUDEvents(message, UserChannels, internalEmitter);
@@ -43,6 +47,12 @@ module.exports = {
     };
 
     PubSub.subscribe(UserChannels.External.Event, { unsubscribe: false }, handleMessage);
+  },
+  emitInternalResponseEvent: function emitInternalResponseEvent(response, event) {
+    this.internalEmitter.emit(
+      event,
+      response
+    );
   },
   internalEmitter: internalEmitter
 };

@@ -5,16 +5,37 @@ var SubscriptionManager = require('../managers/SubscriptionManager');
 var UserChannels = require('../../PubSubChannels').User;
 
 /**
- * Calls the corresponding service layer method to get system status
- *
- * @param {ClientRequest} request - The http request object
- * @param {IncomingMessage} response - The http response object
- * @param {function} next The callback used to pass control to the next action/middleware
- *
- * @author Hadi Shayesteh <Hadishayesteh@gmail.com>
- * @since  14 Aug 2017
+ * Calls the corresponding service layer method to create a user
  */
 SubscriptionManager.internalEmitter.on(UserChannels.Internal.CreateEvent, function(event){
   UserService.createUser(event);
+});
+
+/**
+ * Calls the corresponding service layer method to get all users
+ */
+SubscriptionManager.internalEmitter.on(UserChannels.Internal.GetAllEvent, function(event){
+  UserService.getAllUsers(event);
+});
+
+/**
+ * Calls the corresponding service layer method to get a single user
+ */
+SubscriptionManager.internalEmitter.on(UserChannels.Internal.GetSingleEvent, function(event){
+  UserService.getSingleUser(event);
+});
+
+/**
+ * Calls the corresponding service layer method to delete a user
+ */
+SubscriptionManager.internalEmitter.on(UserChannels.Internal.DeleteEvent, function(event){
+  UserService.deleteUser(event);
+});
+
+/**
+ * Calls the corresponding service layer method to update a user
+ */
+SubscriptionManager.internalEmitter.on(UserChannels.Internal.UpdateEvent, function(event){
+  UserService.updateUser(event);
 });
 
