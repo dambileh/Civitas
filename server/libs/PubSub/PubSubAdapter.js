@@ -23,7 +23,6 @@ module.exports = {
    * @returns {object} An instance of the adapter. Used to create a Fluent interface
    */
   publish: function publish(message, channel, config) {
-
     var pub = redis.createClient();
     if (!message.tryValidate()) {
       throw new Error("[Message] did not pass the validation checks: [" + message.getValidationErrors() + "]");

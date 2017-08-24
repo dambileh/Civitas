@@ -25,7 +25,7 @@ module.exports = {
     // Make sure that the no other user with the same name exist already
 
     User.findOne(
-      {cellnumber: request.cellnumber},
+      {cellNumber: request.cellNumber},
       function userFindOneCallback(err, user) {
         if (err) {
           return SubscriptionManager.emitInternalResponseEvent(
@@ -42,8 +42,8 @@ module.exports = {
             [
               {
                 code: Errors.UserService.NUMBER_ALREADY_EXISTS,
-                message: 'A user with number [' + request.cellnumber + '] already exists.',
-                path: ['cellnumber']
+                message: 'A user with number [' + request.cellNumber + '] already exists.',
+                path: ['cellNumber']
               }
             ]
           );
@@ -69,15 +69,9 @@ module.exports = {
         userEntity.save(
           function userSaveCallback(err) {
             if (err) {
-              var statusCode = 500;
-
-              if (err.name != null && err.name == 'ValidationError') {
-                statusCode = 400;
-              }
-
               return SubscriptionManager.emitInternalResponseEvent(
                 {
-                  statusCode: statusCode,
+                  statusCode: 500,
                   body: err
                 },
                 UserChannels.Internal.CreateCompletedEvent
@@ -224,7 +218,7 @@ module.exports = {
             [
               {
                 code: Errors.UserService.USER_NOT_FOUND,
-                message: 'No user with id [' + request.cellnumber + '] was found.',
+                message: 'No user with id [' + request.id + '] was found.',
                 path: ['id']
               }
             ]
@@ -315,8 +309,8 @@ module.exports = {
 
         // set the updated properties, mongoose does not behave correctly if you pass a model directly
         var updatedProperties = {
-          firstname: request.firstname,
-          lastname: request.lastname,
+          firstName: request.firstName,
+          lastName: request.lastName,
           email: request.email
         };
 
@@ -331,8 +325,8 @@ module.exports = {
               );
             }
 
-            user.firstname = request.firstname;
-            user.lastname = request.lastname;
+            user.firstName = request.firstName;
+            user.lastName = request.lastName;
             user.email = request.email;
             user.updatedAt = Date.Now;
 

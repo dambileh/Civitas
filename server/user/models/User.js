@@ -8,13 +8,13 @@ var statusEnum = [
 
 var User = new Schema(
   {
-    firstname: {type: String, required: true},
-    lastname: {type: String, required: true},
-    cellnumber: {type: String, required: true},
+    firstName: {type: String, required: true},
+    lastName: {type: String, required: true},
+    cellNumber: {type: String, required: true},
     email: {type: String, required: false},
     status: {type: String, required: true, enum: statusEnum}
   },
-  {timestamps: {createdAt: 'created_at', updatedAt: 'updated_at'}}
+  {timestamps: {createdAt: 'createdAt', updatedAt: 'updatedAt'}}
 );
 
 /**

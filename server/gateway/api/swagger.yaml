@@ -393,19 +393,19 @@ definitions:
   userRequest:
     type: "object"
     required:
-    - "firstname"
-    - "lastname"
-    - "cellnumber"
+    - "firstName"
+    - "lastName"
+    - "cellNumber"
     properties:
-      firstname:
+      firstName:
         type: "string"
         maxLength: 128
         description: "The firstname of the user"
-      lastname:
+      lastName:
         type: "string"
         maxLength: 128
         description: "The lastname of the user"
-      cellnumber:
+      cellNumber:
         type: "string"
         pattern: "^0((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
         maxLength: 128
@@ -418,7 +418,7 @@ definitions:
         description: "The email of the user"
       address:
         $ref: "#/definitions/addressRequest"
-      ar-companies:
+      arCompanies:
         type: "array"
         items:
           type: "string"
@@ -430,7 +430,7 @@ definitions:
           type: "string"
           format: "uuid"
         description: "The ids of the images on user's phone that are linked to his or her profile"
-      avatar-id:
+      avatarId:
         type: "string"
         format: "uuid"
         description: "The id of user's avatar image"
@@ -438,19 +438,19 @@ definitions:
   userResponse:
     type: "object"
     required:
-    - "firstname"
-    - "lastname"
-    - "cellnumber"
+    - "firstName"
+    - "lastName"
+    - "cellNumber"
     properties:
-      firstname:
+      firstName:
         type: "string"
         maxLength: 128
         description: "The firstname of the user"
-      lastname:
+      lastName:
         type: "string"
         maxLength: 128
         description: "The lastname of the user"
-      cellnumber:
+      cellNumber:
         type: "string"
         pattern: "^0((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
         maxLength: 128
@@ -463,7 +463,7 @@ definitions:
         description: "The email of the user"
       address:
         $ref: "#/definitions/addressResponse"
-      ar-companies:
+      arCompanies:
         type: "array"
         items:
           type: "string"
@@ -475,7 +475,7 @@ definitions:
           type: "string"
           format: "uuid"
         description: "The ids of the images on user's phone that are linked to his or her profile"
-      avatar-id:
+      avatarId:
         type: "string"
         format: "uuid"
         description: "The id of user's avatar image"
@@ -487,11 +487,11 @@ definitions:
   userUpdateRequest:
     type: "object"
     properties:
-      firstname:
+      firstName:
         type: "string"
         maxLength: 128
         description: "The firstname of the user"
-      lastname:
+      lastName:
         type: "string"
         maxLength: 128
         description: "The lastname of the user"
@@ -503,7 +503,7 @@ definitions:
         description: "The email of the user"
       address:
         $ref: "#/definitions/addressRequest"
-      ar-companies:
+      arCompanies:
         type: "array"
         items:
           type: "string"
@@ -515,7 +515,7 @@ definitions:
           type: "string"
           format: "uuid"
         description: "The ids of the images on user's phone that are linked to his or her profile"
-      avatar-id:
+      avatarId:
         type: "string"
         format: "uuid"
         description: "The id of user's avatar image"
@@ -535,12 +535,12 @@ definitions:
     type: "object"
     required:
     - "number"
-    - "user-id"
+    - "userId"
     properties:
       number:
         type: "string"
         description: "The user's contact's number"
-      user-id:
+      userId:
         type: "string"
         description: "The id of the user"
 
@@ -557,12 +557,12 @@ definitions:
     type: "object"
     required:
     - "code"
-    - "user-id"
+    - "userId"
     properties:
       code:
         type: "string"
         description: "The user's registration confirmation code"
-      user-id:
+      userId:
         type: "string"
         description: "The id of the user"
 
@@ -581,12 +581,12 @@ definitions:
     type: "object"
     required:
     - "number"
-    - "user-id"
+    - "userId"
     properties:
       number:
         type: "string"
         description: "The invited user's contact number"
-      user-id:
+      userId:
         type: "string"
         description: "The id of the user"
 
@@ -596,7 +596,7 @@ definitions:
     - "line1"
     - "city"
     - "country"
-    - "postal-code"
+    - "postalCode"
     properties:
       line1:
         type: "string"
@@ -622,7 +622,7 @@ definitions:
         type: "string"
         maxLength: 128
         description: "The country"
-      postal-code:
+      postalCode:
         type: "string"
         maxLength: 128
         description: "The postal code"
@@ -633,7 +633,7 @@ definitions:
     - "line1"
     - "city"
     - "country"
-    - "postal-code"
+    - "postalCode"
     properties:
       line1:
         type: "string"
@@ -659,7 +659,7 @@ definitions:
         type: "string"
         maxLength: 128
         description: "The country"
-      postal-code:
+      postalCode:
         type: "string"
         maxLength: 128
         description: "The postal code"

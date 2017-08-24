@@ -156,7 +156,7 @@ module.exports = {
    */
   updateUser: function(args, response, next) {
     var userRequest = args.user.value;
-    userRequest.id = args.id.value;;
+    userRequest.id = args.id.value;
 
     var request = new Message(
       PubSubChannels.User.External.Event,

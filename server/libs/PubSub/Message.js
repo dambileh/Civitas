@@ -1,9 +1,13 @@
 'use strict';
 var AppUtil = require('../AppUtil');
+const uuidv1 = require('uuid/v1');
 
 module.exports = function Message(channel, type, action, recipient, payload) {
   var that = this;
 
+  this.header = {
+    messageId: uuidv1()
+  }
   this.channel = channel;
   this.type = type;
   this.action = action;
@@ -12,6 +16,9 @@ module.exports = function Message(channel, type, action, recipient, payload) {
   this.validationErrors = [];
 
   this.create = function cast(object) {
+    this.header = {
+      messageId: uuidv1()
+    }
     that.channel = object.channel;
     that.type = object.type;
     that.action = object.action;
