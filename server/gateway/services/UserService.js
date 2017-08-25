@@ -8,6 +8,7 @@ var PubSub = require('../../libs/PubSub/PubSubAdapter');
 var Message = require('../../libs/PubSub/Message');
 var constants = require('../../Constants');
 var PubSubChannels = require('../../PubSubChannels');
+var async = require('async');
 
 /**
  * The User Service module
@@ -87,6 +88,7 @@ module.exports = {
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
   getSingleUser: function(args, response, next) {
+
     var userId = args.id.value;
 
     var request = new Message(
@@ -102,17 +104,33 @@ module.exports = {
     PubSub
       .publish(request, PubSubChannels.User.External.Event)
       .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true },
-        function handleCompleted(err, completed) {
-          if (err) {
-            return next(err);
-          }
+        function(err, getUserResponse) {
 
-          response.statusCode = completed.payload.statusCode;
+          response.statusCode = getUserResponse.payload.statusCode;
           response.setHeader('Content-Type', 'application/json');
-          return response.end(JSON.stringify(completed.payload.body));
-        });
-  },
+          return response.end(JSON.stringify(getUserResponse.payload.body));
 
+          // async.parallel(
+          //   [
+          //     async.apply(_getSingleUser, request)
+          //   ],
+          //   function finalCallBack(err, results) {
+          //     if (err) {
+          //       return next(err);
+          //     }
+          //
+          //
+          //     var completed = results[0];
+          //
+          //     response.statusCode = completed.payload.statusCode;
+          //     response.setHeader('Content-Type', 'application/json');
+          //     return response.end(JSON.stringify(completed.payload.body));
+          //   });
+        }
+      );
+
+
+  },
   /**
    * Deletes a user
    *
@@ -180,3 +198,11 @@ module.exports = {
         });
   }
 };
+
+function _getSingleUser(request, callback) {
+  PubSub
+    .publish(request, PubSubChannels.User.External.Event)
+    .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true },
+      callback
+    );
+}
