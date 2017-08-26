@@ -22,38 +22,49 @@ module.exports = {
    *
    * @returns {object} An instance of the adapter. Used to create a Fluent interface
    */
-  publish: function publish(message, channel, config) {
-    var pub = redis.createClient();
-    if (!message.tryValidate()) {
-      throw new Error("[Message] did not pass the validation checks: [" + message.getValidationErrors() + "]");
-    }
+  publish: async function publish(message, channel, config) {
 
-    pub.publish(channel, JSON.stringify(message));
-    return this;
+    //TODO retry and then persist a message if there was any error during poublish
+    let client = await _createClient();
+      if (!message.tryValidate()) {
+        throw new Error("[Message] did not pass the validation checks: [" + message.getValidationErrors() + "]");
+      }
+      client.publish(channel, JSON.stringify(message));
   },
 
   /**
    * This will wait for a response to arrive at a given channel and will return that response to the client
-   * 
+   *
    * @param {string} channel - The channel to wait on
    * @param {object} config - The object containing publisher configurations
    * @param {function} callback - The function that will be called once a the wait is over
    *
    * @returns {object} An instance of the adapter. Used to create a Fluent interface
    */
-  subscribe: function subscribe(channel, config, callback) {
-    var sub = redis.createClient();
+  subscribe: async function subscribe(channel, config, callback) {
+    let sub = await _createClient();
     sub.subscribe(channel);
-    return sub.on('message', function(channel, message) {
-
+    sub.on('message', function(channel, message) {
       message = new Message().createFromString(message);
-
       callback(null, message);
       if (config.unsubscribe) {
         sub.unsubscribe(channel);
       }
-      return this;
     });
   }
 
 };
+
+function _createClient() {
+  return new Promise(function(resolve, reject){
+    var client = redis.createClient();
+    client.on('error', function (err) {
+      reject(err);
+    });
+
+    client.on('connect', function(){
+      resolve(client);
+    });
+  });
+
+}

@@ -35,9 +35,9 @@ module.exports = {
     );
 
     PubSub
-      .publish(request, PubSubChannels.User.External.Event)
-      .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true },
-          function handleCompleted(err, completed) {
+      .publish(request, PubSubChannels.User.External.Event);
+    PubSub
+      .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true }, (err, completed) => {
             if (err) {
               return next(err);
             }
@@ -66,9 +66,10 @@ module.exports = {
     );
 
     PubSub
-      .publish(request, PubSubChannels.User.External.Event)
-      .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true },
-          function handleCompleted(err, completed) {
+      .publish(request, PubSubChannels.User.External.Event);
+
+    PubSub
+      .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true }, (err, completed) => {
             if (err) {
               return next(err);
             }
@@ -102,33 +103,15 @@ module.exports = {
     );
 
     PubSub
-      .publish(request, PubSubChannels.User.External.Event)
-      .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true },
-        function(err, getUserResponse) {
+      .publish(request, PubSubChannels.User.External.Event);
+    PubSub
+      .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true }, (err, getUserResponse) => {
 
           response.statusCode = getUserResponse.payload.statusCode;
           response.setHeader('Content-Type', 'application/json');
           return response.end(JSON.stringify(getUserResponse.payload.body));
-
-          // async.parallel(
-          //   [
-          //     async.apply(_getSingleUser, request)
-          //   ],
-          //   function finalCallBack(err, results) {
-          //     if (err) {
-          //       return next(err);
-          //     }
-          //
-          //
-          //     var completed = results[0];
-          //
-          //     response.statusCode = completed.payload.statusCode;
-          //     response.setHeader('Content-Type', 'application/json');
-          //     return response.end(JSON.stringify(completed.payload.body));
-          //   });
         }
       );
-
 
   },
   /**
@@ -152,9 +135,9 @@ module.exports = {
     );
 
     PubSub
-      .publish(request, PubSubChannels.User.External.Event)
-      .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true },
-        function handleCompleted(err, completed) {
+      .publish(request, PubSubChannels.User.External.Event);
+    PubSub
+      .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true }, (err, completed) => {
           if (err) {
             return next(err);
           }
@@ -185,7 +168,8 @@ module.exports = {
     );
 
     PubSub
-      .publish(request, PubSubChannels.User.External.Event)
+      .publish(request, PubSubChannels.User.External.Event);
+    PubSub
       .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true },
         function handleCompleted(err, completed) {
           if (err) {
@@ -198,11 +182,3 @@ module.exports = {
         });
   }
 };
-
-function _getSingleUser(request, callback) {
-  PubSub
-    .publish(request, PubSubChannels.User.External.Event)
-    .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true },
-      callback
-    );
-}

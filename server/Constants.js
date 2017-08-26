@@ -14,5 +14,11 @@ module.exports = {
       gateway: "gateway",
       user: "user"
     }
+  },
+  user: {
+    status: {
+      active: "active",
+      inactive: "inactive"
+    }
   }
 };
