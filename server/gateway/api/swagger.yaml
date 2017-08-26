@@ -362,6 +362,53 @@ paths:
             $ref: "#/definitions/serverErrorModel"
       x-swagger-router-controller: "UserController"
 
+  /registration/confirm:
+      post:
+        tags:
+        - "user registration"
+        description: "Confirms a registration"
+        operationId: "confrimRegistration"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "body"
+          name: "register"
+          description: "The registration details"
+          required: true
+          schema:
+            $ref: "#/definitions/confirmRegistrationRequest"
+        responses:
+          200:
+            description: "success response that the registration has been confirmed"
+            schema:
+              $ref: "#/definitions/confirmRegistrationResponse"
+          400:
+            description: "Validation Error. Usually caused by a missing or invalid parameter."
+            schema:
+              $ref: "#/definitions/validationErrorModel"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          406:
+            description: "Content type not supported Error. Returned if an unsupported\
+              \ content type is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          413:
+            description: "Message content too big. Returned if the entity body's size\
+              \ is over the allowed limit."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "RegistrationController"
+
   /status:
     get:
       tags:
@@ -395,7 +442,7 @@ definitions:
     required:
     - "firstName"
     - "lastName"
-    - "cellNumber"
+    - "msisdn"
     properties:
       firstName:
         type: "string"
@@ -405,11 +452,11 @@ definitions:
         type: "string"
         maxLength: 128
         description: "The lastname of the user"
-      cellNumber:
+      msisdn:
         type: "string"
-        pattern: "^0((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
+        pattern: "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
         maxLength: 128
-        description: "The user's contact's number"
+        description: "The user's contact number"
       email:
         type: "string"
         format: "email"
@@ -440,7 +487,7 @@ definitions:
     required:
     - "firstName"
     - "lastName"
-    - "cellNumber"
+    - "msisdn"
     properties:
       firstName:
         type: "string"
@@ -450,11 +497,11 @@ definitions:
         type: "string"
         maxLength: 128
         description: "The lastname of the user"
-      cellNumber:
+      msisdn:
         type: "string"
-        pattern: "^0((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
+        pattern: "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
         maxLength: 128
-        description: "The user's contact's number"
+        description: "The user's contact number"
       email:
         type: "string"
         format: "email"
@@ -523,55 +570,56 @@ definitions:
   contactRequest:
     type: "object"
     required:
-    - "number"
+    - "msisdn"
     properties:
-      number:
+      msisdn:
         type: "string"
-        pattern: "^0((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
+        pattern: "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
         maxLength: 128
-        description: "The user's contact's number"
+        description: "The user's contact number"
 
   contactResponse:
     type: "object"
     required:
-    - "number"
+    - "msisdn"
     - "userId"
     properties:
-      number:
+      msisdn:
         type: "string"
-        description: "The user's contact's number"
+        description: "The user's contact number"
       userId:
         type: "string"
         description: "The id of the user"
 
-  userRegistrationConfirmationRequest:
+  confirmRegistrationRequest:
     type: "object"
     required:
     - "code"
+    - "msisdn"
     properties:
       code:
         type: "string"
-        description: "The user's registration confirmation code"
+        description: "The registration confirmation code sent to the device"
+      msisdn:
+        type: "string"
+        description: "The cell number to which the registration code was sent"
 
-  userRegistrationConfirmationResponse:
+  confirmRegistrationResponse:
     type: "object"
-    required:
-    - "code"
-    - "userId"
     properties:
       code:
         type: "string"
-        description: "The user's registration confirmation code"
-      userId:
+        description: "The registration confirmation code sent to the device"
+      msisdn:
         type: "string"
-        description: "The id of the user"
+        description: "The cell number to which the registration code was sent"
 
   inviteUserRequest:
     type: "object"
     required:
-    - "number"
+    - "msisdn"
     properties:
-      number:
+      msisdn:
         type: "string"
         pattern: "^0((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
         maxLength: 128
@@ -580,10 +628,10 @@ definitions:
   inviteUserResponse:
     type: "object"
     required:
-    - "number"
+    - "msisdn"
     - "userId"
     properties:
-      number:
+      msisdn:
         type: "string"
         description: "The invited user's contact number"
       userId:
