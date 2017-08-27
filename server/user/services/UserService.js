@@ -26,7 +26,7 @@ module.exports = {
     // Make sure that the no other user with the same name exist already
 
     User.findOne(
-      {cellNumber: request.cellNumber},
+      {msisdn: request.msisdn},
       function userFindOneCallback(err, user) {
         if (err) {
           return SubscriptionManager.emitInternalResponseEvent(
@@ -43,8 +43,8 @@ module.exports = {
             [
               {
                 code: Errors.UserService.NUMBER_ALREADY_EXISTS,
-                message: `A user with number [${request.cellNumber}] already exists.`,
-                path: ['cellNumber']
+                message: `A user with number [${request.msisdn}] already exists.`,
+                path: ['msisdn']
               }
             ]
           );
@@ -288,7 +288,7 @@ module.exports = {
             [
               {
                 code: Errors.UserService.USER_NOT_FOUND,
-                message: `No user with id [${request.cellNumber}] was found.`,
+                message: `No user with id [${request.msisdn}] was found.`,
                 path: ['id']
               }
             ]

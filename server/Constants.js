@@ -1,16 +1,17 @@
 module.exports = {
   pubSub: {
-    message_type: {
+  messageType: {
       crud: "crud",
       custom: "custom"
     },
-    message_action: {
+    messageAction: {
       create: "create",
       update: "update",
       delete: "delete",
       getSingle: "getSingle",
       getAll: "getAll",
-      confirmRegistration: "confirmRegistration"
+      confirmRegistration: "confirmRegistration",
+      requestRegistration: "requestRegistration"
     },
     recipients: {
       gateway: "gateway",

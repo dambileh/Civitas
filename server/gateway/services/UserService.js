@@ -25,8 +25,8 @@ module.exports = {
 
     var request = new Message(
       PubSubChannels.User.External.Event,
-      constants.pubSub.message_type.crud,
-      constants.pubSub.message_action.create,
+      constants.pubSub.messageType.crud,
+      constants.pubSub.messageAction.create,
       userRequest
     );
 
@@ -62,8 +62,8 @@ module.exports = {
 
     var request = new Message(
       PubSubChannels.User.External.Event,
-      constants.pubSub.message_type.crud,
-      constants.pubSub.message_action.getAll,
+      constants.pubSub.messageType.crud,
+      constants.pubSub.messageAction.getAll,
       {}
     );
 
@@ -103,8 +103,8 @@ module.exports = {
 
     var request = new Message(
       PubSubChannels.User.External.Event,
-      constants.pubSub.message_type.crud,
-      constants.pubSub.message_action.getSingle,
+      constants.pubSub.messageType.crud,
+      constants.pubSub.messageAction.getSingle,
       {
         id: userId
       }
@@ -144,8 +144,8 @@ module.exports = {
 
     var request = new Message(
       PubSubChannels.User.External.Event,
-      constants.pubSub.message_type.crud,
-      constants.pubSub.message_action.delete,
+      constants.pubSub.messageType.crud,
+      constants.pubSub.messageAction.delete,
       {
         id: userId
       }
@@ -186,8 +186,8 @@ module.exports = {
 
     var request = new Message(
       PubSubChannels.User.External.Event,
-      constants.pubSub.message_type.crud,
-      constants.pubSub.message_action.update,
+      constants.pubSub.messageType.crud,
+      constants.pubSub.messageAction.update,
       userRequest
     );
 

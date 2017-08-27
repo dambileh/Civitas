@@ -11,7 +11,7 @@ var User = new Schema(
   {
     firstName: {type: String, required: true},
     lastName: {type: String, required: true},
-    cellNumber: {type: String, required: true},
+    msisdn: {type: String, required: true},
     email: {type: String, required: false},
     status: {type: String, required: true, enum: statusEnum},
     friends: [{ type: Schema.ObjectId, ref: 'user', autopopulate: true }]
