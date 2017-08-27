@@ -8,7 +8,8 @@ module.exports = {
       update: "update",
       delete: "delete",
       getSingle: "getSingle",
-      getAll: "getAll"
+      getAll: "getAll",
+      requestRegistration: "requestRegistration"
     },
     recipients: {
       gateway: "gateway",

@@ -46,12 +46,15 @@ function emitCRUDEvents(message, channel, internalEmitter) {
 }
 
 function _sendCrudCompleted(request, response, channel, action, internalEmitter) {
+
+  // pass the same messageId that was set on the request so that the gateway can map the completed event back to 
+  // the original event
   var completedResponse = new Message(
     channel.External.CompletedEvent,
     constants.pubSub.message_type.crud,
     action,
     response,
-    request.header.messageId
+    request.header.messageId 
   );
 
   PubSub.publish(completedResponse, channel.External.CompletedEvent);
