@@ -8,15 +8,16 @@ var PubSub = require('../../libs/PubSub/PubSubAdapter');
 var SubscriptionHelper = require('../../libs/PubSub/SubscriptionHelper');
 var UserChannels = require('../../PubSubChannels').User;
 var constants = require('../../Constants');
+var process = require('process');
 
 module.exports = {
-  initialize: function () {
+  initialize: async function () {
 
     if (AppUtil.isNullOrUndefined(UserChannels)) {
       throw new Error("[channel] is not set");
     }
 
-    var handleMessage = function handleMessage(err, message) {
+    var handleMessage = async function handleMessage(err, message) {
       if (err) {
         return;
       }
@@ -31,22 +32,29 @@ module.exports = {
           " for recipient [" + message.recipient + "]"
       );
 
-      if (
-        message.channel == UserChannels.External.Event &&
-        message.recipient == constants.pub_sub.recipients.user
-      ) {
-        switch (message.type) {
-          case "crud":
-            SubscriptionHelper.emitCRUDEvents(message, UserChannels, internalEmitter);
-            break;
-          default:
-            logging.logAction(logging.logLevels.ERROR, "Type [%s] is not supported", message.type)
-        }
+      switch (message.type) {
+        case "crud":
+          SubscriptionHelper.emitCRUDEvents(message, UserChannels, internalEmitter);
+          break;
+        default:
+          logging.logAction(logging.logLevels.ERROR, "Type [%s] is not supported", message.type)
       }
-
     };
 
-    PubSub.subscribe(UserChannels.External.Event, { unsubscribe: false }, handleMessage);
+    try {
+      await PubSub.subscribe(
+        UserChannels.External.Event,
+        {
+          unsubscribe: false,
+          subscriberId: process.pid,
+          subscriberType: constants.pubSub.recipients.user
+        },
+        handleMessage
+      );
+    } catch (e) {
+      logging.logAction(logging.logLevels.ERROR, `Failed to subscribe to channel [${UserChannels.External.Event}]`, e);
+      throw e;
+    }
   },
   emitInternalResponseEvent: function emitInternalResponseEvent(response, event) {
     this.internalEmitter.emit(

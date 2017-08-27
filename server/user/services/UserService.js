@@ -10,6 +10,7 @@ var _ = require('lodash');
 var SubscriptionManager = require('../managers/SubscriptionManager');
 var UserChannels = require('../../PubSubChannels').User;
 var Errors = require('../../ErrorCodes');
+var Constants = require('../../Constants');
 
 /**
  * The User Service module
@@ -42,7 +43,7 @@ module.exports = {
             [
               {
                 code: Errors.UserService.NUMBER_ALREADY_EXISTS,
-                message: 'A user with number [' + request.cellNumber + '] already exists.',
+                message: `A user with number [${request.cellNumber}] already exists.`,
                 path: ['cellNumber']
               }
             ]
@@ -57,7 +58,7 @@ module.exports = {
           );
         }
 
-        request.status = 'inactive';
+        request.status = Constants.user.status.inactive;
 
         var userEntity = new User(request);
 
@@ -172,7 +173,7 @@ module.exports = {
 
           var notFoundError = new ResourceNotFoundError(
             'Resource not found.',
-            'No user with id [' + request.id + '] was found'
+            `No user with id [${request.id}] was found`
           );
 
           return SubscriptionManager.emitInternalResponseEvent(
@@ -218,7 +219,7 @@ module.exports = {
             [
               {
                 code: Errors.UserService.USER_NOT_FOUND,
-                message: 'No user with id [' + request.id + '] was found.',
+                message: `No user with id [${request.id}] was found.`,
                 path: ['id']
               }
             ]
@@ -287,7 +288,7 @@ module.exports = {
             [
               {
                 code: Errors.UserService.USER_NOT_FOUND,
-                message: 'No user with id [' + request.cellnumber + '] was found.',
+                message: `No user with id [${request.cellNumber}] was found.`,
                 path: ['id']
               }
             ]
@@ -328,7 +329,7 @@ module.exports = {
             user.firstName = request.firstName;
             user.lastName = request.lastName;
             user.email = request.email;
-            user.updatedAt = Date.Now;
+            user.updatedAt = new Date();
 
             return SubscriptionManager.emitInternalResponseEvent(
               {

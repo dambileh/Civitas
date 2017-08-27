@@ -2,23 +2,21 @@
 var AppUtil = require('../AppUtil');
 const uuidv1 = require('uuid/v1');
 
-module.exports = function Message(channel, type, action, recipient, payload) {
+module.exports = function Message(channel, type, action, payload, id = uuidv1()) {
   var that = this;
 
   this.header = {
-    messageId: uuidv1()
-  }
+    messageId: id
+  };
+  
   this.channel = channel;
   this.type = type;
   this.action = action;
   this.payload = payload;
-  this.recipient = recipient;
   this.validationErrors = [];
 
   this.create = function cast(object) {
-    this.header = {
-      messageId: uuidv1()
-    }
+    this.header = object.header;
     that.channel = object.channel;
     that.type = object.type;
     that.action = object.action;
@@ -46,13 +44,15 @@ module.exports = function Message(channel, type, action, recipient, payload) {
       errors.push("[action] property is required");
     }
 
-    if (AppUtil.isNullOrUndefined(that.recipient)) {
-      errors.push("[recipient] property is required");
+    if (AppUtil.isNullOrUndefined(that.header)) {
+      errors.push("[header] property is required");
+    } else if (AppUtil.isNullOrUndefined(that.header.messageId)) {
+      errors.push("[header.messageId] property is required");
     }
 
     if (AppUtil.isNullOrUndefined(that.payload)) {
       errors.push("[payload] property is required");
-    } else if (typeof that.payload !== "object") {
+    } else if (!AppUtil.isObject(that.payload)) {
       errors.push("The payload [" + that.payload + "] has to be an object. Found ["
         + (typeof that.payload) + "] instead");
     }

@@ -5,23 +5,23 @@ var PubSub = require('../../libs/PubSub/PubSubAdapter');
 function emitCRUDEvents(message, channel, internalEmitter) {
 
   internalEmitter.on(channel.Internal.CreateCompletedEvent, function(response){
-    _sendCrudCompleted(response, channel, constants.pub_sub.message_action.create, internalEmitter);
+    _sendCrudCompleted(message, response, channel, constants.pubSub.message_action.create, internalEmitter);
   });
 
   internalEmitter.on(channel.Internal.UpdateCompletedEvent, function(response) {
-    _sendCrudCompleted(response, channel, constants.pub_sub.message_action.update, internalEmitter);
+    _sendCrudCompleted(message, response, channel, constants.pubSub.message_action.update, internalEmitter);
   });
 
   internalEmitter.on(channel.Internal.DeleteCompletedEvent, function(response){
-    _sendCrudCompleted(response, channel, constants.pub_sub.message_action.delete, internalEmitter);
+    _sendCrudCompleted(message, response, channel, constants.pubSub.message_action.delete, internalEmitter);
   });
 
   internalEmitter.on(channel.Internal.GetSingleCompletedEvent, function(response){
-    _sendCrudCompleted(response, channel, constants.pub_sub.message_action.getSingle, internalEmitter);
+    _sendCrudCompleted(message, response, channel, constants.pubSub.message_action.getSingle, internalEmitter);
   });
 
   internalEmitter.on(channel.Internal.GetAllCompletedEvent, function(response){
-    _sendCrudCompleted(response, channel, constants.pub_sub.message_action.getAll, internalEmitter);
+    _sendCrudCompleted(message, response, channel, constants.pubSub.message_action.getAll, internalEmitter);
   });
 
   switch (message.action) {
@@ -45,14 +45,15 @@ function emitCRUDEvents(message, channel, internalEmitter) {
   }
 }
 
-function _sendCrudCompleted(response, channel, action, internalEmitter) {
+function _sendCrudCompleted(request, response, channel, action, internalEmitter) {
   var completedResponse = new Message(
     channel.External.CompletedEvent,
-    constants.pub_sub.message_type.crud,
+    constants.pubSub.message_type.crud,
     action,
-    constants.pub_sub.recipients.gateway,
-    response
+    response,
+    request.header.messageId
   );
+
   PubSub.publish(completedResponse, channel.External.CompletedEvent);
   _removeAllCRUDListeners(channel, internalEmitter);
 }
