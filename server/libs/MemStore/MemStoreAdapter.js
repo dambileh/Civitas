@@ -12,34 +12,333 @@ var redis = require('redis');
  */
 module.exports = {
 
-  /**
-   * This will publish a message to a given channel
-   *
-   * @param {object} message - The message object that will be published to the given channel
-   * @param {string} channel - The channel to which the message will be published
-   * @param {object} config - The object containing publisher configurations
-   *
-   * @returns {object} An instance of the adapter. Used to create a Fluent interface
-   */
-  hashMap: {
-    put: async function put(key, value) {
+  keyValue: {
+
+    /**
+     * Saves a key value pair in the store
+     *
+     * @param {object} options - The map options object
+     * @param {string} key - The name of the key
+     * @param {object} value - The value that will be saved for the key
+     */
+    put: async function put(options, key, value) {
       let client = await _createClient();
-      client.set(key, JSON.stringify(value));
-    },
-    get: async function get(key, callback) {
-      let client = await _createClient();
-      client.get(key, (err, value) => {
-        callback(err, JSON.parse(value));
+      return new Promise((resolve, reject) => {
+        client.set(key, JSON.stringify(value), (err, result) => {
+          if (options && options.expire) {
+            client.expire(key, options.expire);
+          }
+          client.quit();
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
       });
     },
+
+    /**
+     * Gets a value associated to a given key
+     *
+     * @param {string} key - The name of the key
+     */
+    get: async function get(key) {
+      let client = await _createClient();
+      return new Promise(function(resolve, reject){
+        client.get(key, (err, value) => {
+          client.quit();
+          if (err) {
+            reject(err);
+          } else {
+            resolve(JSON.parse(value));
+          }
+        });
+      });
+    },
+
+    /**
+     * Removes a key and its associated value from the store
+     *
+     * @param {string} key - The name of the key
+     */
     remove: async function remove(key) {
       let client = await _createClient();
-      client.del(key);
+      return new Promise((resolve, reject) => {
+        client.del(key, (err, result) => {
+          client.quit();
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      });
     },
-    contains: async function contains(key, callback) {
+
+    /**
+     * Checks if a given key exist in the store
+     *
+     * @param {string} key - The name of the key
+     */
+    contains: async function contains(key) {
       let client = await _createClient();
-      client.get(key, (err, value) => {
-        callback(err, value != null);
+      return new Promise(function(resolve, reject){
+        client.exists(key, (err, value) => {
+          client.quit();
+          if (err) {
+            reject(err);
+          } else {
+            resolve(value === 1);
+          }
+        });
+      });
+    }
+  },
+
+  hash: {
+    /**
+     * Saves a key value pair in the store
+     *
+     * @param {object} options - The map options object
+     * @param {string} key - The name of the key
+     * @param {object} value - The value that will be saved for the key
+     */
+    put: async function put(options, key, ...value) {
+      let client = await _createClient();
+      return new Promise((resolve, reject) => {
+        client.hmset(key, value, (err, result) => {
+          if (options && options.expire) {
+            client.expire(key, options.expire);
+          }
+          client.quit();
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      });
+    },
+
+    /**
+     * Gets a value associated to a given key
+     *
+     * @param {string} key - The name of the key
+     */
+    get: async function get(key) {
+      let client = await _createClient();
+      return new Promise(function(resolve, reject){
+        client.hgetall(key, (err, value) => {
+          client.quit();
+          if (err) {
+            reject(err);
+          } else {
+            resolve(value);
+          }
+        });
+      });
+    },
+
+    /**
+     * Removes a key and its associated value from the store
+     *
+     * @param {string} key - The name of the key
+     */
+    remove: async function remove(key) {
+      let client = await _createClient();
+      return new Promise((resolve, reject) => {
+        client.del(key, (err, result) => {
+          client.quit();
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      });
+    },
+
+    /**
+     * Checks if a given key exist in the store
+     *
+     * @param {string} key - The name of the key
+     */
+    contains: async function contains(key) {
+      let client = await _createClient();
+      return new Promise(function(resolve, reject){
+        client.exists(key, (err, value) => {
+          client.quit();
+          if (err) {
+            reject(err);
+          } else {
+            resolve(value === 1);
+          }
+        });
+      });
+    }
+  },
+  set: {
+    /**
+     * Saves a key value pair in the store
+     *
+     * @param {object} options - The map options object
+     * @param {string} key - The name of the key
+     * @param {object} value - The value that will be saved for the key
+     */
+    put: async function put(options, key, ...value) {
+      let client = await _createClient();
+      return new Promise((resolve, reject) => {
+        client.sadd(key, value, (err, result) => {
+          if (options && options.expire) {
+            client.expire(key, options.expire);
+          }
+          client.quit();
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      });
+    },
+
+    /**
+     * Gets a value associated to a given key
+     *
+     * @param {string} key - The name of the key
+     */
+    get: async function get(key) {
+      let client = await _createClient();
+      return new Promise(function(resolve, reject){
+        client.smembers(key, (err, value) => {
+          client.quit();
+          if (err) {
+            reject(err);
+          } else {
+            resolve(value);
+          }
+        });
+      });
+    },
+
+    /**
+     * Removes a key and its associated value from the store
+     *
+     * @param {string} key - The name of the key
+     */
+    remove: async function remove(key) {
+      let client = await _createClient();
+      return new Promise((resolve, reject) => {
+        client.del(key, (err, result) => {
+          client.quit();
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      });
+    },
+
+    /**
+     * Checks if a given key exist in the store
+     *
+     * @param {string} key - The name of the key
+     */
+    contains: async function contains(key) {
+      let client = await _createClient();
+      return new Promise(function(resolve, reject){
+        client.exists(key, (err, value) => {
+          client.quit();
+          if (err) {
+            reject(err);
+          } else {
+            resolve(value === 1);
+          }
+        });
+      });
+    }
+  },
+  list: {
+    /**
+     * Saves a key value pair in the store
+     *
+     * @param {object} options - The map options object
+     * @param {string} key - The name of the key
+     * @param {object} value - The value that will be saved for the key
+     */
+    put: async function put(options, key, ...value) {
+      let client = await _createClient();
+      return new Promise((resolve, reject) => {
+        client.rpush(key, value, (err, result) => {
+          if (options && options.expire) {
+            client.expire(key, options.expire);
+          }
+          client.quit();
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      });
+    },
+
+    /**
+     * Gets a value associated to a given key
+     *
+     * @param {string} key - The name of the key
+     */
+    get: async function get(key) {
+      let client = await _createClient();
+      return new Promise(function(resolve, reject){
+        client.lrange(key, 0, -1, (err, value) => {
+          client.quit();
+          if (err) {
+            reject(err);
+          } else {
+            resolve(value);
+          }
+        });
+      });
+    },
+
+    /**
+     * Removes a key and its associated value from the store
+     *
+     * @param {string} key - The name of the key
+     */
+    remove: async function remove(key) {
+      let client = await _createClient();
+      return new Promise((resolve, reject) => {
+        client.del(key, (err, result) => {
+          client.quit();
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      });
+    },
+
+    /**
+     * Checks if a given key exist in the store
+     *
+     * @param {string} key - The name of the key
+     */
+    contains: async function contains(key) {
+      let client = await _createClient();
+      return new Promise(function(resolve, reject){
+        client.exists(key, (err, value) => {
+          client.quit();
+          if (err) {
+            reject(err);
+          } else {
+            resolve(value === 1);
+          }
+        });
       });
     }
   }

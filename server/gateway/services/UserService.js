@@ -14,7 +14,7 @@ var async = require('async');
  * The User Service module
  */
 module.exports = {
-  
+
   /**
    * Creates a user
    *
@@ -22,30 +22,36 @@ module.exports = {
    * @param {IncomingMessage} response - The http response object
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
-  createUser: function(args, response, next) {
+  createUser: async function (args, response, next) {
 
     var userRequest = args.user.value;
 
     var request = new Message(
       PubSubChannels.User.External.Event,
-      constants.pub_sub.message_type.crud,
-      constants.pub_sub.message_action.create,
-      constants.pub_sub.recipients.user,
+      constants.pubSub.message_type.crud,
+      constants.pubSub.message_action.create,
       userRequest
     );
 
-    PubSub
-      .publish(request, PubSubChannels.User.External.Event);
-    PubSub
-      .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true }, (err, completed) => {
-            if (err) {
-              return next(err);
-            }
+    try {
+      let completed =
+        await PubSub.publishAndWaitForResponse(
+          PubSubChannels.User.External.Event,
+          PubSubChannels.User.External.CompletedEvent,
+          {
+            subscriberType: constants.pubSub.recipients.gateway
+          },
+          request);
 
-            response.statusCode = completed.payload.statusCode;
-            response.setHeader('Content-Type', 'application/json');
-            return response.end(JSON.stringify(completed.payload.body));
-          });
+      response.statusCode = completed.payload.statusCode;
+      response.setHeader('Content-Type', 'application/json');
+      return response.end(JSON.stringify(completed.payload.body));
+    } catch (err) {
+      logging.logAction(
+        logging.logLevels.ERROR,
+        `Failed to subscribe to channel [${PubSubChannels.User.External.CompletedEvent}]`, err);
+      return next(err);
+    }
   },
 
   /**
@@ -55,30 +61,36 @@ module.exports = {
    * @param {IncomingMessage} response - The http response object
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
-  getAllUsers: function(args, response, next) {
+  getAllUsers: async function (args, response, next) {
 
     var request = new Message(
       PubSubChannels.User.External.Event,
-      constants.pub_sub.message_type.crud,
-      constants.pub_sub.message_action.getAll,
-      constants.pub_sub.recipients.user,
+      constants.pubSub.message_type.crud,
+      constants.pubSub.message_action.getAll,
       {}
     );
 
-    PubSub
-      .publish(request, PubSubChannels.User.External.Event);
+    try {
+      let completed =
+        await PubSub.publishAndWaitForResponse(
+          PubSubChannels.User.External.Event,
+          PubSubChannels.User.External.CompletedEvent,
+          {
+            subscriberType: constants.pubSub.recipients.gateway
+          },
+          request);
 
-    PubSub
-      .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true }, (err, completed) => {
-            if (err) {
-              return next(err);
-            }
+      response.statusCode = completed.payload.statusCode;
+      response.setHeader('Content-Type', 'application/json');
+      response.setHeader('X-Result-Count', completed.payload.header.resultCount);
+      return response.end(JSON.stringify(completed.payload.body));
 
-            response.statusCode = completed.payload.statusCode;
-            response.setHeader('Content-Type', 'application/json');
-            response.setHeader('X-Result-Count', completed.payload.header.resultCount);
-            return response.end(JSON.stringify(completed.payload.body));
-          });
+    } catch (err) {
+      logging.logAction(
+        logging.logLevels.ERROR,
+        `Failed to subscribe to channel [${PubSubChannels.User.External.CompletedEvent}]`, err);
+      return next(err);
+    }
   },
 
   /**
@@ -88,30 +100,39 @@ module.exports = {
    * @param {IncomingMessage} response - The http response object
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
-  getSingleUser: function(args, response, next) {
+  getSingleUser: async function (args, response, next) {
 
     var userId = args.id.value;
 
     var request = new Message(
       PubSubChannels.User.External.Event,
-      constants.pub_sub.message_type.crud,
-      constants.pub_sub.message_action.getSingle,
-      constants.pub_sub.recipients.user,
+      constants.pubSub.message_type.crud,
+      constants.pubSub.message_action.getSingle,
       {
         id: userId
       }
     );
 
-    PubSub
-      .publish(request, PubSubChannels.User.External.Event);
-    PubSub
-      .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true }, (err, getUserResponse) => {
+    try {
+      let completed =
+        await PubSub.publishAndWaitForResponse(
+          PubSubChannels.User.External.Event,
+          PubSubChannels.User.External.CompletedEvent,
+          {
+            subscriberType: constants.pubSub.recipients.gateway
+          },
+          request);
 
-          response.statusCode = getUserResponse.payload.statusCode;
-          response.setHeader('Content-Type', 'application/json');
-          return response.end(JSON.stringify(getUserResponse.payload.body));
-        }
-      );
+      response.statusCode = completed.payload.statusCode;
+      response.setHeader('Content-Type', 'application/json');
+      return response.end(JSON.stringify(completed.payload.body))
+
+    } catch (err) {
+      logging.logAction(
+        logging.logLevels.ERROR,
+        `Failed to subscribe to channel [${PubSubChannels.User.External.CompletedEvent}]`, err);
+      return next(err);
+    }
 
   },
   /**
@@ -121,31 +142,38 @@ module.exports = {
    * @param {IncomingMessage} response - The http response object
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
-  deleteUser: function(args, response, next) {
+  deleteUser: async function (args, response, next) {
     var userId = args.id.value;
 
     var request = new Message(
       PubSubChannels.User.External.Event,
-      constants.pub_sub.message_type.crud,
-      constants.pub_sub.message_action.delete,
-      constants.pub_sub.recipients.user,
+      constants.pubSub.message_type.crud,
+      constants.pubSub.message_action.delete,
       {
         id: userId
       }
     );
 
-    PubSub
-      .publish(request, PubSubChannels.User.External.Event);
-    PubSub
-      .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true }, (err, completed) => {
-          if (err) {
-            return next(err);
-          }
+    try {
+      let completed =
+        await PubSub.publishAndWaitForResponse(
+          PubSubChannels.User.External.Event,
+          PubSubChannels.User.External.CompletedEvent,
+          {
+            subscriberType: constants.pubSub.recipients.gateway
+          },
+          request);
 
-          response.statusCode = completed.payload.statusCode;
-          response.setHeader('Content-Type', 'application/json');
-          return response.end(JSON.stringify(completed.payload.body));
-        });
+      response.statusCode = completed.payload.statusCode;
+      response.setHeader('Content-Type', 'application/json');
+      return response.end(JSON.stringify(completed.payload.body))
+
+    } catch (err) {
+      logging.logAction(
+        logging.logLevels.ERROR,
+        `Failed to subscribe to channel [${PubSubChannels.User.External.CompletedEvent}]`, err);
+      return next(err);
+    }
   },
 
   /**
@@ -155,30 +183,35 @@ module.exports = {
    * @param {IncomingMessage} response - The http response object
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
-  updateUser: function(args, response, next) {
+  updateUser: async function (args, response, next) {
     var userRequest = args.user.value;
     userRequest.id = args.id.value;
 
     var request = new Message(
       PubSubChannels.User.External.Event,
-      constants.pub_sub.message_type.crud,
-      constants.pub_sub.message_action.update,
-      constants.pub_sub.recipients.user,
+      constants.pubSub.message_type.crud,
+      constants.pubSub.message_action.update,
       userRequest
     );
 
-    PubSub
-      .publish(request, PubSubChannels.User.External.Event);
-    PubSub
-      .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true },
-        function handleCompleted(err, completed) {
-          if (err) {
-            return next(err);
-          }
+    try {
+      let completed =
+        await PubSub.publishAndWaitForResponse(
+          PubSubChannels.User.External.Event,
+          PubSubChannels.User.External.CompletedEvent,
+          {
+            subscriberType: constants.pubSub.recipients.gateway
+          },
+          request);
 
-          response.statusCode = completed.payload.statusCode;
-          response.setHeader('Content-Type', 'application/json');
-          return response.end(JSON.stringify(completed.payload.body));
-        });
+      response.statusCode = completed.payload.statusCode;
+      response.setHeader('Content-Type', 'application/json');
+      return response.end(JSON.stringify(completed.payload.body))
+    } catch (err) {
+      logging.logAction(
+        logging.logLevels.ERROR,
+        `Failed to subscribe to channel [${PubSubChannels.User.External.CompletedEvent}]`, err);
+      return next(err);
+    }
   }
 };

@@ -329,7 +329,7 @@ module.exports = {
             user.firstName = request.firstName;
             user.lastName = request.lastName;
             user.email = request.email;
-            user.updatedAt = Date.Now;
+            user.updatedAt = new Date();
 
             return SubscriptionManager.emitInternalResponseEvent(
               {

@@ -1,5 +1,5 @@
 module.exports = {
-  pub_sub: {
+  pubSub: {
     message_type: {
       crud: "crud"
     },
@@ -13,6 +13,10 @@ module.exports = {
     recipients: {
       gateway: "gateway",
       user: "user"
+    },
+    channelStore: {
+      subscribers: "subscribers",
+      messages: "messages"
     }
   },
   user: {
