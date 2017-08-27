@@ -1,14 +1,11 @@
 'use strict';
 
-var AppUtil = require('../../libs/AppUtil');
 var Logging = require('../utilities/Logging');
-var config = require('config');
 var _ = require('lodash');
 var PubSub = require('../../libs/PubSub/PubSubAdapter');
 var Message = require('../../libs/PubSub/Message');
 var constants = require('../../Constants');
 var PubSubChannels = require('../../PubSubChannels');
-var async = require('async');
 
 /**
  * The User Service module
@@ -49,7 +46,7 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to subscribe to channel [${PubSubChannels.User.External.CompletedEvent}]`, err);
+        `Failed to publish to channel [${PubSubChannels.User.External.Event}]`, err);
       return next(err);
     }
   },
@@ -88,7 +85,7 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to subscribe to channel [${PubSubChannels.User.External.CompletedEvent}]`, err);
+        `Failed to publish to channel [${PubSubChannels.User.External.Event}]`, err);
       return next(err);
     }
   },
@@ -130,7 +127,7 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to subscribe to channel [${PubSubChannels.User.External.CompletedEvent}]`, err);
+        `Failed to publish to channel [${PubSubChannels.User.External.Event}]`, err);
       return next(err);
     }
 
@@ -171,7 +168,7 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to subscribe to channel [${PubSubChannels.User.External.CompletedEvent}]`, err);
+        `Failed to publish to channel [${PubSubChannels.User.External.Event}]`, err);
       return next(err);
     }
   },
@@ -210,7 +207,7 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to subscribe to channel [${PubSubChannels.User.External.CompletedEvent}]`, err);
+        `Failed to publish to channel [${PubSubChannels.User.External.Event}]`, err);
       return next(err);
     }
   }
