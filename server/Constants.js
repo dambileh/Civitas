@@ -1,9 +1,9 @@
 module.exports = {
   pubSub: {
-    message_type: {
+    messageType: {
       crud: "crud"
     },
-    message_action: {
+    messageAction: {
       create: "create",
       update: "update",
       delete: "delete",

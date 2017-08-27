@@ -5,23 +5,23 @@ var PubSub = require('../../libs/PubSub/PubSubAdapter');
 function emitCRUDEvents(message, channel, internalEmitter) {
 
   internalEmitter.on(channel.Internal.CreateCompletedEvent, function(response){
-    _sendCrudCompleted(message, response, channel, constants.pubSub.message_action.create, internalEmitter);
+    _sendCrudCompleted(message, response, channel, constants.pubSub.messageAction.create, internalEmitter);
   });
 
   internalEmitter.on(channel.Internal.UpdateCompletedEvent, function(response) {
-    _sendCrudCompleted(message, response, channel, constants.pubSub.message_action.update, internalEmitter);
+    _sendCrudCompleted(message, response, channel, constants.pubSub.messageAction.update, internalEmitter);
   });
 
   internalEmitter.on(channel.Internal.DeleteCompletedEvent, function(response){
-    _sendCrudCompleted(message, response, channel, constants.pubSub.message_action.delete, internalEmitter);
+    _sendCrudCompleted(message, response, channel, constants.pubSub.messageAction.delete, internalEmitter);
   });
 
   internalEmitter.on(channel.Internal.GetSingleCompletedEvent, function(response){
-    _sendCrudCompleted(message, response, channel, constants.pubSub.message_action.getSingle, internalEmitter);
+    _sendCrudCompleted(message, response, channel, constants.pubSub.messageAction.getSingle, internalEmitter);
   });
 
   internalEmitter.on(channel.Internal.GetAllCompletedEvent, function(response){
-    _sendCrudCompleted(message, response, channel, constants.pubSub.message_action.getAll, internalEmitter);
+    _sendCrudCompleted(message, response, channel, constants.pubSub.messageAction.getAll, internalEmitter);
   });
 
   switch (message.action) {
@@ -51,7 +51,7 @@ function _sendCrudCompleted(request, response, channel, action, internalEmitter)
   // the original event
   var completedResponse = new Message(
     channel.External.CompletedEvent,
-    constants.pubSub.message_type.crud,
+    constants.pubSub.messageType.crud,
     action,
     response,
     request.header.messageId 
