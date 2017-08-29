@@ -10,7 +10,7 @@ module.exports = {
    * @returns {boolean} True if is undefined otherwise False
    */
   isNullOrUndefined: function (variable) {
-    return typeof variable === 'undefined' || variable == undefined || data === null;
+    return typeof variable === 'undefined' || variable == undefined || variable === null;
   },
 
   /**

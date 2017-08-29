@@ -1,5 +1,5 @@
 var constants = require('../../Constants');
-var message = require('../../libs/PubSub/Message');
+var Message = require('../../libs/PubSub/Message');
 var pubSub = require('../../libs/PubSub/PubSubAdapter');
 
 /**
@@ -67,7 +67,7 @@ function _sendCrudCompleted(request, response, channelDetails, action, internalE
 
   // pass the same messageId that was set on the request so that the gateway can map the completed event back to 
   // the original event
-  var completedResponse = new message(
+  var completedResponse = new Message(
     channelDetails.External.CompletedEvent,
     constants.pubSub.messageType.crud,
     action,

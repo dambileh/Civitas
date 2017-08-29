@@ -3,7 +3,7 @@
 var logging = require('../utilities/Logging');
 var _ = require('lodash');
 var pubSub = require('../../libs/PubSub/PubSubAdapter');
-var message = require('../../libs/PubSub/Message');
+var Message = require('../../libs/PubSub/Message');
 var constants = require('../../Constants');
 var pubSubChannels = require('../../PubSubChannels');
 
@@ -23,7 +23,7 @@ module.exports = {
 
     var userRequest = args.user.value;
 
-    var request = new message(
+    var request = new Message(
       pubSubChannels.User.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.create,
@@ -60,7 +60,7 @@ module.exports = {
    */
   getAllUsers: async function (args, response, next) {
 
-    var request = new message(
+    var request = new Message(
       pubSubChannels.User.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.getAll,
@@ -101,7 +101,7 @@ module.exports = {
 
     var userId = args.id.value;
 
-    var request = new message(
+    var request = new Message(
       pubSubChannels.User.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.getSingle,
@@ -142,7 +142,7 @@ module.exports = {
   deleteUser: async function (args, response, next) {
     var userId = args.id.value;
 
-    var request = new message(
+    var request = new Message(
       pubSubChannels.User.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.delete,
@@ -184,7 +184,7 @@ module.exports = {
     var userRequest = args.user.value;
     userRequest.id = args.id.value;
 
-    var request = new message(
+    var request = new Message(
       pubSubChannels.User.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.update,

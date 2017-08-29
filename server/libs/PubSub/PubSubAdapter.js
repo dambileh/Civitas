@@ -1,7 +1,7 @@
 'use strict';
 
 var redis = require('redis');
-var message = require('./Message');
+var Message = require('./Message');
 var pubSubHelper = require('./PubSubHelper');
 
 /**
@@ -82,7 +82,7 @@ module.exports = {
       sub.subscribe(responseChannel);
 
       sub.on('message', async function (channel, response) {
-        response = new message().createFromString(response);
+        response = new Message().createFromString(response);
 
         if (
           response.channel == channel &&
@@ -131,7 +131,7 @@ module.exports = {
     });
 
     sub.on('message', async function (channel, message) {
-      message = new message().createFromString(message);
+      message = new Message().createFromString(message);
 
       if (
         message.channel == channel &&
