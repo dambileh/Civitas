@@ -15,17 +15,16 @@ module.exports = {
             "GetSingleCompletedEvent": "UserGetSingleCompletedEvent",
             "GetAllEvent": "UserGetAllEvent",
             "GetAllCompletedEvent": "UserGetAllCompletedEvent"
-        },
-        "Registration": {
-            "External": {
-                "Event": "RegistrationEvent",
-                "CompletedEvent": "RegistrationCompletedEvent"
-            },
-            "Internal": {
-                "RequestRegistrationEvent": "RequestRegistrationEvent",
-                "RequestRegistrationCompletedEvent": "RequestRegistrationCompletedEvent"
-            }
         }
-
+    },
+    "Registration": {
+        "External": {
+            "Event": "RegistrationEvent",
+            "CompletedEvent": "RegistrationCompletedEvent"
+        },
+        "Internal": {
+            "RequestRegistrationEvent": "RequestRegistrationEvent",
+            "RequestRegistrationCompletedEvent": "RequestRegistrationCompletedEvent"
+        }
     }
 };
