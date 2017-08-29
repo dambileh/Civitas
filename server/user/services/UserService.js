@@ -1,6 +1,6 @@
 'use strict';
 
-var user = require('../models/User');
+var User = require('../models/User');
 var validationError = require('../../libs/error/ValidationError');
 var resourceNotFoundError = require('../../libs/error/ResourceNotFoundError');
 var appUtil = require('../../libs/AppUtil');
@@ -23,7 +23,7 @@ module.exports = {
    * @param {object} request - The request that was sent from the controller
    */
   createUser: function createUser(request) {
-    user.findOne(
+    User.findOne(
       {msisdn: request.msisdn},
       function userFindOneCallback(err, user) {
         if (err) {
@@ -58,7 +58,7 @@ module.exports = {
 
         request.status = constants.user.status.inactive;
 
-        var userEntity = new user(request);
+        var userEntity = new User(request);
 
         logging.logAction(
           logging.logLevels.INFO,
@@ -103,7 +103,7 @@ module.exports = {
       'Attempting to retrieve all users'
     );
 
-    user.find(
+    User.find(
       {},
       function userFindCallback(err, users) {
         if (err) {
@@ -156,7 +156,7 @@ module.exports = {
       'Attempting to get a single user'
     );
 
-    user.findById(request.id, function userFindOneCallback(err, user) {
+    User.findById(request.id, function userFindOneCallback(err, user) {
         if (err) {
           return subscriptionManager.emitInternalResponseEvent(
             {
@@ -200,7 +200,7 @@ module.exports = {
    * @param {object} request - The request arguments passed in from the controller
    */
   deleteUser: function deleteUser(request) {
-    user.findById(request.id, function userFindOneCallback(err, user) {
+    User.findById(request.id, function userFindOneCallback(err, user) {
         if (err) {
           return subscriptionManager.emitInternalResponseEvent(
             {
@@ -269,7 +269,7 @@ module.exports = {
    */
   updateUser: function updateUser(request) {
 
-    user.findById(request.id, function userFindOneCallback(err, user) {
+    User.findById(request.id, function userFindOneCallback(err, user) {
         if (err) {
           return subscriptionManager.emitInternalResponseEvent(
             {
