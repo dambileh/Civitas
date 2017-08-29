@@ -1,14 +1,11 @@
 'use strict';
 
-var AppUtil = require('../../libs/AppUtil');
-var Logging = require('../utilities/Logging');
-var config = require('config');
+var logging = require('../utilities/Logging');
 var _ = require('lodash');
-var PubSub = require('../../libs/PubSub/PubSubAdapter');
-var Message = require('../../libs/PubSub/Message');
+var pubSub = require('../../libs/PubSub/PubSubAdapter');
+var message = require('../../libs/PubSub/Message');
 var constants = require('../../Constants');
-var PubSubChannels = require('../../PubSubChannels');
-var async = require('async');
+var pubSubChannels = require('../../PubSubChannels');
 
 /**
  * The User Service module
@@ -26,8 +23,8 @@ module.exports = {
 
     var userRequest = args.user.value;
 
-    var request = new Message(
-      PubSubChannels.User.External.Event,
+    var request = new message(
+      pubSubChannels.User.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.create,
       userRequest
@@ -35,9 +32,9 @@ module.exports = {
 
     try {
       let completed =
-        await PubSub.publishAndWaitForResponse(
-          PubSubChannels.User.External.Event,
-          PubSubChannels.User.External.CompletedEvent,
+        await pubSub.publishAndWaitForResponse(
+          pubSubChannels.User.External.Event,
+          pubSubChannels.User.External.CompletedEvent,
           {
             subscriberType: constants.pubSub.recipients.gateway
           },
@@ -49,7 +46,7 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to subscribe to channel [${PubSubChannels.User.External.CompletedEvent}]`, err);
+        `Failed to subscribe to channel [${pubSubChannels.User.External.CompletedEvent}]`, err);
       return next(err);
     }
   },
@@ -63,8 +60,8 @@ module.exports = {
    */
   getAllUsers: async function (args, response, next) {
 
-    var request = new Message(
-      PubSubChannels.User.External.Event,
+    var request = new message(
+      pubSubChannels.User.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.getAll,
       {}
@@ -72,9 +69,9 @@ module.exports = {
 
     try {
       let completed =
-        await PubSub.publishAndWaitForResponse(
-          PubSubChannels.User.External.Event,
-          PubSubChannels.User.External.CompletedEvent,
+        await pubSub.publishAndWaitForResponse(
+          pubSubChannels.User.External.Event,
+          pubSubChannels.User.External.CompletedEvent,
           {
             subscriberType: constants.pubSub.recipients.gateway
           },
@@ -88,7 +85,7 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to subscribe to channel [${PubSubChannels.User.External.CompletedEvent}]`, err);
+        `Failed to subscribe to channel [${pubSubChannels.User.External.CompletedEvent}]`, err);
       return next(err);
     }
   },
@@ -104,8 +101,8 @@ module.exports = {
 
     var userId = args.id.value;
 
-    var request = new Message(
-      PubSubChannels.User.External.Event,
+    var request = new message(
+      pubSubChannels.User.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.getSingle,
       {
@@ -115,9 +112,9 @@ module.exports = {
 
     try {
       let completed =
-        await PubSub.publishAndWaitForResponse(
-          PubSubChannels.User.External.Event,
-          PubSubChannels.User.External.CompletedEvent,
+        await pubSub.publishAndWaitForResponse(
+          pubSubChannels.User.External.Event,
+          pubSubChannels.User.External.CompletedEvent,
           {
             subscriberType: constants.pubSub.recipients.gateway
           },
@@ -130,7 +127,7 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to subscribe to channel [${PubSubChannels.User.External.CompletedEvent}]`, err);
+        `Failed to subscribe to channel [${pubSubChannels.User.External.CompletedEvent}]`, err);
       return next(err);
     }
 
@@ -145,8 +142,8 @@ module.exports = {
   deleteUser: async function (args, response, next) {
     var userId = args.id.value;
 
-    var request = new Message(
-      PubSubChannels.User.External.Event,
+    var request = new message(
+      pubSubChannels.User.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.delete,
       {
@@ -156,9 +153,9 @@ module.exports = {
 
     try {
       let completed =
-        await PubSub.publishAndWaitForResponse(
-          PubSubChannels.User.External.Event,
-          PubSubChannels.User.External.CompletedEvent,
+        await pubSub.publishAndWaitForResponse(
+          pubSubChannels.User.External.Event,
+          pubSubChannels.User.External.CompletedEvent,
           {
             subscriberType: constants.pubSub.recipients.gateway
           },
@@ -171,7 +168,7 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to subscribe to channel [${PubSubChannels.User.External.CompletedEvent}]`, err);
+        `Failed to subscribe to channel [${pubSubChannels.User.External.CompletedEvent}]`, err);
       return next(err);
     }
   },
@@ -187,8 +184,8 @@ module.exports = {
     var userRequest = args.user.value;
     userRequest.id = args.id.value;
 
-    var request = new Message(
-      PubSubChannels.User.External.Event,
+    var request = new message(
+      pubSubChannels.User.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.update,
       userRequest
@@ -196,9 +193,9 @@ module.exports = {
 
     try {
       let completed =
-        await PubSub.publishAndWaitForResponse(
-          PubSubChannels.User.External.Event,
-          PubSubChannels.User.External.CompletedEvent,
+        await pubSub.publishAndWaitForResponse(
+          pubSubChannels.User.External.Event,
+          pubSubChannels.User.External.CompletedEvent,
           {
             subscriberType: constants.pubSub.recipients.gateway
           },
@@ -210,7 +207,7 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to subscribe to channel [${PubSubChannels.User.External.CompletedEvent}]`, err);
+        `Failed to subscribe to channel [${pubSubChannels.User.External.CompletedEvent}]`, err);
       return next(err);
     }
   }
