@@ -1,20 +1,20 @@
 'use strict';
 
 var logging = require('../utilities/Logging');
-var AppUtil = require('../../libs/AppUtil');
+var appUtil = require('../../libs/AppUtil');
 var events = require('events');
 var internalEmitter = new events.EventEmitter();
-var PubSub = require('../../libs/PubSub/PubSubAdapter');
-var SubscriptionHelper = require('../../libs/PubSub/SubscriptionHelper');
-var UserChannels = require('../../PubSubChannels').User;
+var pubSub = require('../../libs/PubSub/PubSubAdapter');
+var subscriptionHelper = require('../../libs/PubSub/SubscriptionHelper');
+var userChannels = require('../../PubSubChannels').User;
 var constants = require('../../Constants');
 var process = require('process');
 
 module.exports = {
   initialize: async function () {
 
-    if (AppUtil.isNullOrUndefined(UserChannels)) {
-      throw new Error("[channel] is not set");
+    if (appUtil.isNullOrUndefined(userChannels)) {
+      throw new Error('[channel] is not set');
     }
 
     var handleMessage = async function handleMessage(err, message) {
@@ -28,31 +28,30 @@ module.exports = {
 
       logging.logAction(
         logging.logLevels.INFO,
-        "Message [" + JSON.stringify(message) + "] was received on channel [" + UserChannels.External.Event + "]" +
-          " for recipient [" + message.recipient + "]"
+        `Message [${JSON.stringify(message)}] was received on channel [${userChannels.External.Event}] for recipient [
+            ${message.recipient}]`
       );
 
       switch (message.type) {
-        case "crud":
-          SubscriptionHelper.emitCRUDEvents(message, UserChannels, internalEmitter);
+        case constants.pubSub.messageType.crud:
+          subscriptionHelper.emitCRUDEvents(message, userChannels, internalEmitter);
           break;
         default:
-          logging.logAction(logging.logLevels.ERROR, "Type [%s] is not supported", message.type)
+          logging.logAction(logging.logLevels.ERROR, `Type [${message.type}] is not supported`)
       }
     };
 
     try {
-      await PubSub.subscribe(
-        UserChannels.External.Event,
+      await pubSub.subscribe(
+        userChannels.External.Event,
         {
-          unsubscribe: false,
           subscriberId: process.pid,
           subscriberType: constants.pubSub.recipients.user
         },
         handleMessage
       );
     } catch (e) {
-      logging.logAction(logging.logLevels.ERROR, `Failed to subscribe to channel [${UserChannels.External.Event}]`, e);
+      logging.logAction(logging.logLevels.ERROR, `Failed to subscribe to channel [${userChannels.External.Event}]`, e);
       throw e;
     }
   },

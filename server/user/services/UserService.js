@@ -1,16 +1,16 @@
 'use strict';
 
 var User = require('../models/User');
-var ValidationError = require('../../libs/error/ValidationError');
-var ResourceNotFoundError = require('../../libs/error/ResourceNotFoundError');
-var AppUtil = require('../../libs/AppUtil');
-var Logging = require('../utilities/Logging');
+var validationError = require('../../libs/error/ValidationError');
+var resourceNotFoundError = require('../../libs/error/ResourceNotFoundError');
+var appUtil = require('../../libs/AppUtil');
+var logging = require('../utilities/Logging');
 var config = require('config');
 var _ = require('lodash');
-var SubscriptionManager = require('../managers/SubscriptionManager');
-var UserChannels = require('../../PubSubChannels').User;
-var Errors = require('../../ErrorCodes');
-var Constants = require('../../Constants');
+var subscriptionManager = require('../managers/SubscriptionManager');
+var userChannels = require('../../PubSubChannels').User;
+var errors = require('../../ErrorCodes');
+var constants = require('../../Constants');
 
 /**
  * The User Service module
@@ -22,70 +22,68 @@ module.exports = {
    *
    * @param {object} request - The request that was sent from the controller
    */
-  createUser: function (request) {
-    // Make sure that the no other user with the same name exist already
-
+  createUser: function createUser(request) {
     User.findOne(
       {msisdn: request.msisdn},
       function userFindOneCallback(err, user) {
         if (err) {
-          return SubscriptionManager.emitInternalResponseEvent(
+          return subscriptionManager.emitInternalResponseEvent(
             {
               statusCode: 500,
               body: err
             },
-            UserChannels.Internal.CreateCompletedEvent
+            userChannels.Internal.CreateCompletedEvent
           );
         }
-        if (!AppUtil.isNullOrUndefined(user)) {
-          var modelValidationError = new ValidationError(
+        if (!appUtil.isNullOrUndefined(user)) {
+          var modelValidationError = new validationError(
             'Some validation errors occurred.',
             [
               {
-                code: Errors.UserService.NUMBER_ALREADY_EXISTS,
+                code: errors.UserService.NUMBER_ALREADY_EXISTS,
                 message: `A user with number [${request.msisdn}] already exists.`,
                 path: ['msisdn']
               }
             ]
           );
 
-          return SubscriptionManager.emitInternalResponseEvent(
+          return subscriptionManager.emitInternalResponseEvent(
             {
               statusCode: 400,
               body: modelValidationError
             },
-            UserChannels.Internal.CreateCompletedEvent
+            userChannels.Internal.CreateCompletedEvent
           );
         }
 
-        request.status = Constants.user.status.inactive;
+        request.status = constants.user.status.inactive;
 
         var userEntity = new User(request);
 
-        Logging.logAction(
-          Logging.logLevels.INFO,
+        logging.logAction(
+          logging.logLevels.INFO,
           'Attempting to save a new user document'
         );
 
         userEntity.save(
           function userSaveCallback(err) {
             if (err) {
-              return SubscriptionManager.emitInternalResponseEvent(
+              return subscriptionManager.emitInternalResponseEvent(
                 {
                   statusCode: 500,
                   body: err
                 },
-                UserChannels.Internal.CreateCompletedEvent
+                userChannels.Internal.CreateCompletedEvent
               );
 
             }
 
-            return SubscriptionManager.emitInternalResponseEvent(
+            return subscriptionManager.emitInternalResponseEvent(
               {
                 statusCode: 201,
                 body: userEntity
               },
-              UserChannels.Internal.CreateCompletedEvent
+              userChannels.Internal.CreateCompletedEvent
             );
           }
         );
@@ -98,10 +96,10 @@ module.exports = {
    *
    * @param {object} request - The request arguments passed in from the controller
    */
-  getAllUsers: function (request) {
+  getAllUsers: function getAllUsers(request) {
 
-    Logging.logAction(
-      Logging.logLevels.INFO,
+    logging.logAction(
+      logging.logLevels.INFO,
       'Attempting to retrieve all users'
     );
 
@@ -109,18 +107,18 @@ module.exports = {
       {},
       function userFindCallback(err, users) {
         if (err) {
-          return SubscriptionManager.emitInternalResponseEvent(
+          return subscriptionManager.emitInternalResponseEvent(
             {
               statusCode: 500,
               body: err
             },
-            UserChannels.Internal.GetAllCompletedEvent
+            userChannels.Internal.GetAllCompletedEvent
           );
         }
 
         // If the array is empty we need to return a 204 response.
-        if (AppUtil.isArrayEmpty(users)) {
-          return SubscriptionManager.emitInternalResponseEvent(
+        if (appUtil.isArrayEmpty(users)) {
+          return subscriptionManager.emitInternalResponseEvent(
             {
               statusCode: 204,
               header: {
@@ -128,10 +126,10 @@ module.exports = {
               },
               body: {}
             },
-            UserChannels.Internal.GetAllCompletedEvent
+            userChannels.Internal.GetAllCompletedEvent
           );
         } else {
-          return SubscriptionManager.emitInternalResponseEvent(
+          return subscriptionManager.emitInternalResponseEvent(
             {
               statusCode: 200,
               header: {
@@ -139,7 +137,7 @@ module.exports = {
               },
               body: users
             },
-            UserChannels.Internal.GetAllCompletedEvent
+            userChannels.Internal.GetAllCompletedEvent
           );
         }
       }
@@ -151,46 +149,46 @@ module.exports = {
    *
    * @param {object} request - The request that was sent from the controller
    */
-  getSingleUser: function (request) {
+  getSingleUser: function getSingleUser(request) {
 
-    Logging.logAction(
-      Logging.logLevels.INFO,
+    logging.logAction(
+      logging.logLevels.INFO,
       'Attempting to get a single user'
     );
 
     User.findById(request.id, function userFindOneCallback(err, user) {
         if (err) {
-          return SubscriptionManager.emitInternalResponseEvent(
+          return subscriptionManager.emitInternalResponseEvent(
             {
               statusCode: 500,
               body: err
             },
-            UserChannels.Internal.GetSingleCompletedEvent
+            userChannels.Internal.GetSingleCompletedEvent
           );
         }
 
-        if (AppUtil.isNullOrUndefined(user)) {
+        if (appUtil.isNullOrUndefined(user)) {
 
-          var notFoundError = new ResourceNotFoundError(
+          var notFoundError = new resourceNotFoundError(
             'Resource not found.',
             `No user with id [${request.id}] was found`
           );
 
-          return SubscriptionManager.emitInternalResponseEvent(
+          return subscriptionManager.emitInternalResponseEvent(
             {
               statusCode: 404,
               body: notFoundError
             },
-            UserChannels.Internal.GetSingleCompletedEvent
+            userChannels.Internal.GetSingleCompletedEvent
           );
         }
 
-        return SubscriptionManager.emitInternalResponseEvent(
+        return subscriptionManager.emitInternalResponseEvent(
           {
             statusCode: 200,
             body: user
           },
-          UserChannels.Internal.GetSingleCompletedEvent
+          userChannels.Internal.GetSingleCompletedEvent
         );
       }
     );
@@ -201,62 +199,62 @@ module.exports = {
    *
    * @param {object} request - The request arguments passed in from the controller
    */
-  deleteUser: function (request) {
+  deleteUser: function deleteUser(request) {
     User.findById(request.id, function userFindOneCallback(err, user) {
         if (err) {
-          return SubscriptionManager.emitInternalResponseEvent(
+          return subscriptionManager.emitInternalResponseEvent(
             {
               statusCode: 500,
               body: err
             },
-            UserChannels.Internal.DeleteCompletedEvent
+            userChannels.Internal.DeleteCompletedEvent
           );
         }
 
-        if (AppUtil.isNullOrUndefined(user)) {
-          var modelValidationError = new ValidationError(
+        if (appUtil.isNullOrUndefined(user)) {
+          var modelValidationError = new validationError(
             'Some validation errors occurred.',
             [
               {
-                code: Errors.UserService.USER_NOT_FOUND,
+                code: errors.UserService.USER_NOT_FOUND,
                 message: `No user with id [${request.id}] was found.`,
                 path: ['id']
               }
             ]
           );
 
-          return SubscriptionManager.emitInternalResponseEvent(
+          return subscriptionManager.emitInternalResponseEvent(
             {
               statusCode: 400,
               body: modelValidationError
             },
-            UserChannels.Internal.DeleteCompletedEvent
+            userChannels.Internal.DeleteCompletedEvent
           );
         }
 
-        Logging.logAction(
-          Logging.logLevels.INFO,
+        logging.logAction(
+          logging.logLevels.INFO,
           'Attempting to remove a user'
         );
 
         user.remove(
           function noteRemoveCallback(err) {
             if (err) {
-              return SubscriptionManager.emitInternalResponseEvent(
+              return subscriptionManager.emitInternalResponseEvent(
                 {
                   statusCode: 500,
                   body: err
                 },
-                UserChannels.Internal.DeleteCompletedEvent
+                userChannels.Internal.DeleteCompletedEvent
               );
             }
 
-            return SubscriptionManager.emitInternalResponseEvent(
+            return subscriptionManager.emitInternalResponseEvent(
               {
                 statusCode: 200,
                 body: user
               },
-              UserChannels.Internal.DeleteCompletedEvent
+              userChannels.Internal.DeleteCompletedEvent
             );
           }
         );
@@ -269,42 +267,42 @@ module.exports = {
    *
    * @param {object} request - The request arguments passed in from the controller
    */
-  updateUser: function (request) {
+  updateUser: function updateUser(request) {
 
     User.findById(request.id, function userFindOneCallback(err, user) {
         if (err) {
-          return SubscriptionManager.emitInternalResponseEvent(
+          return subscriptionManager.emitInternalResponseEvent(
             {
               statusCode: 500,
               body: err
             },
-            UserChannels.Internal.UpdateCompletedEvent
+            userChannels.Internal.UpdateCompletedEvent
           );
         }
 
-        if (AppUtil.isNullOrUndefined(user)) {
-          var modelValidationError = new ValidationError(
+        if (appUtil.isNullOrUndefined(user)) {
+          var modelValidationError = new validationError(
             'Some validation errors occurred.',
             [
               {
-                code: Errors.UserService.USER_NOT_FOUND,
+                code: errors.UserService.USER_NOT_FOUND,
                 message: `No user with id [${request.msisdn}] was found.`,
                 path: ['id']
               }
             ]
           );
 
-          return SubscriptionManager.emitInternalResponseEvent(
+          return subscriptionManager.emitInternalResponseEvent(
             {
               statusCode: 400,
               body: modelValidationError
             },
-            UserChannels.Internal.UpdateCompletedEvent
+            userChannels.Internal.UpdateCompletedEvent
           );
         }
 
-        Logging.logAction(
-          Logging.logLevels.INFO,
+        logging.logAction(
+          logging.logLevels.INFO,
           'Attempting to update a note document'
         );
 
@@ -315,14 +313,14 @@ module.exports = {
           email: request.email
         };
 
-        User.update({_id: request.id}, updatedProperties, function userUpdateCallback(err) {
+        user.update({_id: request.id}, updatedProperties, function userUpdateCallback(err) {
             if (err) {
-              return SubscriptionManager.emitInternalResponseEvent(
+              return subscriptionManager.emitInternalResponseEvent(
                 {
                   statusCode: 500,
                   body: err
                 },
-                UserChannels.Internal.UpdateCompletedEvent
+                userChannels.Internal.UpdateCompletedEvent
               );
             }
 
@@ -331,12 +329,12 @@ module.exports = {
             user.email = request.email;
             user.updatedAt = new Date();
 
-            return SubscriptionManager.emitInternalResponseEvent(
+            return subscriptionManager.emitInternalResponseEvent(
               {
                 statusCode: 200,
                 body: user
               },
-              UserChannels.Internal.UpdateCompletedEvent
+              userChannels.Internal.UpdateCompletedEvent
             );
           }
         );
