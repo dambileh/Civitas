@@ -1,11 +1,12 @@
 'use strict';
 
-var ServiceHelper = require('./ServiceHelper');
-var AppUtil = require('./AppUtil');
-var ObjectHelper = require('./ObjectHelper');
+var serviceHelper = require('./ServiceHelper');
+var appUtil = require('./AppUtil');
+var objectHelper = require('./ObjectHelper');
 
 /**
  * The Service Driver module
+ * 
  * @param {Object} port - The optional service configurations that will be used to make the http call
  * @param {Object} host - The optional service configurations that will be used to make the http call
  * @param {Object} protocol - The optional service configurations that will be used to make the http call
@@ -48,7 +49,7 @@ ServiceDriver.prototype.setPath = function (path) {
 
   var urlPath = path;
   var message = null;
-  if (AppUtil.isNullOrUndefined(urlPath)) {
+  if (appUtil.isNullOrUndefined(urlPath)) {
     message = 'Required Path Not Set';
   }
   if (message != null) {
@@ -131,7 +132,7 @@ ServiceDriver.prototype.makeBasicCall = function makeBasicCall(funcHandleRespons
       // Reset the flag.
       didTimeout = false;
     } else {
-      if (!AppUtil.isNullOrUndefined(error.message)) {
+      if (!appUtil.isNullOrUndefined(error.message)) {
         message = error.message;
       }
     }
@@ -205,7 +206,7 @@ ServiceDriver.prototype.post = function post(payload, funcHandleResponse, callba
       // Reset the flag.
       didTimeout = false;
     } else {
-      if (!AppUtil.isNullOrUndefined(error.message)) {
+      if (!appUtil.isNullOrUndefined(error.message)) {
         message = error.message;
       }
     }

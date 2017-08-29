@@ -1,10 +1,10 @@
 'use strict';
 
-var ValidationError = require('./error/ValidationError');
-var ResourceNotFoundError = require('./error/ResourceNotFoundError');
-var AuthorizationError = require('./error/AuthorizationError');
-var RuntimeError = require('./error/RuntimeError');
-var AppUtil = require('./AppUtil');
+var validationError = require('./error/ValidationError');
+var resourceNotFoundError = require('./error/ResourceNotFoundError');
+var authorizationError = require('./error/AuthorizationError');
+var runtimeError = require('./error/RuntimeError');
+var appUtil = require('./AppUtil');
 
 /**
  * An instance of the service helper
@@ -57,18 +57,18 @@ module.exports = {
     var triageErrorResponse = resError.body;
     switch (resError.statusCode) {
       case 400:
-        return new ValidationError(triageErrorResponse.message);
+        return new validationError(triageErrorResponse.message);
       case 401:
-        return new AuthorizationError(triageErrorResponse.message);
+        return new authorizationError(triageErrorResponse.message);
       default:
         if (
-          !AppUtil.isNullOrUndefined(triageErrorResponse) &&
-          !AppUtil.isNullOrUndefined(triageErrorResponse.message) &&
-          !AppUtil.isNullOrUndefined(triageErrorResponse.exception)
+          !appUtil.isNullOrUndefined(triageErrorResponse) &&
+          !appUtil.isNullOrUndefined(triageErrorResponse.message) &&
+          !appUtil.isNullOrUndefined(triageErrorResponse.exception)
         ) {
-          return new RuntimeError(triageErrorResponse.message, triageErrorResponse.exception);
+          return new runtimeError(triageErrorResponse.message, triageErrorResponse.exception);
         }
-        return new RuntimeError('Some unexpected error has happened. Error: ' + JSON.stringify(resError));
+        return new runtimeError('Some unexpected error has happened. Error: ' + JSON.stringify(resError));
     }
   },
   /**
@@ -82,9 +82,9 @@ module.exports = {
    * @return {Error} Return error that will be shown to user
    */
   handleTriageGetListResponseErrors: function handleTriageGetListResponseErrors(resError) {
-    if (resError.statusCode == 404 && !AppUtil.isNullOrUndefined(resError) && !AppUtil.isNullOrUndefined(resError.body)) {
+    if (resError.statusCode == 404 && !appUtil.isNullOrUndefined(resError) && !appUtil.isNullOrUndefined(resError.body)) {
       var triageErrorResponse = resError.body;
-      return new ResourceNotFoundError(
+      return new resourceNotFoundError(
         triageErrorResponse.message,
         triageErrorResponse.exception_message
       );

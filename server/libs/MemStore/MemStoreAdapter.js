@@ -345,6 +345,12 @@ module.exports = {
 
 };
 
+/**
+ * Returns an instance of Redis client
+ *
+ * @returns {Promise}
+ * @private
+ */
 function _createClient() {
   return new Promise(function(resolve, reject){
     var client = redis.createClient();
