@@ -9,9 +9,10 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "async": "2.0.0-rc.5",
+    "async": "^2.5.0",
     "config": "^1.21.0",
     "connect": "^3.2.0",
+    "winston": "^2.2.0",
     "js-yaml": "^3.3.0",
     "lodash": "^4.17.4",
     "newrelic": "1.28.0",

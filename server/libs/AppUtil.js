@@ -2,23 +2,87 @@
  * Created by hossein on 2016/05/17.
  */
 module.exports = {
-  isNullOrUndefined: function (data) {
-    return typeof data === 'undefined' || data == undefined || data === null;
+
+  /**
+   * Checks whether the passed in variable is null or undefined
+   * @param {*} variable - The variable that will be checked
+   *
+   * @returns {boolean} True if is undefined otherwise False
+   */
+  isNullOrUndefined: function (variable) {
+    return typeof variable === 'undefined' || variable == undefined || variable === null;
   },
 
   /**
-   * This checks if the given array is empty or not.
-   * 
-   * It is considered empty if any of the below checks are true or if it is null
+   * Checks whether the passed in array is empty or undefined
    *
-   * @param {Array} data - The variable to check.
+   * @param {array} array - The array that will be checked
    *
-   * @author Hadi Shayesteh <Hadishayesteh@gmail.com>
-   * @since  14 Aug 2017
-   *
-   * @return {boolean} will return true of the given array is empty otherwise false
+   * @returns {boolean} True if is undefined or empty otherwise False
    */
-  isArrayEmpty: function (data) {
-    return this.isNullOrUndefined(data) || data.length === 0;
+  isArrayEmpty: function (array) {
+    return this.isNullOrUndefined(array) || array.length === 0;
+  },
+
+  /**
+   * Removed the passed in element from the given array
+   *
+   * @param {array} array - The array from which the element will be removed
+   * @param {*} element - The element that will be removed
+   * 
+   * @returns {array} The updated array
+   */
+  removeFromArray: function (array, element) {
+    if (array.length && array.length > 0 && array.indexOf(element) > -1) {
+      array.splice(array.indexOf(element), 1)
+    }
+    return array;
+  },
+
+  /**
+   * Checks whether the passed in variable is object (array is also considered and object)
+   * 
+   * @param {*} variable - The variable that will be checked
+   * 
+   * @returns {boolean} True if is is an object otherwise False
+   */
+  isObject: function (variable) {
+    return ((typeof variable) === "object");
+  },
+
+  /**
+   * Will wait for certain amount of time
+   *
+   * @param {integer} timeout - The amount of time to wait
+   *
+   * @returns {Promise}
+   */
+  wait: function wait(timeout) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve()
+      }, timeout)
+    })
+  },
+
+  /**
+   * Will retry to call the passed in function
+   * 
+   * @param {function} fn - The function to retry 
+   * @param {integer} tryCount - The number of retry attempts 
+   * @param {integer} tryIntervals - The wait interval between each interval in milliseconds
+   * 
+   * @returns {Promise}
+   */
+  retry: async function retry(fn, tryCount, tryIntervals) {
+    for (let i = 0; i < tryCount; i++) {
+      try {
+        await fn();
+      } catch (err) {
+        await this.wait(tryIntervals)
+      }
+    }
   }
+
 };
+

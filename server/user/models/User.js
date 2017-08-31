@@ -1,23 +1,29 @@
+'use strict';
+
 var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+var autopopulate = require('mongoose-autopopulate');
+var schema = mongoose.Schema;
 
 var statusEnum = [
   'active',
   'inactive'
 ];
 
-var User = new Schema(
+var user = new schema(
   {
-    firstname: {type: String, required: true},
-    lastname: {type: String, required: true},
-    cellnumber: {type: String, required: true},
+    firstName: {type: String, required: true},
+    lastName: {type: String, required: true},
+    msisdn: {type: String, required: true},
     email: {type: String, required: false},
-    status: {type: String, required: true, enum: statusEnum}
+    status: {type: String, required: true, enum: statusEnum},
+    friends: [{ type: schema.ObjectId, ref: 'user', autopopulate: true }]
   },
-  {timestamps: {createdAt: 'created_at', updatedAt: 'updated_at'}}
+  {timestamps: {createdAt: 'createdAt', updatedAt: 'updatedAt'}}
 );
+
+user.plugin(autopopulate);
 
 /**
  * Defines the schema for the user model
  */
-module.exports = mongoose.model('user', User);
+module.exports = mongoose.model('user', user);

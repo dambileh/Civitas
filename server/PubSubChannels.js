@@ -34,5 +34,15 @@ module.exports = {
             "GetAllEvent": "ContactGetAllEvent",
             "GetAllCompletedEvent": "ContactGetAllCompletedEvent"
         }
+    },
+    "Registration": {
+        "External": {
+            "Event": "RegistrationEvent",
+            "CompletedEvent": "RegistrationCompletedEvent"
+        },
+        "Internal": {
+            "RequestRegistrationEvent": "RequestRegistrationEvent",
+            "RequestRegistrationCompletedEvent": "RequestRegistrationCompletedEvent"
+        }
     }
 };

@@ -1,18 +1,29 @@
 module.exports = {
-  pub_sub: {
-    message_type: {
+  pubSub: {
+    messageType: {
       crud: "crud"
     },
-    message_action: {
+    messageAction: {
       create: "create",
       update: "update",
       delete: "delete",
       getSingle: "getSingle",
-      getAll: "getAll"
+      getAll: "getAll",
+      requestRegistration: "requestRegistration"
     },
     recipients: {
       gateway: "gateway",
       user: "user"
+    },
+    channelStore: {
+      subscribers: "subscribers",
+      messages: "messages"
+    }
+  },
+  user: {
+    status: {
+      active: "active",
+      inactive: "inactive"
     }
   }
 };
