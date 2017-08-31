@@ -1,0 +1,726 @@
+swagger: "2.0"
+info:
+  description: "Gateway to Civitas"
+  version: "1.0.0"
+  title: "Civitas Gateway"
+host: "localhost:4000"
+basePath: "/v1"
+tags:
+- name: "gateway"
+  description: "Operations related to gateway entity"
+  externalDocs:
+    description: "Find out more"
+    url: "http://swagger.io"
+schemes:
+- "http"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+paths:
+  /user:
+    get:
+        tags:
+        - "user"
+        description: "returns all the usere records"
+        operationId: "getAllUsers"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters: []
+        responses:
+          200:
+            description: "An array of users"
+            schema:
+              type: "array"
+              items:
+                $ref: "#/definitions/userResponse"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "UserController"
+    post:
+      tags:
+      - "user"
+      description: "Creates a user"
+      operationId: "createUser"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "user"
+        description: "The user entity details"
+        required: true
+        schema:
+          $ref: "#/definitions/userRequest"
+      responses:
+        201:
+          description: "success response that the user has been added"
+          schema:
+            $ref: "#/definitions/userResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "UserController"
+  /user/{id}:
+    put:
+      tags:
+      - "user"
+      description: "Updates a user"
+      operationId: "updateUser"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "The id of user entity that will be updated"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "user"
+        description: "The user entity details"
+        required: true
+        schema:
+          $ref: "#/definitions/userUpdateRequest"
+      responses:
+        201:
+          description: "success response that the user has been added"
+          schema:
+            $ref: "#/definitions/userResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "UserController"
+    delete:
+        tags:
+        - "user"
+        description: "Deletes a user"
+        operationId: "deleteUser"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "path"
+          name: "id"
+          description: "The id of user entity that will be deleted"
+          required: true
+          type: "string"
+        responses:
+          200:
+            description: "An array of users"
+            schema:
+              type: "array"
+              items:
+                $ref: "#/definitions/userResponse"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "UserController"
+    get:
+        tags:
+        - "user"
+        description: "Returns a user"
+        operationId: "getSingleUser"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "path"
+          name: "id"
+          description: "The id of user entity that will be returned"
+          required: true
+          type: "string"
+        responses:
+          200:
+            description: "An array of users"
+            schema:
+              type: "array"
+              items:
+                $ref: "#/definitions/userResponse"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "UserController"
+  /user/{id}/contact:
+    post:
+      tags:
+      - "user contacts"
+      description: "Creates a contact for the user"
+      operationId: "createContact"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "The id of user entity"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "contact"
+        description: "The user contact entity details"
+        required: true
+        schema:
+          $ref: "#/definitions/contactRequest"
+      responses:
+        201:
+          description: "success response that the user contact has been added"
+          schema:
+            $ref: "#/definitions/contactResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "ContactController"
+
+  /user/{id}/invite-user:
+    post:
+      tags:
+      - "invite user"
+      description: "Allows user to invite another user"
+      operationId: "inviteUser"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "The id of user"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "invite"
+        description: "The user invitation details"
+        required: true
+        schema:
+          $ref: "#/definitions/inviteUserRequest"
+      responses:
+        200:
+          description: "success response that the user's invitation has been sent"
+          schema:
+            $ref: "#/definitions/inviteUserResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "UserController"
+
+  /registration/confirm:
+    post:
+      tags:
+      - "user registration"
+      description: "Confirms a registration"
+      operationId: "confrimRegistration"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "register"
+        description: "The registration details"
+        required: true
+        schema:
+          $ref: "#/definitions/confirmRegistrationRequest"
+      responses:
+        200:
+          description: "success response that the registration has been confirmed"
+          schema:
+            $ref: "#/definitions/confirmRegistrationResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "RegistrationController"
+
+  /status:
+    get:
+      tags:
+      - "status"
+      description: "gets the status of the messaging service"
+      operationId: "getSystemStatus"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "The server status will be returned"
+          schema:
+            $ref: "#/definitions/serverStatusResponse"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "StatusController"
+
+definitions:
+  userRequest:
+    type: "object"
+    required:
+    - "firstName"
+    - "lastName"
+    - "msisdn"
+    properties:
+      firstName:
+        type: "string"
+        maxLength: 128
+        description: "The firstname of the user"
+      lastName:
+        type: "string"
+        maxLength: 128
+        description: "The lastname of the user"
+      msisdn:
+        type: "string"
+        pattern: "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
+        maxLength: 128
+        description: "The user's contact number"
+        #Ref: http://wa.rwick.com/2016/06/09/validating-south-african-cell-numbers-with-a-regular-expression-regex/
+      email:
+        type: "string"
+        format: "email"
+        minLength: 6
+        maxLength: 128
+        description: "The email of the user"
+      address:
+        $ref: "#/definitions/addressRequest"
+      arCompanies:
+        type: "array"
+        items:
+          type: "string"
+          format: "uuid"
+        description: "The ids of the AR companies that service the user"
+      images:
+        type: "array"
+        items:
+          type: "string"
+          format: "uuid"
+        description: "The ids of the images on user's phone that are linked to his or her profile"
+      avatarId:
+        type: "string"
+        format: "uuid"
+        description: "The id of user's avatar image"
+
+  userResponse:
+    type: "object"
+    required:
+    - "firstName"
+    - "lastName"
+    - "msisdn"
+    properties:
+      firstName:
+        type: "string"
+        maxLength: 128
+        description: "The firstname of the user"
+      lastName:
+        type: "string"
+        maxLength: 128
+        description: "The lastname of the user"
+      msisdn:
+        type: "string"
+        pattern: "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
+        maxLength: 128
+        description: "The user's contact number"
+      email:
+        type: "string"
+        format: "email"
+        minLength: 6
+        maxLength: 128
+        description: "The email of the user"
+      address:
+        $ref: "#/definitions/addressResponse"
+      arCompanies:
+        type: "array"
+        items:
+          type: "string"
+          format: "uuid"
+        description: "The ids of the AR companies that service the user"
+      images:
+        type: "array"
+        items:
+          type: "string"
+          format: "uuid"
+        description: "The ids of the images on user's phone that are linked to his or her profile"
+      avatarId:
+        type: "string"
+        format: "uuid"
+        description: "The id of user's avatar image"
+      status:
+        type: "string"
+        enum: ["active", "inactive"]
+        description: "The firstname of the user"
+
+  userUpdateRequest:
+    type: "object"
+    properties:
+      firstName:
+        type: "string"
+        maxLength: 128
+        description: "The firstname of the user"
+      lastName:
+        type: "string"
+        maxLength: 128
+        description: "The lastname of the user"
+      email:
+        type: "string"
+        format: "email"
+        minLength: 6
+        maxLength: 128
+        description: "The email of the user"
+      address:
+        $ref: "#/definitions/addressRequest"
+      arCompanies:
+        type: "array"
+        items:
+          type: "string"
+          format: "uuid"
+        description: "The ids of the AR companies that service the user"
+      images:
+        type: "array"
+        items:
+          type: "string"
+          format: "uuid"
+        description: "The ids of the images on user's phone that are linked to his or her profile"
+      avatarId:
+        type: "string"
+        format: "uuid"
+        description: "The id of user's avatar image"
+
+  contactRequest:
+    type: "object"
+    required:
+    - "msisdn"
+    properties:
+      msisdn:
+        type: "string"
+        pattern: "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
+        maxLength: 128
+        description: "The user's contact number"
+
+  contactResponse:
+    type: "object"
+    required:
+    - "msisdn"
+    - "userId"
+    properties:
+      msisdn:
+        type: "string"
+        description: "The user's contact number"
+      userId:
+        type: "string"
+        description: "The id of the user"
+
+  confirmRegistrationRequest:
+    type: "object"
+    required:
+    - "code"
+    - "msisdn"
+    properties:
+      code:
+        type: "string"
+        description: "The registration confirmation code sent to the device"
+      msisdn:
+        type: "string"
+        description: "The cell number to which the registration code was sent"
+
+  confirmRegistrationResponse:
+    type: "object"
+    properties:
+      code:
+        type: "string"
+        description: "The registration confirmation code sent to the device"
+      msisdn:
+        type: "string"
+        description: "The cell number to which the registration code was sent"
+
+  inviteUserRequest:
+    type: "object"
+    required:
+    - "msisdn"
+    properties:
+      msisdn:
+        type: "string"
+        pattern: "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
+        maxLength: 128
+        description: "The invited user's contact number"
+
+  inviteUserResponse:
+    type: "object"
+    required:
+    - "msisdn"
+    - "userId"
+    properties:
+      msisdn:
+        type: "string"
+        description: "The invited user's contact number"
+      userId:
+        type: "string"
+        description: "The id of the user"
+
+  addressRequest:
+    type: "object"
+    required:
+    - "line1"
+    - "city"
+    - "country"
+    - "postalCode"
+    properties:
+      line1:
+        type: "string"
+        maxLength: 128
+        description: "The first line of address"
+      line2:
+        type: "string"
+        maxLength: 128
+        description: "The second line of address"
+      city:
+        type: "string"
+        maxLength: 128
+        description: "The city"
+      state:
+        type: "string"
+        maxLength: 128
+        description: "The state"
+      province:
+        type: "string"
+        maxLength: 128
+        description: "The province"
+      country:
+        type: "string"
+        maxLength: 128
+        description: "The country"
+      postalCode:
+        type: "string"
+        maxLength: 128
+        description: "The postal code"
+
+  addressResponse:
+    type: "object"
+    required:
+    - "line1"
+    - "city"
+    - "country"
+    - "postalCode"
+    properties:
+      line1:
+        type: "string"
+        maxLength: 128
+        description: "The first line of address"
+      line2:
+        type: "string"
+        maxLength: 128
+        description: "The second line of address"
+      city:
+        type: "string"
+        maxLength: 128
+        description: "The city"
+      state:
+        type: "string"
+        maxLength: 128
+        description: "The state"
+      province:
+        type: "string"
+        maxLength: 128
+        description: "The province"
+      country:
+        type: "string"
+        maxLength: 128
+        description: "The country"
+      postalCode:
+        type: "string"
+        maxLength: 128
+        description: "The postal code"
+
+  serverStatusResponse:
+    type: "object"
+    required:
+    - "up_time"
+    properties:
+      up_time:
+        type: "integer"
+
+  serverErrorModel:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    properties:
+      code:
+        type: "string"
+      message:
+        type: "string"
+      stack:
+        type: "string"
+  clientErrorModel:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    properties:
+      code:
+        type: "string"
+      message:
+        type: "string"
+      stack:
+        type: "string"
+  validationErrorModel:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    properties:
+      code:
+        type: "string"
+      message:
+        type: "string"
+      errors:
+        type: "array"
+        items:
+          $ref: "#/definitions/validationErrorSingleModel"
+  validationErrorSingleModel:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    - "path"
+    properties:
+      code:
+        type: "string"
+      message:
+        type: "string"
+      path:
+        type: "array"
+        items:
+          type: "string"
+      description:
+        type: "string"
