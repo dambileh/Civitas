@@ -81,6 +81,10 @@ module.exports = {
       let sub = await pubSubHelper.createClient();
       sub.subscribe(responseChannel);
 
+      sub.on('subscribe', async function (channel, count) {
+        await pubSubHelper.registerChannelSubscribers(channel, option.subscriberType, option.subscriberId)
+      });
+
       sub.on('message', async function (channel, response) {
         response = new Message().createFromString(response);
 
