@@ -1,13 +1,10 @@
 'use strict';
 
-var AppUtil = require('../../libs/AppUtil');
-var Logging = require('../utilities/Logging');
-var config = require('config');
 var _ = require('lodash');
-var PubSub = require('../../libs/PubSub/PubSubAdapter');
-var Message = require('../../libs/PubSub/Message');
+var pubSub = require('../../libs/PubSub/PubSubAdapter');
+var message = require('../../libs/PubSub/Message');
 var constants = require('../../Constants');
-var PubSubChannels = require('../../PubSubChannels');
+var pubSubChannels = require('../../PubSubChannels');
 
 /**
  * The User Service module
@@ -28,17 +25,18 @@ module.exports = {
 
     var payload = {
       "user-id": userId,
-      "number": contactPayload
+      "number": contactPayload.number
     };
 
-    var request = new Message(
-      PubSubChannels.Contact.External.Event,
+    var request = new message(
+      pubSubChannels.Contact.External.Event,
       constants.pub_sub.message_type.crud,
       constants.pub_sub.message_action.create,
+      constants.pub_sub.recipients.user,
       payload
     );
 
-    PubSub
+    pubSub
       .publish(request, PubSubChannels.Contact.External.Event)
       .subscribe(PubSubChannels.Contact.External.CompletedEvent, { unsubscribe: true },
           function handleCompleted(err, completed) {
