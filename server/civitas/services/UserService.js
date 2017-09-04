@@ -4,10 +4,12 @@ var User = require('../models/User');
 var validationError = require('../../libs/error/ValidationError');
 var resourceNotFoundError = require('../../libs/error/ResourceNotFoundError');
 var appUtil = require('../../libs/AppUtil');
+var validationChain = require('../../libs/ValidationChain');
 var logging = require('../utilities/Logging');
 var config = require('config');
 var _ = require('lodash');
 var subscriptionManager = require('../managers/SubscriptionManager');
+var addressManager = require('../managers/AddressManager');
 var userChannels = require('../../PubSubChannels').User;
 var errors = require('../../ErrorCodes');
 var constants = require('../../Constants');
@@ -22,10 +24,10 @@ module.exports = {
    *
    * @param {object} request - The request that was sent from the controller
    */
-  createUser: function createUser(request) {
+  createUser: async function createUser(request) {
     User.findOne(
       {msisdn: request.msisdn},
-      function userFindOneCallback(err, user) {
+      async function userFindOneCallback(err, user) {
         if (err) {
           return subscriptionManager.emitInternalResponseEvent(
             {
@@ -35,22 +37,33 @@ module.exports = {
             userChannels.Internal.CreateCompletedEvent
           );
         }
-        if (!appUtil.isNullOrUndefined(user)) {
-          var modelValidationError = new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.UserService.NUMBER_ALREADY_EXISTS,
-                message: `A user with number [${request.msisdn}] already exists.`,
-                path: ['msisdn']
-              }
-            ]
-          );
 
+        var chain = new validationChain();
+
+        var validationResult = await chain
+          .add(
+            _numberAlreadyExistValidator,
+            {
+              parameters: [user],
+              error: new validationError(
+                'Some validation errors occurred.',
+                [
+                  {
+                    code: errors.User.NUMBER_ALREADY_EXISTS,
+                    message: `A user with number [${request.msisdn}] already exists.`,
+                    path: ['msisdn']
+                  }
+                ]
+              )
+            }
+          )
+          .validate({mode: 'exitOnError'});
+
+        if (validationResult) {
           return subscriptionManager.emitInternalResponseEvent(
             {
               statusCode: 400,
-              body: modelValidationError
+              body: validationResult
             },
             userChannels.Internal.CreateCompletedEvent
           );
@@ -58,35 +71,70 @@ module.exports = {
 
         request.status = constants.user.status.inactive;
 
-        var userEntity = new User(request);
+        var userEntity = null;
+
+        try {
+          await addressManager.createAddresses(request.addresses);
+        } catch (error) {
+          return subscriptionManager.emitInternalResponseEvent(
+            {
+              statusCode: 400,
+              body: error
+            },
+            userChannels.Internal.CreateCompletedEvent
+          );
+        }
+
+        request.addresses = [];
+
+        try {
+          userEntity = new User(request);
+        } catch (error) {
+          if (error.name === constants.global.error.strictMode) {
+            return subscriptionManager.emitInternalResponseEvent(
+              {
+                statusCode: 400,
+                body: error
+              },
+              userChannels.Internal.CreateCompletedEvent
+            );
+          }
+        }
 
         logging.logAction(
           logging.logLevels.INFO,
           'Attempting to save a new user document'
         );
 
-        userEntity.save(
-          function userSaveCallback(err) {
-            if (err) {
-              return subscriptionManager.emitInternalResponseEvent(
-                {
-                  statusCode: 500,
-                  body: err
-                },
-                userChannels.Internal.CreateCompletedEvent
-              );
-
-            }
-
             return subscriptionManager.emitInternalResponseEvent(
               {
                 statusCode: 201,
                 body: userEntity
               },
-              userChannels.Internal.CreateCompletedEvent
-            );
-          }
-        );
+              userChannels.Internal.CreateCompletedEvent);
+
+        // userEntity.save(
+        //   function userSaveCallback(err) {
+        //     if (err) {
+        //       return subscriptionManager.emitInternalResponseEvent(
+        //         {
+        //           statusCode: 500,
+        //           body: err
+        //         },
+        //         userChannels.Internal.CreateCompletedEvent
+        //       );
+        //
+        //     }
+        //
+        //     return subscriptionManager.emitInternalResponseEvent(
+        //       {
+        //         statusCode: 201,
+        //         body: userEntity
+        //       },
+        //       userChannels.Internal.CreateCompletedEvent
+        //     );
+        //   }
+        // );
       }
     );
   },
@@ -96,8 +144,7 @@ module.exports = {
    *
    * @param {object} request - The request arguments passed in from the controller
    */
-  getAllUsers: function getAllUsers(request) {
-
+  getAllUsers: async function getAllUsers(request) {
     logging.logAction(
       logging.logLevels.INFO,
       'Attempting to retrieve all users'
@@ -216,7 +263,7 @@ module.exports = {
             'Some validation errors occurred.',
             [
               {
-                code: errors.UserService.USER_NOT_FOUND,
+                code: errors.User.USER_NOT_FOUND,
                 message: `No user with id [${request.id}] was found.`,
                 path: ['id']
               }
@@ -285,7 +332,7 @@ module.exports = {
             'Some validation errors occurred.',
             [
               {
-                code: errors.UserService.USER_NOT_FOUND,
+                code: errors.User.USER_NOT_FOUND,
                 message: `No user with id [${request.msisdn}] was found.`,
                 path: ['id']
               }
@@ -342,3 +389,8 @@ module.exports = {
     );
   }
 };
+
+let _numberAlreadyExistValidator = function (existingUser) {
+  return (appUtil.isNullOrUndefined(existingUser))
+};
+

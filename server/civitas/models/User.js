@@ -17,6 +17,8 @@ var user = new schema(
     email: {type: String, required: false},
     status: {type: String, required: true, enum: statusEnum},
     friends: [{ type: schema.ObjectId, ref: 'user', autopopulate: true }]
+    // ,
+    // addresses: [{ type: schema.ObjectId, ref: 'address', autopopulate: true }]
   },
   {timestamps: {createdAt: 'createdAt', updatedAt: 'updatedAt'}}
 );

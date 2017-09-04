@@ -1,14 +1,14 @@
 ---
 swagger: "2.0"
 info:
-  description: "Civitas User Service"
+  description: "Civitas Service"
   version: "1.0.0"
-  title: "Civitas User Service"
+  title: "Civitas Service"
 host: "localhost:4010"
 basePath: "/v1"
 tags:
 - name: "user"
-  description: "Operations related to user entity"
+  description: "Operations related to entites present in Civita application"
   externalDocs:
     description: "Find out more"
     url: "http://swagger.io"
@@ -23,7 +23,7 @@ paths:
     get:
       tags:
       - "status"
-      description: "gets the status of the messaging service"
+      description: "gets the status of the Civitas service"
       operationId: "getSystemStatus"
       consumes:
       - "application/json"

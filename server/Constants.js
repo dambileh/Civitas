@@ -25,5 +25,10 @@ module.exports = {
       active: "active",
       inactive: "inactive"
     }
+  },
+  global: {
+    error: {
+      strictMode: "StrictModeError"
+    }
   }
 };
