@@ -4,7 +4,7 @@
 
 'use strict';
 
-var RegistrationService = require('../services/RegistrationService');
+var registrationService = require('../services/RegistrationService');
 
 /**
  * The Registration controller module
@@ -21,6 +21,6 @@ module.exports = {
      * @param {function} next The callback used to pass control to the next action/middleware
      */
     confirmRegistration: function confirmRegistration(request, response, next) {
-        RegistrationService.confirmRegistration(request.swagger.params, response, next);
+        registrationService.confirmRegistration(request.swagger.params, response, next);
     }
 };

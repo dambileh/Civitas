@@ -4,11 +4,11 @@
 
 'use strict';
 
-var Logging = require('../utilities/Logging');
-var PubSub = require('../../libs/PubSub/PubSubAdapter');
-var Message = require('../../libs/PubSub/Message');
+var logging = require('../utilities/Logging');
+var pubSub = require('../../libs/PubSub/PubSubAdapter');
+var message = require('../../libs/PubSub/Message');
 var constants = require('../../Constants');
-var PubSubChannels = require('../../PubSubChannels');
+var pubSubChannels = require('../../PubSubChannels');
 
 /**
  * The Registration Service module
@@ -19,18 +19,18 @@ module.exports = {
 
     var regRequest = args.register.value;
 
-    var request = new Message(
-      PubSubChannels.Registration.External.CompletedEvent,
-      constants.pub_sub.message_type.custom,
-      constants.pub_sub.message_action.confirmRegistration,
-      constants.pub_sub.recipients.registration,
+    var request = new message(
+      pubSubChannels.Registration.External.CompletedEvent,
+      constants.pubSub.messageType.custom,
+      constants.pubSub.messageAction.confirmRegistration,
+      constants.pubSub.recipients.registration,
       regRequest
     );
       
     try {
-      let completed = await PubSub.publishAndWaitForResponse(
-        PubSubChannels.Registration.External.Event,
-        PubSubChannels.Registration.External.CompletedEvent,
+      let completed = await pubSub.publishAndWaitForResponse(
+        pubSubChannels.Registration.External.Event,
+        pubSubChannels.Registration.External.CompletedEvent,
         {
           subscriberType: constants.pubSub.recipients.gateway
         },
@@ -43,7 +43,7 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to publish to channel [${PubSubChannels.Registration.External.Event}]`, err);
+        `Failed to publish to channel [${pubSubChannels.Registration.External.Event}]`, err);
       return next(err);
     }
   }
