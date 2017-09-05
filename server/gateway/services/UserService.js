@@ -6,6 +6,7 @@ var pubSub = require('../../libs/PubSub/PubSubAdapter');
 var Message = require('../../libs/PubSub/Message');
 var constants = require('../../Constants');
 var pubSubChannels = require('../../PubSubChannels');
+var process = require('process');
 
 /**
  * The User Service module
@@ -36,7 +37,8 @@ module.exports = {
           pubSubChannels.User.External.Event,
           pubSubChannels.User.External.CompletedEvent,
           {
-            subscriberType: constants.pubSub.recipients.gateway
+            subscriberType: constants.pubSub.recipients.gateway,
+            subscriberId: process.pid
           },
           request);
 
@@ -73,7 +75,8 @@ module.exports = {
           pubSubChannels.User.External.Event,
           pubSubChannels.User.External.CompletedEvent,
           {
-            subscriberType: constants.pubSub.recipients.gateway
+            subscriberType: constants.pubSub.recipients.gateway,
+            subscriberId: process.pid
           },
           request);
 
@@ -116,7 +119,8 @@ module.exports = {
           pubSubChannels.User.External.Event,
           pubSubChannels.User.External.CompletedEvent,
           {
-            subscriberType: constants.pubSub.recipients.gateway
+            subscriberType: constants.pubSub.recipients.gateway,
+            subscriberId: process.pid
           },
           request);
 
@@ -157,7 +161,8 @@ module.exports = {
           pubSubChannels.User.External.Event,
           pubSubChannels.User.External.CompletedEvent,
           {
-            subscriberType: constants.pubSub.recipients.gateway
+            subscriberType: constants.pubSub.recipients.gateway,
+            subscriberId: process.pid
           },
           request);
 
@@ -197,7 +202,8 @@ module.exports = {
           pubSubChannels.User.External.Event,
           pubSubChannels.User.External.CompletedEvent,
           {
-            subscriberType: constants.pubSub.recipients.gateway
+            subscriberType: constants.pubSub.recipients.gateway,
+            subscriberId: process.pid
           },
           request);
 
