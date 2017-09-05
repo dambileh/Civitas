@@ -1,7 +1,8 @@
 module.exports = {
   pubSub: {
-    messageType: {
-      crud: "crud"
+  messageType: {
+      crud: "crud",
+      custom: "custom"
     },
     messageAction: {
       create: "create",
@@ -9,11 +10,13 @@ module.exports = {
       delete: "delete",
       getSingle: "getSingle",
       getAll: "getAll",
+      confirmRegistration: "confirmRegistration",
       requestRegistration: "requestRegistration"
     },
     recipients: {
       gateway: "gateway",
-      user: "user"
+      user: "user",
+      registration: "registration"
     },
     channelStore: {
       subscribers: "subscribers",
