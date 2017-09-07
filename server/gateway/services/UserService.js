@@ -21,7 +21,6 @@ module.exports = {
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
   createUser: async function (args, response, next) {
-
     var userRequest = args.user.value;
 
     var request = new Message(

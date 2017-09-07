@@ -26,7 +26,6 @@ module.exports = {
    * @param {object} request - The request that was sent from the controller
    */
   createUser: async function createUser(request) {
-
     let user = null;
     try {
       user = await User.findOne({msisdn: request.msisdn});
@@ -101,7 +100,7 @@ module.exports = {
 
       // If there is an error creating the address, we should remove the user record as well
       await userEntity.remove();
-      
+
       return subscriptionManager.emitInternalResponseEvent(
         {
           statusCode: statusCode,
