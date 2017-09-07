@@ -1,10 +1,9 @@
 'use strict';
 
 var User = require('../models/User');
-var validationError = require('../../libs/error/ValidationError');
+
 var resourceNotFoundError = require('../../libs/error/ResourceNotFoundError');
 var appUtil = require('../../libs/AppUtil');
-var validationChain = require('../../libs/ValidationChain');
 var logging = require('../utilities/Logging');
 var config = require('config');
 var _ = require('lodash');
@@ -13,6 +12,8 @@ var addressManager = require('../managers/AddressManager');
 var userChannels = require('../../PubSubChannels').User;
 var errors = require('../../ErrorCodes');
 var constants = require('../../Constants');
+var Address = require('../models/Address');
+var userValidator = require('../validators/UserValidator');
 
 /**
  * The User Service module
@@ -25,117 +26,108 @@ module.exports = {
    * @param {object} request - The request that was sent from the controller
    */
   createUser: async function createUser(request) {
-    User.findOne(
-      {msisdn: request.msisdn},
-      async function userFindOneCallback(err, user) {
-        if (err) {
-          return subscriptionManager.emitInternalResponseEvent(
-            {
-              statusCode: 500,
-              body: err
-            },
-            userChannels.Internal.CreateCompletedEvent
-          );
-        }
 
-        var chain = new validationChain();
+    let user = null;
+    try {
+      user = await User.findOne({msisdn: request.msisdn});
+    } catch (err) {
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: 500,
+          body: err
+        },
+        userChannels.Internal.CreateCompletedEvent
+      );
+    }
 
-        var validationResult = await chain
-          .add(
-            _numberAlreadyExistValidator,
-            {
-              parameters: [user],
-              error: new validationError(
-                'Some validation errors occurred.',
-                [
-                  {
-                    code: errors.User.NUMBER_ALREADY_EXISTS,
-                    message: `A user with number [${request.msisdn}] already exists.`,
-                    path: ['msisdn']
-                  }
-                ]
-              )
-            }
-          )
-          .validate({mode: 'exitOnError'});
+    var validationResult = await userValidator.validateCreate(user, request);
 
-        if (validationResult) {
-          return subscriptionManager.emitInternalResponseEvent(
-            {
-              statusCode: 400,
-              body: validationResult
-            },
-            userChannels.Internal.CreateCompletedEvent
-          );
-        }
+    if (validationResult) {
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: 400,
+          body: validationResult
+        },
+        userChannels.Internal.CreateCompletedEvent
+      );
+    }
 
-        request.status = constants.user.status.inactive;
+    request.status = constants.user.status.inactive;
 
-        var userEntity = null;
+    // get address from the request and unset it so that we can create tje User model
+    // Otherwise it will fail the Array of Ids schema validation
+    let requestAddresses = request.addresses;
 
-        try {
-          await addressManager.createAddresses(request.addresses);
-        } catch (error) {
-          return subscriptionManager.emitInternalResponseEvent(
-            {
-              statusCode: 400,
-              body: error
-            },
-            userChannels.Internal.CreateCompletedEvent
-          );
-        }
+    request.addresses = [];
 
-        request.addresses = [];
+    let userEntity = null;
 
-        try {
-          userEntity = new User(request);
-        } catch (error) {
-          if (error.name === constants.global.error.strictMode) {
-            return subscriptionManager.emitInternalResponseEvent(
-              {
-                statusCode: 400,
-                body: error
-              },
-              userChannels.Internal.CreateCompletedEvent
-            );
-          }
-        }
+    try {
+      userEntity = new User(request);
+    } catch (error) {
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: 500,
+          body: error
+        },
+        userChannels.Internal.CreateCompletedEvent
+      );
+    }
 
-        logging.logAction(
-          logging.logLevels.INFO,
-          'Attempting to save a new user document'
-        );
+    logging.logAction(
+      logging.logLevels.INFO,
+      'Attempting to save a new user document'
+    );
 
-            return subscriptionManager.emitInternalResponseEvent(
-              {
-                statusCode: 201,
-                body: userEntity
-              },
-              userChannels.Internal.CreateCompletedEvent);
+    await userEntity.save();
 
-        // userEntity.save(
-        //   function userSaveCallback(err) {
-        //     if (err) {
-        //       return subscriptionManager.emitInternalResponseEvent(
-        //         {
-        //           statusCode: 500,
-        //           body: err
-        //         },
-        //         userChannels.Internal.CreateCompletedEvent
-        //       );
-        //
-        //     }
-        //
-        //     return subscriptionManager.emitInternalResponseEvent(
-        //       {
-        //         statusCode: 201,
-        //         body: userEntity
-        //       },
-        //       userChannels.Internal.CreateCompletedEvent
-        //     );
-        //   }
-        // );
+    let userAddresses = null;
+
+    try {
+      userAddresses = await addressManager.createAddresses(
+        requestAddresses,
+        userEntity.id,
+        constants.address.ownerType.user
+      );
+    } catch (error) {
+
+      let statusCode = 0;
+
+      if (error.status === 400) {
+        statusCode = 400;
+      } else {
+        statusCode = 500;
       }
+
+      // If there is an error creating the address, we should remove the user record as well
+      await userEntity.remove();
+      
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: statusCode,
+          body: error
+        },
+        userChannels.Internal.CreateCompletedEvent
+      );
+    }
+
+    // Now that we have created the addresses, we should set them on the user record
+    // We only save the ids
+    userEntity.addresses = userAddresses.map((userAddress) => {
+      return userAddress.id;
+    });
+
+    await userEntity.save();
+
+    // sEt the address objects back on for display
+    userEntity.addresses = userAddresses;
+
+    return subscriptionManager.emitInternalResponseEvent(
+      {
+        statusCode: 201,
+        body: userEntity
+      },
+      userChannels.Internal.CreateCompletedEvent
     );
   },
 
@@ -145,50 +137,51 @@ module.exports = {
    * @param {object} request - The request arguments passed in from the controller
    */
   getAllUsers: async function getAllUsers(request) {
+
     logging.logAction(
       logging.logLevels.INFO,
       'Attempting to retrieve all users'
     );
 
-    User.find(
-      {},
-      function userFindCallback(err, users) {
-        if (err) {
-          return subscriptionManager.emitInternalResponseEvent(
-            {
-              statusCode: 500,
-              body: err
-            },
-            userChannels.Internal.GetAllCompletedEvent
-          );
-        }
+    let users = null;
 
-        // If the array is empty we need to return a 204 response.
-        if (appUtil.isArrayEmpty(users)) {
-          return subscriptionManager.emitInternalResponseEvent(
-            {
-              statusCode: 204,
-              header: {
-                resultCount: 0
-              },
-              body: {}
-            },
-            userChannels.Internal.GetAllCompletedEvent
-          );
-        } else {
-          return subscriptionManager.emitInternalResponseEvent(
-            {
-              statusCode: 200,
-              header: {
-                resultCount: users.length
-              },
-              body: users
-            },
-            userChannels.Internal.GetAllCompletedEvent
-          );
-        }
-      }
-    );
+    try {
+      users = await User.find({}).populate('addresses').populate('friends');
+    } catch (err) {
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: 500,
+          body: err
+        },
+        userChannels.Internal.GetAllCompletedEvent
+      );
+    }
+
+    // If the array is empty we need to return a 204 response.
+    if (appUtil.isArrayEmpty(users)) {
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: 204,
+          header: {
+            resultCount: 0
+          },
+          body: {}
+        },
+        userChannels.Internal.GetAllCompletedEvent
+      );
+    } else {
+
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: 200,
+          header: {
+            resultCount: users.length
+          },
+          body: users
+        },
+        userChannels.Internal.GetAllCompletedEvent
+      );
+    }
   },
 
   /**
@@ -196,48 +189,50 @@ module.exports = {
    *
    * @param {object} request - The request that was sent from the controller
    */
-  getSingleUser: function getSingleUser(request) {
+  getSingleUser: async function getSingleUser(request) {
 
     logging.logAction(
       logging.logLevels.INFO,
       'Attempting to get a single user'
     );
 
-    User.findById(request.id, function userFindOneCallback(err, user) {
-        if (err) {
-          return subscriptionManager.emitInternalResponseEvent(
-            {
-              statusCode: 500,
-              body: err
-            },
-            userChannels.Internal.GetSingleCompletedEvent
-          );
-        }
+    let user = null;
 
-        if (appUtil.isNullOrUndefined(user)) {
+    try {
+      user = await User.findById(request.id).populate('addresses').populate('friends');
 
-          var notFoundError = new resourceNotFoundError(
-            'Resource not found.',
-            `No user with id [${request.id}] was found`
-          );
+    } catch (err) {
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: 500,
+          body: err
+        },
+        userChannels.Internal.GetSingleCompletedEvent
+      );
+    }
 
-          return subscriptionManager.emitInternalResponseEvent(
-            {
-              statusCode: 404,
-              body: notFoundError
-            },
-            userChannels.Internal.GetSingleCompletedEvent
-          );
-        }
+    if (appUtil.isNullOrUndefined(user)) {
 
-        return subscriptionManager.emitInternalResponseEvent(
-          {
-            statusCode: 200,
-            body: user
-          },
-          userChannels.Internal.GetSingleCompletedEvent
-        );
-      }
+      var notFoundError = new resourceNotFoundError(
+        'Resource not found.',
+        `No user with id [${request.id}] was found`
+      );
+
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: 404,
+          body: notFoundError
+        },
+        userChannels.Internal.GetSingleCompletedEvent
+      );
+    }
+
+    return subscriptionManager.emitInternalResponseEvent(
+      {
+        statusCode: 200,
+        body: user
+      },
+      userChannels.Internal.GetSingleCompletedEvent
     );
   },
 
@@ -246,66 +241,65 @@ module.exports = {
    *
    * @param {object} request - The request arguments passed in from the controller
    */
-  deleteUser: function deleteUser(request) {
-    User.findById(request.id, function userFindOneCallback(err, user) {
-        if (err) {
-          return subscriptionManager.emitInternalResponseEvent(
-            {
-              statusCode: 500,
-              body: err
-            },
-            userChannels.Internal.DeleteCompletedEvent
-          );
-        }
+  deleteUser: async function deleteUser(request) {
 
-        if (appUtil.isNullOrUndefined(user)) {
-          var modelValidationError = new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.User.USER_NOT_FOUND,
-                message: `No user with id [${request.id}] was found.`,
-                path: ['id']
-              }
-            ]
-          );
+    let user = null;
+    try {
+      user = await User.findById(request.id);
+    } catch (err) {
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: 500,
+          body: err
+        },
+        userChannels.Internal.DeleteCompletedEvent
+      );
+    }
 
-          return subscriptionManager.emitInternalResponseEvent(
-            {
-              statusCode: 400,
-              body: modelValidationError
-            },
-            userChannels.Internal.DeleteCompletedEvent
-          );
-        }
-
-        logging.logAction(
-          logging.logLevels.INFO,
-          'Attempting to remove a user'
-        );
-
-        user.remove(
-          function noteRemoveCallback(err) {
-            if (err) {
-              return subscriptionManager.emitInternalResponseEvent(
-                {
-                  statusCode: 500,
-                  body: err
-                },
-                userChannels.Internal.DeleteCompletedEvent
-              );
-            }
-
-            return subscriptionManager.emitInternalResponseEvent(
-              {
-                statusCode: 200,
-                body: user
-              },
-              userChannels.Internal.DeleteCompletedEvent
-            );
+    if (appUtil.isNullOrUndefined(user)) {
+      var modelValidationError = new validationError(
+        'Some validation errors occurred.',
+        [
+          {
+            code: errors.User.USER_NOT_FOUND,
+            message: `No user with id [${request.id}] was found.`,
+            path: ['id']
           }
-        );
-      }
+        ]
+      );
+
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: 400,
+          body: modelValidationError
+        },
+        userChannels.Internal.DeleteCompletedEvent
+      );
+    }
+
+    logging.logAction(
+      logging.logLevels.INFO,
+      'Attempting to remove a user'
+    );
+
+    try {
+      await user.remove();
+    } catch (err) {
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: 500,
+          body: err
+        },
+        userChannels.Internal.DeleteCompletedEvent
+      );
+    }
+
+    return subscriptionManager.emitInternalResponseEvent(
+      {
+        statusCode: 200,
+        body: user
+      },
+      userChannels.Internal.DeleteCompletedEvent
     );
   },
 
@@ -314,83 +308,136 @@ module.exports = {
    *
    * @param {object} request - The request arguments passed in from the controller
    */
-  updateUser: function updateUser(request) {
+  updateUser: async function updateUser(request) {
 
-    User.findById(request.id, function userFindOneCallback(err, user) {
-        if (err) {
-          return subscriptionManager.emitInternalResponseEvent(
-            {
-              statusCode: 500,
-              body: err
-            },
-            userChannels.Internal.UpdateCompletedEvent
-          );
-        }
+    let user = null;
 
-        if (appUtil.isNullOrUndefined(user)) {
-          var modelValidationError = new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.User.USER_NOT_FOUND,
-                message: `No user with id [${request.msisdn}] was found.`,
-                path: ['id']
-              }
-            ]
-          );
+    try {
+      user = await User.findById(request.id);
+    } catch (err) {
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: 500,
+          body: err
+        },
+        userChannels.Internal.UpdateCompletedEvent
+      );
+    }
 
-          return subscriptionManager.emitInternalResponseEvent(
-            {
-              statusCode: 400,
-              body: modelValidationError
-            },
-            userChannels.Internal.UpdateCompletedEvent
-          );
-        }
+    var validationResult = await userValidator.validateUpdate(user, request);
 
-        logging.logAction(
-          logging.logLevels.INFO,
-          'Attempting to update a note document'
-        );
+    if (validationResult) {
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: 400,
+          body: validationResult
+        },
+        userChannels.Internal.CreateCompletedEvent
+      );
+    }
 
-        // set the updated properties, mongoose does not behave correctly if you pass a model directly
-        var updatedProperties = {
-          firstName: request.firstName,
-          lastName: request.lastName,
-          email: request.email
-        };
+    logging.logAction(
+      logging.logLevels.INFO,
+      `Attempting to update a user document with id [${user.id}]`
+    );
 
-        user.update({_id: request.id}, updatedProperties, function userUpdateCallback(err) {
-            if (err) {
-              return subscriptionManager.emitInternalResponseEvent(
-                {
-                  statusCode: 500,
-                  body: err
-                },
-                userChannels.Internal.UpdateCompletedEvent
-              );
-            }
+    let userAddresses = null;
 
-            user.firstName = request.firstName;
-            user.lastName = request.lastName;
-            user.email = request.email;
-            user.updatedAt = new Date();
+    // First update the address
+    try {
+      userAddresses = await _updateUserAddress(user, request);
+    } catch (error) {
 
-            return subscriptionManager.emitInternalResponseEvent(
-              {
-                statusCode: 200,
-                body: user
-              },
-              userChannels.Internal.UpdateCompletedEvent
-            );
-          }
-        );
+      let statusCode = 0;
+
+      if (error.status === 400) {
+        statusCode = 400;
+      } else {
+        statusCode = 500;
       }
+
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: statusCode,
+          body: error
+        },
+        userChannels.Internal.UpdateCompletedEvent
+      );
+    }
+
+    user.addresses = userAddresses.map((userAddress) => {
+      return userAddress.id;
+    });
+
+    user.firstName = request.firstName;
+    user.lastName = request.lastName;
+    user.email = request.email;
+
+    try {
+      await user.save();
+    } catch (err) {
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: 500,
+          body: err
+        },
+        userChannels.Internal.UpdateCompletedEvent
+      );
+    }
+
+    user.updatedAt = new Date();
+
+    // set the address objects back on the display response
+    user.addresses = userAddresses;
+    return subscriptionManager.emitInternalResponseEvent(
+      {
+        statusCode: 200,
+        body: user
+      },
+      userChannels.Internal.UpdateCompletedEvent
     );
   }
 };
 
-let _numberAlreadyExistValidator = function (existingUser) {
-  return (appUtil.isNullOrUndefined(existingUser))
-};
+function _updateUserAddress(user, request) {
 
+  return new Promise(async function (resolve, reject) {
+    // It is easier just to remove the existing addresses and insert the new ones
+
+    // First create the new address records so we can return the validation errors
+    let userAddresses = null;
+    try {
+      userAddresses = await addressManager.createAddresses(
+        request.addresses,
+        user.id,
+        constants.address.ownerType.user
+      );
+    } catch (error) {
+      return reject(error);
+    }
+
+    // Now remove the old address records
+    if (user.addresses.length > 0) {
+      try {
+
+        await addressManager.removeAddresses(
+          user.addresses
+        );
+      } catch (error) {
+
+        // If there is an error removing the old addresses, the new addresses should be removed as well
+        if (userAddresses.length > 0) {
+          await addressManager.removeAddresses(
+            userAddresses.map((address) => {
+              return address.id;
+            })
+          );
+        }
+        return reject(error);
+      }
+    }
+
+    return resolve(userAddresses);
+
+  });
+}

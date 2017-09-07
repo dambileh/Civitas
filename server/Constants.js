@@ -26,6 +26,13 @@ module.exports = {
       inactive: "inactive"
     }
   },
+  address: {
+    ownerType: {
+      company: "company",
+      user: "user",
+      person: "person"
+    }
+  },
   global: {
     error: {
       strictMode: "StrictModeError"

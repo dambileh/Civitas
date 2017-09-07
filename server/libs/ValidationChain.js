@@ -9,7 +9,6 @@ function ValidatorChain() {
     return new ValidatorChain();
   }
   this._validators = [];
-
 }
 /**
  * Adds a new validator to the chain
@@ -32,6 +31,12 @@ ValidatorChain.prototype.add = function (fn, options = {}) {
     error: options.error
   });
   return this;
+};
+
+ValidatorChain.modes = {
+  "RUN_ALL" : "runAll",
+  "EXIT_ON_ERROR" : "exitOnError",
+  "RUN_ALL_PARALLEL" : "runAllParallel"
 };
 
 /**

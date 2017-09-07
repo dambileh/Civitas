@@ -1,7 +1,6 @@
 'use strict';
 
 var mongoose = require('mongoose');
-var autopopulate = require('mongoose-autopopulate');
 var schema = mongoose.Schema;
 
 var addressType = [
@@ -21,7 +20,7 @@ var ownerType = [
 
 var address = new schema(
   {
-    "ownerId": {type: schema.ObjectId, ref: 'user', autopopulate: true, required: true},
+    "owner": {type: schema.ObjectId, required: true},
     "ownerType": {type: String, required: true, enum: ownerType},
     "detail": {
       "line1": {type: String, required: true},
@@ -42,9 +41,29 @@ var address = new schema(
   {timestamps: {createdAt: 'createdAt', updatedAt: 'updatedAt'}}
 );
 
-address.plugin(autopopulate);
-
 /**
  * Defines the schema for the address model
  */
 module.exports = mongoose.model('address', address);
+
+
+/*
+ // Example of dynamically passing the DbRef type
+ // here we passing user as the DbRef type
+
+ let addresses = null;
+ try {
+ addresses = await Address.
+ find({}).
+ populate('owner', null, 'user');
+ } catch (err) {
+ return subscriptionManager.emitInternalResponseEvent(
+ {
+ statusCode: 500,
+ body: err
+ },
+ userChannels.Internal.GetAllCompletedEvent
+ );
+ }
+ */
+
