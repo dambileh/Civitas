@@ -541,9 +541,9 @@ definitions:
     type: "object"
     additionalProperties: false
     required:
-    - "msisdn"
+    - "numbers"
     properties:
-      msisdn:
+      numbers:
         type: "array"
         items:
           type: "string"

@@ -27,14 +27,13 @@ module.exports = {
 
     var payload = {
       "user-id": userId,
-      "number": contactPayload.msisdn
+      "numbers": contactPayload.numbers
     };
 
     var request = new message(
       pubSubChannels.User.External.Event,
       constants.pubSub.messageType.custom,
-      constants.pubSub.messageAction["add-friends"],
-      constants.pubSub.recipients.user,
+      constants.pubSub.messageAction.addFriends,
       payload
     );
 

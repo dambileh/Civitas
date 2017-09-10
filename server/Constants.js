@@ -12,7 +12,7 @@ module.exports = {
       getAll: "getAll",
       confirmRegistration: "confirmRegistration",
       requestRegistration: "requestRegistration",
-      "add-friends": "add-friends"
+      addFriends: "addFriends"
     },
     recipients: {
       gateway: "gateway",
