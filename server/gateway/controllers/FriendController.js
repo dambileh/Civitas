@@ -1,6 +1,6 @@
 'use strict';
 
-var contactService = require('../services/ContactService');
+var friendService = require('../services/FriendService');
 
 /**
  * The User Contact controller module
@@ -19,8 +19,8 @@ module.exports = {
    * @author Hadi Shayesteh <hadishayesteh@gmail.com>
    * @since 23 Aug 2017
    */
-  createContact: function createContact(request, response, next) {
-    contactService.createContact(request.swagger.params, response, next);
+  createFriend: (request, response, next) => {
+    friendService.createFriend(request.swagger.params, response, next);
   }
 
 };

@@ -14,7 +14,9 @@ module.exports = {
       "GetSingleEvent": "UserGetSingleEvent",
       "GetSingleCompletedEvent": "UserGetSingleCompletedEvent",
       "GetAllEvent": "UserGetAllEvent",
-      "GetAllCompletedEvent": "UserGetAllCompletedEvent"
+      "GetAllCompletedEvent": "UserGetAllCompletedEvent",
+      "AddUserFriendsEvent": "AddUserFriendsEvent",
+      "AddUserFriendsCompletedEvent": "AddUserFriendsCompletedEvent"
     }
   },
   "Registration": {
