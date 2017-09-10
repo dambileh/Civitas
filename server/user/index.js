@@ -59,10 +59,14 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
 
   subscriptionManager.initialize();
 
-  // Start the server
-  if (process.argv[2]) {
-    serverPort = process.argv[2];
+  if(process.argv.indexOf("PORT") != -1){ //does PORT exist?
+    serverPort = process.argv[process.argv.indexOf("PORT") + 1];
   }
+
+  // Start the server
+  // if (process.argv[2]) {
+  //   serverPort = process.argv[2];
+  // }
 
   http.createServer(app).listen(serverPort, function () {
     console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
