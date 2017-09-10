@@ -26,10 +26,8 @@ var mocha = new Mocha(options);
 var testDir = './tests/';
 // List of directories that will run at the end
 var excludedDir = ['endpoint'];
-// To run only specific unit tests add your class here in as
-// 'handlers/amqp/message-notification-handler-test.js'
+// To run only specific unit tests add your class here in as 'endpoint/user-test.js'
 var customDir = [
-  'endpoint/user-test.js'
 ];
 
 // Add excluded directories that need to run last
