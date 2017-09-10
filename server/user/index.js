@@ -70,4 +70,30 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
           console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
       }
   });
+
+  process.on('unhandledRejection', ( error, promise ) => {
+    console.log(`UnhandledPromiseRejection detected for promise [${JSON.stringify(promise)}]`);
+    console.log( `Stack Trace: [${error.stack }]`)
+
+  } );
+
+//do something when app is closing
+  process.on('exit', (p1) => {
+    console.log('exit', p1)
+  });
+
+//catches ctrl+c event
+  process.on('SIGINT', (p1) => {
+    console.log('SIGINT', p1)
+    process.exit();
+  });
+
+//catches uncaught exceptions
+  process.on('uncaughtException', (err) => {
+    console.log('uncaughtException', err)
+    process.exit(1);
+  });
+
+
+
 });
