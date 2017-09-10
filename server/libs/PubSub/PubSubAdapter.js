@@ -71,7 +71,7 @@ module.exports = {
         // Then publish the message
         pub.publish(channel, JSON.stringify(message));
       }
-
+      pub.publish(channel, JSON.stringify(message));
       pub.quit();
 
       if (!option.subscriberType) {

@@ -9,5 +9,15 @@
       "put": "PUT",
       "get": "GET"
     }
+  },
+  "logging" : [
+    {
+      "name": "file",
+      "level": "debug",
+      "filename": "/var/log/civitas/user/application-test.log"
+    }
+  ],
+  "mongo": {
+    "database_hosts" : ["mongodb://localhost:27017/UserTest"]
   }
 }
