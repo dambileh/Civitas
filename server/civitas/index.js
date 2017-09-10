@@ -59,8 +59,9 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
 
   subscriptionManager.initialize();
 
-  if(process.argv.indexOf("PORT") != -1){ //does PORT exist?
-    serverPort = process.argv[process.argv.indexOf("PORT") + 1];
+  // Start the server
+  if (process.argv[2]) {
+    serverPort = process.argv[2];
   }
 
   http.createServer(app).listen(serverPort, function () {
@@ -73,26 +74,6 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
   process.on('unhandledRejection', ( error, promise ) => {
     console.log(`UnhandledPromiseRejection detected for promise [${JSON.stringify(promise)}]`);
     console.log( `Stack Trace: [${error.stack }]`)
-
   } );
-
-//do something when app is closing
-  process.on('exit', (p1) => {
-    console.log('exit', p1)
-  });
-
-//catches ctrl+c event
-  process.on('SIGINT', (p1) => {
-    console.log('SIGINT', p1)
-    process.exit();
-  });
-
-//catches uncaught exceptions
-  process.on('uncaughtException', (err) => {
-    console.log('uncaughtException', err)
-    process.exit(1);
-  });
-
-
 
 });

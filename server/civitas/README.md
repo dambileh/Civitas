@@ -1,5 +1,5 @@
-# User
-Service to manage user
+# Civitas
+Civitas main service
 
 ### Running the server
 To run the server, follow these simple steps:
