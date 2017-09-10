@@ -72,22 +72,6 @@ module.exports = {
           )
         }
       )
-      .add(
-        that.addressNotEmptyValidator,
-        {
-          parameters: [request],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.User.AT_LEAST_ONE_ADDRESS_MUST_BE_SET,
-                message: `At least one address must be set for the user`,
-                path: ['addresses']
-              }
-            ]
-          )
-        }
-      )
       .validate({mode: validationChain.modes.EXIT_ON_ERROR});
   }
 };

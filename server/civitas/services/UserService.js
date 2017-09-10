@@ -343,35 +343,46 @@ module.exports = {
     let userAddresses = null;
 
     // First update the address
-    try {
-      userAddresses = await _updateUserAddress(user, request);
-    } catch (error) {
+    if (request.addresses) {
 
-      let statusCode = 0;
+      try {
+        userAddresses = await _updateUserAddress(user, request);
+      } catch (error) {
 
-      if (error.status === 400) {
-        statusCode = 400;
-      } else {
-        statusCode = 500;
+        let statusCode = 0;
+
+        if (error.status === 400) {
+          statusCode = 400;
+        } else {
+          statusCode = 500;
+        }
+
+        return subscriptionManager.emitInternalResponseEvent(
+          {
+            statusCode: statusCode,
+            body: error
+          },
+          userChannels.Internal.UpdateCompletedEvent
+        );
       }
 
-      return subscriptionManager.emitInternalResponseEvent(
-        {
-          statusCode: statusCode,
-          body: error
-        },
-        userChannels.Internal.UpdateCompletedEvent
-      );
+      user.addresses = userAddresses.map((userAddress) => {
+        return userAddress.id;
+      });
     }
 
-    user.addresses = userAddresses.map((userAddress) => {
-      return userAddress.id;
-    });
+    if (request.firstName) {
+      user.firstName = request.firstName;
+    }
 
-    user.firstName = request.firstName;
-    user.lastName = request.lastName;
-    user.email = request.email;
+    if (request.lastName) {
+      user.firstName = request.lastName;
+    }
 
+    if (request.email) {
+      user.email = request.email;
+    }
+    
     try {
       await user.save();
     } catch (err) {
