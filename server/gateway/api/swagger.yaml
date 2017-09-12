@@ -59,6 +59,7 @@ paths:
       - in: "body"
         name: "user"
         description: "The user entity details"
+
         required: true
         schema:
           $ref: "#/definitions/userRequest"
@@ -114,8 +115,8 @@ paths:
         schema:
           $ref: "#/definitions/userUpdateRequest"
       responses:
-        201:
-          description: "success response that the user has been added"
+        200:
+          description: "A single user"
           schema:
             $ref: "#/definitions/userResponse"
         400:
@@ -191,11 +192,9 @@ paths:
           type: "string"
         responses:
           200:
-            description: "An array of users"
+            description: "A single user"
             schema:
-              type: "array"
-              items:
-                $ref: "#/definitions/userResponse"
+              $ref: "#/definitions/userResponse"
           405:
             description: "Method not supported Error. Returned if an unsupported http\
               \ method is used."
@@ -206,12 +205,13 @@ paths:
             schema:
               $ref: "#/definitions/serverErrorModel"
         x-swagger-router-controller: "UserController"
-  /user/{id}/contact:
+
+  /user/{id}/friend:
     post:
       tags:
-      - "user"
-      description: "Creates a contact for the user"
-      operationId: "createContact"
+      - "user friends"
+      description: "Creates a friend for the user"
+      operationId: "createFriend"
       consumes:
       - "application/json"
       produces:
@@ -223,16 +223,16 @@ paths:
         required: true
         type: "string"
       - in: "body"
-        name: "contact"
-        description: "The user contact entity details"
+        name: "friend"
+        description: "The user friend entity details"
         required: true
         schema:
-          $ref: "#/definitions/contactRequest"
+          $ref: "#/definitions/friendRequest"
       responses:
         201:
-          description: "success response that the user contact has been added"
+          description: "success response that the user friend has been added"
           schema:
-            $ref: "#/definitions/contactResponse"
+            $ref: "#/definitions/friendResponse"
         400:
           description: "Validation Error. Usually caused by a missing or invalid parameter."
           schema:
@@ -256,64 +256,12 @@ paths:
           description: "unexpected error"
           schema:
             $ref: "#/definitions/serverErrorModel"
-      x-swagger-router-controller: "ContactController"
-
-  /user/{id}/confirm-registration:
-    post:
-      tags:
-      - "user"
-      description: "Confirms a user's registration"
-      operationId: "confrimRegistration"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "path"
-        name: "id"
-        description: "The id of user"
-        required: true
-        type: "string"
-      - in: "body"
-        name: "register"
-        description: "The user registration details"
-        required: true
-        schema:
-          $ref: "#/definitions/userRegistrationConfirmationRequest"
-      responses:
-        200:
-          description: "success response that the user's registeration has been confirmed"
-          schema:
-            $ref: "#/definitions/userRegistrationConfirmationResponse"
-        400:
-          description: "Validation Error. Usually caused by a missing or invalid parameter."
-          schema:
-            $ref: "#/definitions/validationErrorModel"
-        405:
-          description: "Method not supported Error. Returned if an unsupported http\
-            \ method is used."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
-        406:
-          description: "Content type not supported Error. Returned if an unsupported\
-            \ content type is used."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
-        413:
-          description: "Message content too big. Returned if the entity body's size\
-            \ is over the allowed limit."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
-        default:
-          description: "unexpected error"
-          schema:
-            $ref: "#/definitions/serverErrorModel"
-      x-swagger-router-controller: "UserController"
+      x-swagger-router-controller: "FriendController"
 
   /user/{id}/invite-user:
     post:
       tags:
-      - "user"
+      - "invite user"
       description: "Allows user to invite another user"
       operationId: "inviteUser"
       consumes:
@@ -362,6 +310,53 @@ paths:
             $ref: "#/definitions/serverErrorModel"
       x-swagger-router-controller: "UserController"
 
+  /registration/confirm:
+    post:
+      tags:
+      - "user registration"
+      description: "Confirms a registration"
+      operationId: "confirmRegistration"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "register"
+        description: "The registration details"
+        required: true
+        schema:
+          $ref: "#/definitions/confirmRegistrationRequest"
+      responses:
+        200:
+          description: "success response that the registration has been confirmed"
+          schema:
+            $ref: "#/definitions/confirmRegistrationResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "RegistrationController"
+
   /status:
     get:
       tags:
@@ -393,32 +388,37 @@ definitions:
   userRequest:
     type: "object"
     required:
-    - "firstname"
-    - "lastname"
-    - "cellnumber"
+    - "firstName"
+    - "lastName"
+    - "msisdn"
+    - "addresses"
+    additionalProperties: false
     properties:
-      firstname:
+      firstName:
         type: "string"
         maxLength: 128
         description: "The firstname of the user"
-      lastname:
+      lastName:
         type: "string"
         maxLength: 128
         description: "The lastname of the user"
-      cellnumber:
+      msisdn:
         type: "string"
-        pattern: "^0((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
+        pattern: "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
         maxLength: 128
-        description: "The user's contact's number"
+        description: "The user's msisdn number"
+        #Ref: http://wa.rwick.com/2016/06/09/validating-south-african-cell-numbers-with-a-regular-expression-regex/
       email:
         type: "string"
         format: "email"
         minLength: 6
         maxLength: 128
         description: "The email of the user"
-      address:
-        $ref: "#/definitions/addressRequest"
-      ar-companies:
+      addresses:
+        type: array
+        items:
+          $ref: "#/definitions/addressRequest"
+      arCompanies:
         type: "array"
         items:
           type: "string"
@@ -430,7 +430,7 @@ definitions:
           type: "string"
           format: "uuid"
         description: "The ids of the images on user's phone that are linked to his or her profile"
-      avatar-id:
+      avatarId:
         type: "string"
         format: "uuid"
         description: "The id of user's avatar image"
@@ -438,44 +438,51 @@ definitions:
   userResponse:
     type: "object"
     required:
-    - "firstname"
-    - "lastname"
-    - "cellnumber"
+    - "firstName"
+    - "lastName"
+    - "msisdn"
     properties:
-      firstname:
+      firstName:
         type: "string"
         maxLength: 128
         description: "The firstname of the user"
-      lastname:
+      lastName:
         type: "string"
         maxLength: 128
         description: "The lastname of the user"
-      cellnumber:
+      msisdn:
         type: "string"
-        pattern: "^0((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
+        pattern: "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
         maxLength: 128
-        description: "The user's contact's number"
+        description: "The user's msisdn"
       email:
         type: "string"
         format: "email"
         minLength: 6
         maxLength: 128
-        description: "The email of the user"
-      address:
-        $ref: "#/definitions/addressResponse"
-      ar-companies:
+      addresses:
+        type: array
+        items:
+          $ref: "#/definitions/addressResponse"
+      arCompanies:
         type: "array"
         items:
           type: "string"
           format: "uuid"
         description: "The ids of the AR companies that service the user"
+      friends:
+        type: "array"
+        items:
+          type: "string"
+          format: "uuid"
+        description: "The ids of the user's friends"
       images:
         type: "array"
         items:
           type: "string"
           format: "uuid"
         description: "The ids of the images on user's phone that are linked to his or her profile"
-      avatar-id:
+      avatarId:
         type: "string"
         format: "uuid"
         description: "The id of user's avatar image"
@@ -483,15 +490,22 @@ definitions:
         type: "string"
         enum: ["active", "inactive"]
         description: "The firstname of the user"
+      createdAt:
+        type: "string"
+        description: "The created date"
+      updatedAt:
+        type: "string"
+        description: "The updated date"
 
   userUpdateRequest:
     type: "object"
+    additionalProperties: false
     properties:
-      firstname:
+      firstName:
         type: "string"
         maxLength: 128
         description: "The firstname of the user"
-      lastname:
+      lastName:
         type: "string"
         maxLength: 128
         description: "The lastname of the user"
@@ -501,9 +515,11 @@ definitions:
         minLength: 6
         maxLength: 128
         description: "The email of the user"
-      address:
-        $ref: "#/definitions/addressRequest"
-      ar-companies:
+      addresses:
+        type: array
+        items:
+          $ref: "#/definitions/addressRequest"
+      arCompanies:
         type: "array"
         items:
           type: "string"
@@ -515,125 +531,156 @@ definitions:
           type: "string"
           format: "uuid"
         description: "The ids of the images on user's phone that are linked to his or her profile"
-      avatar-id:
+      avatarId:
         type: "string"
         format: "uuid"
         description: "The id of user's avatar image"
 
-  contactRequest:
+  friendRequest:
     type: "object"
+    additionalProperties: false
     required:
-    - "number"
+    - "numbers"
     properties:
-      number:
-        type: "string"
-        pattern: "^0((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
-        maxLength: 128
-        description: "The user's contact's number"
+      numbers:
+        type: "array"
+        items:
+          type: "string"
+          pattern: "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
+          maxLength: 128
+          description: "The msisdn of user's friend"
 
-  contactResponse:
+  friendResponse:
     type: "object"
     required:
-    - "number"
-    - "user-id"
+    - "msisdn"
+    - "userId"
     properties:
-      number:
+      msisdn:
         type: "string"
-        description: "The user's contact's number"
-      user-id:
+        description: "The msisdn of user's friend"
+      userId:
         type: "string"
         description: "The id of the user"
 
-  userRegistrationConfirmationRequest:
+  confirmRegistrationRequest:
     type: "object"
+    additionalProperties: false
     required:
     - "code"
+    - "msisdn"
     properties:
       code:
         type: "string"
-        description: "The user's registration confirmation code"
+        description: "The registration confirmation code sent to the device"
+      msisdn:
+        type: "string"
+        description: "The cell number to which the registration code was sent"
 
-  userRegistrationConfirmationResponse:
+  confirmRegistrationResponse:
     type: "object"
-    required:
-    - "code"
-    - "user-id"
     properties:
       code:
         type: "string"
-        description: "The user's registration confirmation code"
-      user-id:
+        description: "The registration confirmation code sent to the device"
+      msisdn:
         type: "string"
-        description: "The id of the user"
+        description: "The cell number to which the registration code was sent"
 
   inviteUserRequest:
+    additionalProperties: false
     type: "object"
     required:
-    - "number"
+    - "msisdn"
     properties:
-      number:
+      msisdn:
         type: "string"
-        pattern: "^0((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
+        pattern: "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
         maxLength: 128
         description: "The invited user's contact number"
 
   inviteUserResponse:
     type: "object"
     required:
-    - "number"
-    - "user-id"
+    - "msisdn"
+    - "userId"
     properties:
-      number:
+      msisdn:
         type: "string"
         description: "The invited user's contact number"
-      user-id:
+      userId:
         type: "string"
         description: "The id of the user"
 
   addressRequest:
+    additionalProperties: false
     type: "object"
     required:
-    - "line1"
-    - "city"
-    - "country"
-    - "postal-code"
+    - "isPrimary"
     properties:
-      line1:
-        type: "string"
-        maxLength: 128
-        description: "The first line of address"
-      line2:
-        type: "string"
-        maxLength: 128
-        description: "The second line of address"
-      city:
-        type: "string"
-        maxLength: 128
-        description: "The city"
-      state:
-        type: "string"
-        maxLength: 128
-        description: "The state"
-      province:
-        type: "string"
-        maxLength: 128
-        description: "The province"
-      country:
-        type: "string"
-        maxLength: 128
-        description: "The country"
-      postal-code:
-        type: "string"
-        maxLength: 128
-        description: "The postal code"
+      detail:
+        $ref: "#/definitions/addressDetail"
+      location:
+        $ref: "#/definitions/location"
+      isPrimary:
+        type: "boolean"
+        description: "Indicates if this is the primary address"
 
   addressResponse:
     type: "object"
+    properties:
+      detail:
+        $ref: "#/definitions/addressDetail"
+      location:
+        $ref: "#/definitions/location"
+      isPrimary:
+        type: "boolean"
+        description: "Indicates if this is the primary address"
+      createdAt:
+        type: "string"
+        description: "The created date"
+      updatedAt:
+        type: "string"
+        description: "The updated date"
+
+  phoneNumberRequest:
+    additionalProperties: false
+    type: "object"
+    required:
+    - "type"
+    - "number"
+    properties:
+      number:
+        type: "string"
+        description: "The user's phone number"
+      type:
+        type: "string"
+        enum: ["personal", "business", "home"]
+        description: "The type of the landline number"
+
+  phoneNumberResponse:
+    type: "object"
+    required:
+    - "type"
+    - "number"
+    properties:
+      number:
+        type: "string"
+        description: "The user's phone number"
+      type:
+        type: "string"
+        enum: ["personal", "business", "home"]
+        description: "The type of the landline number"
+
+  addressDetail:
+    additionalProperties: false
+    type: "object"
     required:
     - "line1"
     - "city"
     - "country"
-    - "postal-code"
+    - "postalCode"
+    - "type"
     properties:
       line1:
         type: "string"
@@ -659,10 +706,31 @@ definitions:
         type: "string"
         maxLength: 128
         description: "The country"
-      postal-code:
+      postalCode:
         type: "string"
         maxLength: 128
         description: "The postal code"
+      type:
+        type: "string"
+        enum: ["physical", "postal"]
+        description: "The type of the address"
+
+  location:
+    additionalProperties: false
+    type: "object"
+    required:
+    - "type"
+    - "coordinates"
+    properties:
+      coordinates:
+        type: "array"
+        items:
+          type: "integer"
+          description: "The ids of the AR companies that service the user"
+      type:
+        type: "string"
+        enum: ["Point"]
+        description: "The longitude and latitude of the location"
 
   serverStatusResponse:
     type: "object"
@@ -684,6 +752,7 @@ definitions:
         type: "string"
       stack:
         type: "string"
+
   clientErrorModel:
     type: "object"
     required:
@@ -696,6 +765,7 @@ definitions:
         type: "string"
       stack:
         type: "string"
+
   validationErrorModel:
     type: "object"
     required:

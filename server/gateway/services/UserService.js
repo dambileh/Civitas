@@ -1,7 +1,7 @@
 'use strict';
 
 var AppUtil = require('../../libs/AppUtil');
-var Logging = require('../utilities/Logging');
+var logging = require('../utilities/Logging');
 var config = require('config');
 var _ = require('lodash');
 var PubSub = require('../../libs/PubSub/PubSubAdapter');
@@ -187,7 +187,7 @@ module.exports = {
    * @param {IncomingMessage} response - The http response object
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
-  inviteUser: function(args, response, next) {
+  inviteUser: async function(args, response, next) {
 
     var invitePayload = args.invite.value;
     var userId = args.id.value;
@@ -196,26 +196,33 @@ module.exports = {
       "user-id": userId,
       "number": invitePayload
     };
-
     var request = new Message(
       PubSubChannels.User.External.Event,
-      constants.pub_sub.message_type.crud,
-      constants.pub_sub.message_action.create,
-      constants.pub_sub.recipients.user,
+      constants.pubSub.messageType.custom,
+      constants.pubSub.messageAction.inviteUser,
+      constants.pubSub.recipients.user,
       payload
     );
 
-    PubSub
-      .publish(request, PubSubChannels.User.External.Event)
-      .subscribe(PubSubChannels.User.External.CompletedEvent, { unsubscribe: true },
-        function handleCompleted(err, completed) {
-          if (err) {
-            return next(err);
-          }
+    try {
+      let completed =
+        await PubSub.publishAndWaitForResponse(
+          PubSubChannels.User.External.Event,
+          PubSubChannels.User.External.CompletedEvent,
+        {
+          subscriberType: constants.pubSub.recipients.gateway,
+          subscriberId: process.pid
+        },
+        request);
 
-          response.statusCode = completed.payload.statusCode;
-          response.setHeader('Content-Type', 'application/json');
-          return response.end(JSON.stringify(completed.payload.body));
-        });
-  },
+      response.statusCode = completed.payload.statusCode;
+      response.setHeader('Content-Type', 'application/json');
+      return response.end(JSON.stringify(completed.payload.body));
+    } catch (err) {
+      logging.logAction(
+        logging.logLevels.ERROR,
+        `Failed to subscribe to channel [${PubSubChannels.User.External.CompletedEvent}]`, err);
+      return next(err);
+    }
+  }
 };
