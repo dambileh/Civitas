@@ -1,68 +1,98 @@
 var constants = require('../../Constants');
 var Message = require('../../libs/PubSub/Message');
-var PubSub = require('../../libs/PubSub/PubSubAdapter');
+var pubSub = require('../../libs/PubSub/PubSubAdapter');
 
-function emitCRUDEvents(message, channel, internalEmitter) {
+/**
+ * Emits the passed message as an internal CRUD events
+ *
+ * @param {object} message - The message that will be emitted
+ * @param {string} channelDetails - Contains the external channelDetails details
+ * @param {string} internalEmitter - An instance of the internal emitter
+ */
+function emitCRUDEvents(message, channelDetails, internalEmitter) {
 
-  internalEmitter.on(channel.Internal.CreateCompletedEvent, function(response){
-    _sendCrudCompleted(response, channel, constants.pub_sub.message_action.create, internalEmitter);
+  internalEmitter.on(channelDetails.Internal.CreateCompletedEvent, function(response){
+    _sendCrudCompleted(message, response, channelDetails, constants.pubSub.messageAction.create, internalEmitter);
   });
 
-  internalEmitter.on(channel.Internal.UpdateCompletedEvent, function(response) {
-    _sendCrudCompleted(response, channel, constants.pub_sub.message_action.update, internalEmitter);
+  internalEmitter.on(channelDetails.Internal.UpdateCompletedEvent, function(response) {
+    _sendCrudCompleted(message, response, channelDetails, constants.pubSub.messageAction.update, internalEmitter);
   });
 
-  internalEmitter.on(channel.Internal.DeleteCompletedEvent, function(response){
-    _sendCrudCompleted(response, channel, constants.pub_sub.message_action.delete, internalEmitter);
+  internalEmitter.on(channelDetails.Internal.DeleteCompletedEvent, function(response){
+    _sendCrudCompleted(message, response, channelDetails, constants.pubSub.messageAction.delete, internalEmitter);
   });
 
-  internalEmitter.on(channel.Internal.GetSingleCompletedEvent, function(response){
-    _sendCrudCompleted(response, channel, constants.pub_sub.message_action.getSingle, internalEmitter);
+  internalEmitter.on(channelDetails.Internal.GetSingleCompletedEvent, function(response){
+    _sendCrudCompleted(message, response, channelDetails, constants.pubSub.messageAction.getSingle, internalEmitter);
   });
 
-  internalEmitter.on(channel.Internal.GetAllCompletedEvent, function(response){
-    _sendCrudCompleted(response, channel, constants.pub_sub.message_action.getAll, internalEmitter);
+  internalEmitter.on(channelDetails.Internal.GetAllCompletedEvent, function(response){
+    _sendCrudCompleted(message, response, channelDetails, constants.pubSub.messageAction.getAll, internalEmitter);
   });
 
   switch (message.action) {
-    case "create":
-      internalEmitter.emit(channel.Internal.CreateEvent, message.payload);
+    case constants.pubSub.messageAction.create:
+      internalEmitter.emit(channelDetails.Internal.CreateEvent, message.payload);
       break;
-    case "update":
-      internalEmitter.emit(channel.Internal.UpdateEvent, message.payload);
+    case constants.pubSub.messageAction.update:
+      internalEmitter.emit(channelDetails.Internal.UpdateEvent, message.payload);
       break;
-    case "delete":
-      internalEmitter.emit(channel.Internal.DeleteEvent, message.payload);
+    case constants.pubSub.messageAction.delete:
+      internalEmitter.emit(channelDetails.Internal.DeleteEvent, message.payload);
       break;
-    case "getSingle":
-      internalEmitter.emit(channel.Internal.GetSingleEvent, message.payload);
+    case constants.pubSub.messageAction.getSingle:
+      internalEmitter.emit(channelDetails.Internal.GetSingleEvent, message.payload);
       break;
-    case "getAll":
-      internalEmitter.emit(channel.Internal.GetAllEvent, message.payload);
+    case constants.pubSub.messageAction.getAll:
+      internalEmitter.emit(channelDetails.Internal.GetAllEvent, message.payload);
       break;
     default:
-      logging.logAction(logging.logLevels.ERROR, "Type [%s] is not supported", message.type)
+      logging.logAction(logging.logLevels.ERROR, `Type [${message.type}] is not supported`)
   }
 }
 
-function _sendCrudCompleted(response, channel, action, internalEmitter) {
+/**
+ * Publishes an external CRUD completed event
+ *
+ * @param {object} request - The original CRUD request object
+ * @param {object} response - The CRUD response object
+ * @param {string} channelDetails - Contains the external channelDetails details
+ * @param {string} action - The CRUD action that was specified on the request
+ * @param {object} internalEmitter - An instance of the internal event emitter
+ *
+ * @private
+ */
+function _sendCrudCompleted(request, response, channelDetails, action, internalEmitter) {
+
+  // pass the same messageId that was set on the request so that the gateway can map the completed event back to 
+  // the original event
   var completedResponse = new Message(
-    channel.External.CompletedEvent,
-    constants.pub_sub.message_type.crud,
+    channelDetails.External.CompletedEvent,
+    constants.pubSub.messageType.crud,
     action,
-    constants.pub_sub.recipients.gateway,
-    response
+    response,
+    request.header.messageId 
   );
-  PubSub.publish(completedResponse, channel.External.CompletedEvent);
-  _removeAllCRUDListeners(channel, internalEmitter);
+
+  pubSub.publish(completedResponse, channelDetails.External.CompletedEvent);
+  _removeAllCRUDListeners(channelDetails, internalEmitter);
 }
 
-function _removeAllCRUDListeners(channel, internalEmitter) {
-  internalEmitter.removeAllListeners(channel.Internal.CreateCompletedEvent);
-  internalEmitter.removeAllListeners(channel.Internal.UpdateCompletedEvent);
-  internalEmitter.removeAllListeners(channel.Internal.DeleteCompletedEvent);
-  internalEmitter.removeAllListeners(channel.Internal.GetSingleCompletedEvent);
-  internalEmitter.removeAllListeners(channel.Internal.GetAllCompletedEvent);
+/**
+ * Removed the internal event listeners
+ *
+ * @param {string} channelDetails - Contains the external channelDetails details
+ * @param {object} internalEmitter - An instance of the internal event emitter
+ *
+ * @private
+ */
+function _removeAllCRUDListeners(channelDetails, internalEmitter) {
+  internalEmitter.removeAllListeners(channelDetails.Internal.CreateCompletedEvent);
+  internalEmitter.removeAllListeners(channelDetails.Internal.UpdateCompletedEvent);
+  internalEmitter.removeAllListeners(channelDetails.Internal.DeleteCompletedEvent);
+  internalEmitter.removeAllListeners(channelDetails.Internal.GetSingleCompletedEvent);
+  internalEmitter.removeAllListeners(channelDetails.Internal.GetAllCompletedEvent);
 }
 
 module.exports = {

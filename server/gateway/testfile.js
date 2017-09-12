@@ -16,7 +16,6 @@ var Mocha = require('mocha');
 var fs = require('fs');
 var mongoose = require('mongoose');
 var config = require('config');
-var AppUtil = require('./libs/AppUtil');
 
 var options = {
   'reporter' : mochaReporter
@@ -27,8 +26,7 @@ var mocha = new Mocha(options);
 var testDir = './tests/';
 // List of directories that will run at the end
 var excludedDir = ['endpoint'];
-// To run only specific unit tests add your class here in as
-// 'handlers/amqp/message-notification-handler-test.js'
+// To run only specific unit tests add your class here in as 'endpoint/user-test.js'
 var customDir = [
 ];
 
@@ -73,14 +71,20 @@ var readTestDir = function readTestDirectory(path) {
   );
 };
 
-var dropDatabase = function () {
-  mongoose.connect(config.mongo.database_host, function () {
-    mongoose.connection.db.dropDatabase();
+var dropDatabase = async function () {
+  config.mongo.database_hosts.forEach(async (host) => {
+    try {
+      await mongoose.connect(host);
+      await mongoose.connection.db.dropDatabase();
+      await mongoose.connection.close();
+    } catch (error) {
+      console.error(`An error occurred while dropping the database with host [${host}]`, error);
+    }
   });
-  mongoose.connection.close();
+
 };
 
-if (AppUtil.isNullOrUndefined(customDir) || customDir.length === 0) {
+if (!customDir || customDir.length === 0) {
   dropDatabase();
   // Read all files/dirs recursively from the specified testing directory
   readTestDir(testDir);

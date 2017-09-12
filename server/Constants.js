@@ -1,18 +1,45 @@
 module.exports = {
-  pub_sub: {
-    message_type: {
-      crud: "crud"
+  pubSub: {
+    messageType: {
+        crud: "crud",
+        custom: "custom"
     },
-    message_action: {
+    messageAction: {
       create: "create",
       update: "update",
       delete: "delete",
       getSingle: "getSingle",
-      getAll: "getAll"
+      getAll: "getAll",
+      confirmRegistration: "confirmRegistration",
+      requestRegistration: "requestRegistration",
+      addFriends: "addFriends"
     },
     recipients: {
       gateway: "gateway",
-      user: "user"
+      user: "user",
+      registration: "registration"
+    },
+    channelStore: {
+      subscribers: "subscribers",
+      messages: "messages"
+    }
+  },
+  user: {
+    status: {
+      active: "active",
+      inactive: "inactive"
+    }
+  },
+  address: {
+    ownerType: {
+      company: "company",
+      user: "user",
+      person: "person"
+    }
+  },
+  global: {
+    error: {
+      strictMode: "StrictModeError"
     }
   }
 };

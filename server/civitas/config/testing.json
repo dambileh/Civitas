@@ -18,6 +18,9 @@
     }
   ],
   "mongo": {
-    "database_hosts" : ["mongodb://localhost:27017/UserTest"]
+    "database_host" : "mongodb://localhost:27017/UserTest",
+    "options" : {
+      "config":{"autoIndex": true}
+    }
   }
 }

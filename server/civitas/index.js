@@ -8,22 +8,22 @@ var fs = require('fs');
 var serverPort = 4010;
 var mongoose = require('mongoose');
 var config = require('config');
-var ErrorHandler = require('../libs/error/ErrorHandler');
-var SubscriptionManager = require('./managers/SubscriptionManager');
-var Logging = require('./utilities/Logging');
+var errorHandler = require('../libs/error/ErrorHandler');
+var subscriptionManager = require('./managers/SubscriptionManager');
+var logging = require('./utilities/Logging');
 
 // swaggerRouter configuration
 var options = {
   swaggerUi: '/swagger.json',
   controllers: './controllers',
-  useStubs: process.env.NODE_ENV === 'development' ? true : false // Conditionally turn on stubs (mock mode)
+  useStubs: process.env.NODE_ENV === 'development' // Conditionally turn on stubs (mock mode)
 };
 
 mongoose.connect(config.mongo.database_host, config.mongo.options);
 mongoose.connection.on(
   'error',
   function (error) {
-    Logging.logAction(Logging.logLevels.ERROR, 'MongoDB connection error', error.stack);
+    logging.logAction(logging.logLevels.ERROR, 'MongoDB connection error', error.stack);
   }
 );
 
@@ -55,9 +55,9 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
       app.use(middleware.swaggerUi());
   }
 
-  app.use(ErrorHandler.onError);
+  app.use(errorHandler.onError);
 
-  SubscriptionManager.initialize();
+  subscriptionManager.initialize();
 
   // Start the server
   if (process.argv[2]) {
@@ -70,4 +70,10 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
           console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
       }
   });
+
+  process.on('unhandledRejection', ( error, promise ) => {
+    console.log(`UnhandledPromiseRejection detected for promise [${JSON.stringify(promise)}]`);
+    console.log( `Stack Trace: [${error.stack }]`)
+  } );
+
 });
