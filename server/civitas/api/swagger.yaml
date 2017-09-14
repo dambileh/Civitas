@@ -44,7 +44,7 @@ paths:
           description: "unexpected error"
           schema:
             $ref: "#/definitions/serverErrorModel"
-      x-swagger-router-controller: "Status"
+      x-swagger-router-controller: "StatusController"
 definitions:
   serverStatusResponse:
     type: "object"

@@ -47,8 +47,8 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
   app.use(errorHandler.onError);
 
   // Start the server
-  if (process.argv[2]) {
-    serverPort = process.argv[2];
+  if(process.argv.indexOf("PORT") != -1){ //does PORT exist?
+    serverPort = process.argv[process.argv.indexOf("PORT") + 1];
   }
 
   http.createServer(app).listen(serverPort, function () {

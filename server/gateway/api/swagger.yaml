@@ -115,8 +115,8 @@ paths:
         schema:
           $ref: "#/definitions/userUpdateRequest"
       responses:
-        201:
-          description: "success response that the user has been added"
+        200:
+          description: "A single user"
           schema:
             $ref: "#/definitions/userResponse"
         400:
@@ -192,11 +192,9 @@ paths:
           type: "string"
         responses:
           200:
-            description: "An array of users"
+            description: "A single user"
             schema:
-              type: "array"
-              items:
-                $ref: "#/definitions/userResponse"
+              $ref: "#/definitions/userResponse"
           405:
             description: "Method not supported Error. Returned if an unsupported http\
               \ method is used."
