@@ -127,7 +127,7 @@ module.exports = {
             [
               {
                 code: errors.Address.INCORRECT_COORDINATE_FORMAT,
-                message: `the passed in coordinates are not in correct format`,
+                message: `The passed in coordinates are not in correct format`,
                 path: ['addresses', 'location', 'coordinates']
               }
             ]
