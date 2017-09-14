@@ -7,6 +7,16 @@ var addressValidator = require('../validators/AddressValidator');
 var validationError = require('../../libs/error/ValidationError');
 
 module.exports = {
+
+  /**
+   * Inserts the passed in addresses in the database
+   *
+   * @param {array} addresses - The array of new addresses
+   * @param {string} ownerId - The if of address owner
+   * @param {string} ownerType - The type of address owner
+   * 
+   * @returns {Promise}
+   */
   createAddresses: async function (addresses, ownerId, ownerType) {
 
     return new Promise(async function (resolve, reject) {
@@ -46,6 +56,14 @@ module.exports = {
     });
 
   },
+
+  /**
+   * Removes the passed in addresses from the database
+   *
+   * @param {array} addressIds - The ids  of the addresses that will be removed 
+   *
+   * @returns {Promise}
+   */
   removeAddresses: async function (addressIds) {
 
     return new Promise(async function (resolve, reject) {

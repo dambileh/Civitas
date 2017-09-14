@@ -5,15 +5,48 @@ var validationError = require('../../libs/error/ValidationError');
 var errors = require('../../ErrorCodes');
 
 module.exports = {
-  newUserValidator: function alreadyExistValidator(user) {
+
+  /**
+   * New user validator
+   *
+   * @param {object} user - The user entity that will be validated
+   *
+   * @returns {boolean} - If the validation was successful
+   */
+  newUserValidator: function newUserValidator(user) {
     return !(user);
   },
+
+  /**
+   * Existing user validator
+   *
+   * @param {object} user - The user entity that will be validated
+   *
+   * @returns {boolean} - If the validation was successful
+   */
   existingUserValidator: function existingUserValidator(user) {
-    return (user);
+    return (user ? true: false);
   },
+
+  /**
+   * Address not empty validator
+   *
+   * @param {object} request - The user entity that will be validated
+   *
+   * @returns {boolean} - If the validation was successful
+   */
   addressNotEmptyValidator: function addressNotEmptyValidator(request) {
     return (request.addresses.length > 0);
   },
+  
+  /**
+   * Executes all user create validations
+   *
+   * @param {user} user - The existing user
+   * @param {object} request - The new user entity that will be validated
+   *
+   * @returns {boolean} - If the validation was successful
+   */
   validateCreate: async function validateCreate(user, request) {
     let that = this;
     
@@ -52,6 +85,15 @@ module.exports = {
       )
       .validate({mode: validationChain.modes.EXIT_ON_ERROR});
   },
+
+  /**
+   * Executes all user update validations
+   *
+   * @param {user} user - The existing user
+   * @param {object} request - The new user entity that will be validated
+   *
+   * @returns {boolean} - If the validation was successful
+   */
   validateUpdate: async function validateCreate(user, request) {
     let that = this;
 
