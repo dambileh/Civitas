@@ -7,7 +7,6 @@ var subscriptionHelper = require('../../libs/PubSub/SubscriptionHelper');
 var userChannels = require('../../PubSubChannels').User;
 var constants = require('../../Constants');
 var process = require('process');
-var internalEventEmitter = require('../../libs/InternalEventEmitter');
 
 module.exports = {
   initialize: async function () {
@@ -53,12 +52,5 @@ module.exports = {
       logging.logAction(logging.logLevels.ERROR, `Failed to subscribe to channel [${userChannels.External.Event}]`, e);
       throw e;
     }
-  },
-  // TODO is this really necessary??
-  emitInternalResponseEvent: function emitInternalResponseEvent(response, event) {
-    internalEventEmitter.emit(
-      event,
-      response
-    );
   }
 };
