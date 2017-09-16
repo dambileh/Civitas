@@ -1,0 +1,17 @@
+{
+  "logging": [
+    {
+      "name": "file",
+      "level": "debug",
+      "filename": "/var/log/civitas/user/application.log"
+    }
+  ],
+  "mongo": {
+    "database_host": "mongodb://localhost:27017/User",
+    "options": {
+      "config": {
+        "autoIndex": true
+      }
+    }
+  }
+}

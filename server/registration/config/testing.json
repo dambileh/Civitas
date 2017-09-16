@@ -14,11 +14,13 @@
     {
       "name": "file",
       "level": "debug",
-      "filename": "/var/log/civitas/user/application-test.log"
+      "filename": "/Users/kevin/Library/Logs/civitas/registration/application.log"
     }
   ],
   "mongo": {
-    "database_hosts" : ["mongodb://localhost:27017/UserTest",
-                        "mongodb://localhost:27017/RegistrationTest"]
+    "database_host" : "mongodb://localhost:27017/RegistrationTest",
+    "options" : {
+      "config":{"autoIndex": true}
+    }
   }
 }

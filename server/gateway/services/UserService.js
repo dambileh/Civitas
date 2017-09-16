@@ -32,7 +32,7 @@ module.exports = {
     );
 
     try {
-      let completed =
+      let userEventCompleted =
         await pubSub.publishAndWaitForResponse(
           pubSubChannels.User.External.Event,
           pubSubChannels.User.External.CompletedEvent,
@@ -42,9 +42,26 @@ module.exports = {
           },
           request);
 
-      response.statusCode = completed.payload.statusCode;
+		// publish a new event to registration channel
+		try {
+			let regEventCompleted =
+				await pubSub.publishAndWaitForResponse(
+					pubSubChannels.Registration.External.Event,
+					pubSubChannels.Registration.External.CompletedEvent,
+					{
+						subscriberType: constants.pubSub.recipients.gateway
+					},
+				);
+		} catch (err) {
+			logging.logAction(
+				logging.logLevels.ERROR,
+				`Failed to subscribe to channel [${pubSubChannels.Registration.External.CompletedEvent}]`, err);
+			return next(err);
+		}
+
+      response.statusCode = userEventCompleted.payload.statusCode;
       response.setHeader('Content-Type', 'application/json');
-      return response.end(JSON.stringify(completed.payload.body));
+      return response.end(JSON.stringify(userEventCompleted.payload.body));
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
