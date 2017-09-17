@@ -8,8 +8,6 @@ var fs = require('fs');
 var serverPort = 4000;
 var config = require('config');
 var errorHandler = require('../libs/error/ErrorHandler');
-
-// swaggerRouter configuration
 var options = {
   swaggerUi: '/swagger.json',
   controllers: './controllers',
@@ -52,14 +50,23 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
   }
 
   http.createServer(app).listen(serverPort, function () {
-    console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
-      if (process.env.NODE_ENV !== 'ci') {
-          console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
-      }
+    console.log(`Your server is listening on port ${serverPort} (http://localhost:${serverPort})`);
+    if (process.env.NODE_ENV !== 'ci') {
+      console.log(`Swagger-ui is available on http://localhost:${serverPort}/docs`);
+    }
   });
-  
+
   process.on('unhandledRejection', ( error, promise ) => {
     console.log(`UnhandledPromiseRejection detected for promise [${JSON.stringify(promise)}]`);
-    console.log( `Stack Trace: [${error.stack }]`)
+    console.log( `Stack Trace: [${error.stack }]`);
+    process.exit(1);
   } );
+
+  process.on ('SIGINT', () => {
+    process.exit(0);
+  });
+
+  process.on ('uncaughtException', err => {
+    process.exit(1);
+  });
 });

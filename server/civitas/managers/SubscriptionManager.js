@@ -7,6 +7,7 @@ var subscriptionHelper = require('../../libs/PubSub/SubscriptionHelper');
 var userChannels = require('../../PubSubChannels').User;
 var constants = require('../../Constants');
 var process = require('process');
+var internalEventEmitter = require('../../libs/InternalEventEmitter');
 
 module.exports = {
   initialize: async function () {
@@ -54,3 +55,6 @@ module.exports = {
     }
   }
 };
+
+process.on('exit', () => {
+});

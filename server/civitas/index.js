@@ -60,20 +60,29 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
   subscriptionManager.initialize();
 
   // Start the server
-  if (process.argv[2]) {
-    serverPort = process.argv[2];
+  if(process.argv.indexOf("PORT") != -1){ //does PORT exist?
+    serverPort = process.argv[process.argv.indexOf("PORT") + 1];
   }
 
   http.createServer(app).listen(serverPort, function () {
-    console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
+    console.log(`Your server is listening on port ${serverPort} (http://localhost:${serverPort})`);
       if (process.env.NODE_ENV !== 'ci') {
-          console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
+          console.log(`Swagger-ui is available on http://localhost:${serverPort}/docs`);
       }
   });
 
   process.on('unhandledRejection', ( error, promise ) => {
     console.log(`UnhandledPromiseRejection detected for promise [${JSON.stringify(promise)}]`);
-    console.log( `Stack Trace: [${error.stack }]`)
-  } );
+    console.log( `Stack Trace: [${error.stack }]`);
+    process.exit(1);
+  });
+
+  process.on('SIGINT', () => {
+    process.exit(0);
+  });
+
+  process.on('uncaughtException', () => {
+    process.exit(1);
+  });
 
 });
