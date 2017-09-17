@@ -42,26 +42,39 @@ module.exports = {
           },
           request);
 
-		// publish a new event to registration channel
-		try {
-			let regEventCompleted =
-				await pubSub.publishAndWaitForResponse(
-					pubSubChannels.Registration.External.Event,
-					pubSubChannels.Registration.External.CompletedEvent,
-					{
-						subscriberType: constants.pubSub.recipients.gateway
-					},
-				);
-		} catch (err) {
-			logging.logAction(
-				logging.logLevels.ERROR,
-				`Failed to subscribe to channel [${pubSubChannels.Registration.External.CompletedEvent}]`, err);
-			return next(err);
-		}
+      // publish a new event to registration channel
+
+      try {
+        var registrationRequest = new Message(
+          pubSubChannels.Registration.External.Event,
+          constants.pubSub.messageType.custom,
+          constants.pubSub.messageAction.requestRegistration,
+          {
+            msisdn : userRequest.msisdn
+          }
+        );
+
+          await pubSub.publishAndWaitForResponse(
+            pubSubChannels.Registration.External.Event,
+            pubSubChannels.Registration.External.CompletedEvent,
+            {
+              subscriberType: constants.pubSub.recipients.gateway,
+              subscriberId: process.pid
+            },
+            registrationRequest
+          );
+
+      } catch (err) {
+        logging.logAction(
+          logging.logLevels.ERROR,
+          `Failed to subscribe to channel [${pubSubChannels.Registration.External.CompletedEvent}]`, err);
+        return next(err);
+      }
 
       response.statusCode = userEventCompleted.payload.statusCode;
       response.setHeader('Content-Type', 'application/json');
       return response.end(JSON.stringify(userEventCompleted.payload.body));
+
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,

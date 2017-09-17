@@ -1,6 +1,6 @@
 'use strict';
 
-var Registration = require('../models/Registration');
+var Verification = require('../models/Verification');
 var appUtil = require('../../libs/AppUtil');
 var logging = require('../utilities/Logging');
 var _ = require('lodash');
@@ -13,127 +13,108 @@ var TwilioAuthService = require('node-twilio-verify');
  */
 module.exports = {
 
-    /**
-     * Request registration
-     *
-     * @param {object} request - The request that was sent from the controller
-     */
-	requestRegistration: function requestRegistration(request) {
-        Registration.findOne(
-            {msisdn: request.msisdn},
-            function requestRegistrationCallback(err, registration) {
-                if (err) {
-                    return subscriptionManager.emitInternalResponseEvent(
-                        {
-                            statusCode: 500,
-                            body: err
-                        },
-                        registrationChannels.Internal.RequestRegistrationCompletedEvent
-                    );
-                }
+  /**
+   * Request registration
+   *
+   * @param {object} request - The request that was sent from the controller
+   */
+  requestRegistration: async function requestRegistration(request) {
 
-				var high = 9999;
-                var low = 1000;
-                var code = Math.floor(Math.random() * (high - low + 1) + low);
+    let registration = null;
 
-                // check if there is already an existing registration code
-                if (!appUtil.isNullOrUndefined(registration)) {
-					var updatedProperties = {
-						msisdn: request.msisdn,
-						code: code
-					};
+    try {
+      registration = await Verification.findOne(
+        {
+          msisdn: request.msisdn
+        }
+      );
 
-					registration.update({_id: request.id}, updatedProperties, function userUpdateCallback(err) {
-							if (err) {
-								return subscriptionManager.emitInternalResponseEvent(
-									{
-										statusCode: 500,
-										body: err
-									},
-									userChannels.Internal.UpdateCompletedEvent
-								);
-							}
+      var high = 9999;
+      var low = 1000;
+      var code = Math.floor(Math.random() * (high - low + 1) + low);
 
-							registration.msisdn = request.firstName;
-							registration.code = code;
-							registration.updatedAt = new Date();
+      // check if there is already an existing registration code
+      if (!appUtil.isNullOrUndefined(registration)) {
 
-							return subscriptionManager.emitInternalResponseEvent(
-								{
-									statusCode: 200,
-									body: registration
-								},
-								registrationChannels.Internal.UpdateCompletedEvent
-							);
-						}
-					);
-                }
+        registration.code = code;
 
-                request.code = code;
-                var registrationEntity = new Registration(request);
+        await registration.save();
 
-                logging.logAction(
-                    logging.logLevels.INFO,
-                    'Attempting to create a new registration code for ' + request.msisdn
-                );
+        registration.msisdn = request.msisdn;
+        registration.code = code;
+        registration.updatedAt = new Date();
 
-                registrationEntity.save(
-                    function userSaveCallback(err) {
-                        if (err) {
-                            return subscriptionManager.emitInternalResponseEvent(
-                                {
-                                    statusCode: 500,
-                                    body: err
-                                },
-                                registrationChannels.Internal.CreateCompletedEvent
-                            );
-
-                        }
-
-                        /*
-                        Uncomment this when ready to test SMS
-
-                        // Sending SMS to the subscriber
-						var accountSid = "xxxxxxxx",
-							authToken = "yyyyyyyyyy",
-							fromNumber = '+1xxxxxxxxxx';
-
-						var twilioAuthService = new TwilioAuthService();
-						twilioAuthService.init(accountSid, authToken);
-						twilioAuthService.setFromNumber(fromNumber);
-
-                        var msgBody = 'Your Civitas registration code: ' + code;
-
-						twilioAuthService.sendCode(request.msisdn, msgBody).then(function(results) {
-							return subscriptionManager.emitInternalResponseEvent(
-								{
-									statusCode: 201,
-									body: registrationEntity
-								},
-								registrationChannels.Internal.CreateCompletedEvent
-							);
-						}, function error(err) {
-							return subscriptionManager.emitInternalResponseEvent(
-								{
-									statusCode: 500,
-									body: err
-								},
-								registrationChannels.Internal.CreateCompletedEvent
-							);
-						});
-						*/
-
-                        // Remove below when above is uncommented
-						return subscriptionManager.emitInternalResponseEvent(
-							{
-								statusCode: 201,
-								body: registrationEntity
-							},
-							registrationChannels.Internal.CreateCompletedEvent
-						);
-                    }
-                );
-            }
+        return subscriptionManager.emitInternalResponseEvent(
+          {
+            statusCode: 200,
+            body: registration
+          },
+          registrationChannels.Internal.RequestRegistrationCompletedEvent
         );
+      }
+
+      request.code = code;
+
+      var registrationEntity = new Verification(request);
+
+      logging.logAction(
+        logging.logLevels.INFO,
+        'Attempting to create a new registration code for ' + request.msisdn
+      );
+
+      await registrationEntity.save();
+      
+      /*
+       Uncomment this when ready to test SMS
+
+       // Sending SMS to the subscriber
+       var accountSid = "xxxxxxxx",
+       authToken = "yyyyyyyyyy",
+       fromNumber = '+1xxxxxxxxxx';
+
+       var twilioAuthService = new TwilioAuthService();
+       twilioAuthService.init(accountSid, authToken);
+       twilioAuthService.setFromNumber(fromNumber);
+
+       var msgBody = 'Your Civitas registration code: ' + code;
+
+       twilioAuthService.sendCode(request.msisdn, msgBody).then(function(results) {
+       return subscriptionManager.emitInternalResponseEvent(
+       {
+       statusCode: 200,
+       body: registrationEntity
+       },
+       registrationChannels.Internal.CreateCompletedEvent
+       );
+       }, function error(err) {
+       return subscriptionManager.emitInternalResponseEvent(
+       {
+       statusCode: 500,
+       body: err
+       },
+       registrationChannels.Internal.CreateCompletedEvent
+       );
+       });
+       */
+
+      // Remove below when above is uncommented
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: 200,
+          body: registrationEntity
+        },
+        registrationChannels.Internal.RequestRegistrationCompletedEvent
+      );
+
+    } catch (err) {
+      return subscriptionManager.emitInternalResponseEvent(
+        {
+          statusCode: 500,
+          body: err
+        },
+        registrationChannels.Internal.RequestRegistrationCompletedEvent
+      );
     }
+
+  }
 };

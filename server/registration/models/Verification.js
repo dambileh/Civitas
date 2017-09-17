@@ -5,8 +5,8 @@ var Schema = mongoose.Schema;
 
 var verification = new Schema(
     {
-		msisdn: {type: String, required: true},
-        code: {type: String, required: true}
+		  msisdn: {type: String, required: true},
+      code: {type: String, required: true}
     },
     {timestamps: {createdAt: 'createdAt', updatedAt: 'updatedAt'}}
 );
