@@ -56,5 +56,49 @@ module.exports = {
       return next(err);
     }
 
+  },
+
+  /**
+   * Allows users to invite other users
+   *
+   * @param {object} args - The request arguments passed in from the controller
+   * @param {IncomingMessage} response - The http response object
+   * @param {function} next - The callback used to pass control to the next action/middleware
+   */
+  inviteFriend: async function(args, response, next) {
+
+    var invitePayload = args.invite.value;
+    var userId = args.id.value;
+
+    var payload = {
+      "user-id": userId,
+      "number": invitePayload
+    };
+    var request = new Message(
+      pubSubChannels.User.External.Event,
+      constants.pubSub.messageType.custom,
+      constants.pubSub.messageAction.inviteFriend,
+      payload
+    );
+
+    try {
+      let completed =
+        await pubSub.publishAndWaitForResponse(
+          pubSubChannels.User.External.Event,
+          pubSubChannels.User.External.CompletedEvent,
+          {
+            subscriberType: constants.pubSub.recipients.gateway
+          },
+          request);
+
+      response.statusCode = completed.payload.statusCode;
+      response.setHeader('Content-Type', 'application/json');
+      return response.end(JSON.stringify(completed.payload.body));
+    } catch (err) {
+      logging.logAction(
+        logging.logLevels.ERROR,
+        `Failed to subscribe to channel [${pubSubChannels.User.External.CompletedEvent}]`, err);
+      return next(err);
+    }
   }
 };

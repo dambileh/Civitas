@@ -258,12 +258,12 @@ paths:
             $ref: "#/definitions/serverErrorModel"
       x-swagger-router-controller: "FriendController"
 
-  /user/{id}/invite-user:
+  /user/{id}/invite-friend:
     post:
       tags:
       - "invite user"
       description: "Allows user to invite another user"
-      operationId: "inviteUser"
+      operationId: "inviteFriend"
       consumes:
       - "application/json"
       produces:
@@ -279,12 +279,12 @@ paths:
         description: "The user invitation details"
         required: true
         schema:
-          $ref: "#/definitions/inviteUserRequest"
+          $ref: "#/definitions/inviteFriendRequest"
       responses:
         200:
           description: "success response that the user's invitation has been sent"
           schema:
-            $ref: "#/definitions/inviteUserResponse"
+            $ref: "#/definitions/inviteFriendResponse"
         400:
           description: "Validation Error. Usually caused by a missing or invalid parameter."
           schema:
@@ -308,7 +308,7 @@ paths:
           description: "unexpected error"
           schema:
             $ref: "#/definitions/serverErrorModel"
-      x-swagger-router-controller: "UserController"
+      x-swagger-router-controller: "FriendController"
 
   /registration/confirm:
     post:
@@ -587,7 +587,7 @@ definitions:
         type: "string"
         description: "The cell number to which the registration code was sent"
 
-  inviteUserRequest:
+  inviteFriendRequest:
     additionalProperties: false
     type: "object"
     required:
@@ -599,7 +599,7 @@ definitions:
         maxLength: 128
         description: "The invited user's contact number"
 
-  inviteUserResponse:
+  inviteFriendResponse:
     type: "object"
     required:
     - "msisdn"

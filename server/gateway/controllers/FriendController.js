@@ -21,6 +21,17 @@ module.exports = {
    */
   createFriend: (request, response, next) => {
     friendService.createFriend(request.swagger.params, response, next);
+  },
+
+  /**
+   * Calls the corresponding service layer method to invite a friend
+   *
+   * @param {ClientRequest} request - The http request object
+   * @param {IncomingMessage} response - The http response object
+   * @param {function} next The callback used to pass control to the next action/middleware
+   */
+  inviteFriend: function getNote(request, response, next) {
+    friendService.inviteFriend(request.swagger.params, response, next);
   }
 
 };
