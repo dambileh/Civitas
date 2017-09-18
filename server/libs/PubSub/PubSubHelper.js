@@ -3,6 +3,8 @@
 var redis = require('redis');
 var memStoreAdapter = require('../MemStore/MemStoreAdapter');
 var appUtil = require('../AppUtil');
+var pubSubChannels = require('../../PubSubChannels');
+var processHelper = require('../../libs/ProcessHelper');
 
 /**
  * An instance of the Pub Sub Helper
@@ -35,42 +37,74 @@ module.exports = {
    * 
    * @param {string} channel - The channel on which the subscriber will be registered  
    * @param {string} subscriberType - The type of the subscriber
-   * @param {string} subscriberId - The id of the subscriber
    */
-  registerChannelSubscribers: async function (channel, subscriberType, subscriberId) {
+  registerChannelSubscribers: async function (channel, subscriberType) {
+    const processUniqueId = processHelper.getUniqueId();
+
     let store = await memStoreAdapter.keyValue.get(channel);
     if (store) {
       if (store[subscriberType]) {
-        store[subscriberType].push(subscriberId);
+        // Only add if it does not exist already
+        if (!store[subscriberType].includes(processUniqueId)) {
+          store[subscriberType].push(processUniqueId);
+        }
+
       } else {
-        store[subscriberType] = [subscriberId];
+        store[subscriberType] = [processUniqueId];
       }
     }
     else {
       store = {};
-      store[subscriberType] = [subscriberId];
+      store[subscriberType] = [processUniqueId];
     }
     await memStoreAdapter.keyValue.put({}, channel, store);
   },
 
   /**
-   * Removed a subscriber from the list of subscribers for a given channel
-   *
-   * @param {string} channel - The channel from which the subscriber will be unregistered
-   * @param {string} subscriberType - The type of the subscriber
-   * @param {string} subscriberId - The id of the subscriber
+   * Removes a the current process from all channels subscribers list
    */
-  unregisterChannelSubscribers: async function (channel, subscriberType, subscriberId) {
-    let store = await memStoreAdapter.keyValue.get(channel);
+  unregisterSubscriberFromAllChannels: async function () {
+    return new Promise(async (resolve, reject) => {
+      let allChannelKeys = Object.keys(pubSubChannels);
 
-    if (store && store[subscriberType]) {
-      store[subscriberType] = appUtil.removeFromArray(
-        store[subscriberType],
-        subscriberId
-      );
-    }
+      let allChanelNames = [];
 
-    await memStoreAdapter.keyValue.put({}, channel, store);
+      for(let key of allChannelKeys) {
+        let channel = pubSubChannels[key];
+
+        let allChannelEventKeys = Object.keys(channel.External);
+
+        for (let eventKey of allChannelEventKeys) {
+
+          try {
+
+            allChanelNames.push(channel.External[eventKey]);
+            let store = await memStoreAdapter.keyValue.get(channel.External[eventKey]);
+
+            if (store) {
+
+              let allStoreKeys = Object.keys(store);
+
+              for (let storeKey of allStoreKeys) {
+
+                store[storeKey] = appUtil.removeFromArray(
+                  store[storeKey],
+                  processHelper.getUniqueId()
+                );
+
+              }
+
+              await memStoreAdapter.keyValue.put({}, channel.External[eventKey], store);
+            }
+
+          } catch(err) {
+            return reject(err);
+          }
+        }
+      }
+
+      return resolve(null);
+    });
   },
 
   /**
@@ -82,12 +116,20 @@ module.exports = {
    */
   getSubscriberTypes: async function (channel) {
     let store = await memStoreAdapter.keyValue.get(channel);
-    let types = [];
-    if (store) {
-      types = Object.keys(store);
-    }
+    return (store) ? Object.keys(store) : [];
+  },
 
-    return types;
+  /**
+   * Returns the subscribers of a certain channel + subscriber type combination
+   * 
+   * @param {string} channel - The channel whose subscribers will be returned
+   * @param {string} subscriberType - The subscriber type of the channel
+   * 
+   * @returns {Array} The array of subscriber types
+   */
+  getChannelSubscribersForType: async function (channel, subscriberType) {
+    let store = await memStoreAdapter.keyValue.get(channel);
+    return (store[subscriberType]) ? store[subscriberType] : [];
   },
 
   /**
