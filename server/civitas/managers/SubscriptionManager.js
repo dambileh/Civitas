@@ -6,8 +6,6 @@ var pubSub = require('../../libs/PubSub/PubSubAdapter');
 var subscriptionHelper = require('../../libs/PubSub/SubscriptionHelper');
 var userChannels = require('../../PubSubChannels').User;
 var constants = require('../../Constants');
-var process = require('process');
-var internalEventEmitter = require('../../libs/InternalEventEmitter');
 
 module.exports = {
   initialize: async function () {
@@ -44,7 +42,6 @@ module.exports = {
       await pubSub.subscribe(
         userChannels.External.Event,
         {
-          subscriberId: process.pid,
           subscriberType: constants.pubSub.recipients.user
         },
         handleMessage
@@ -55,6 +52,3 @@ module.exports = {
     }
   }
 };
-
-process.on('exit', () => {
-});

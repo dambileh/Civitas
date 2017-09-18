@@ -11,6 +11,7 @@ var config = require('config');
 var errorHandler = require('../libs/error/ErrorHandler');
 var subscriptionManager = require('./managers/SubscriptionManager');
 var logging = require('./utilities/Logging');
+var processHelper = require('../libs/ProcessHelper');
 
 // swaggerRouter configuration
 var options = {
@@ -71,18 +72,5 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
       }
   });
 
-  process.on('unhandledRejection', ( error, promise ) => {
-    console.log(`UnhandledPromiseRejection detected for promise [${JSON.stringify(promise)}]`);
-    console.log( `Stack Trace: [${error.stack }]`);
-    process.exit(1);
-  });
-
-  process.on('SIGINT', () => {
-    process.exit(0);
-  });
-
-  process.on('uncaughtException', () => {
-    process.exit(1);
-  });
-
+  processHelper.handleProcessExit();
 });

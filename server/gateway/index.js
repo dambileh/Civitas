@@ -18,6 +18,8 @@ var options = {
 var spec = fs.readFileSync('./api/swagger.yaml', 'utf8');
 var swaggerDoc = jsyaml.safeLoad(spec);
 
+var processHelper = require('../libs/ProcessHelper');
+
 /**
  * Initialize the Swagger middleware.
  *
@@ -39,13 +41,13 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
 
   // Serve the Swagger documents and Swagger UI
   if (process.env.NODE_ENV !== 'ci') {
-      app.use(middleware.swaggerUi());
+    app.use(middleware.swaggerUi());
   }
 
   app.use(errorHandler.onError);
 
   // Start the server
-  if(process.argv.indexOf("PORT") != -1){ //does PORT exist?
+  if (process.argv.indexOf("PORT") != -1) { //does PORT exist?
     serverPort = process.argv[process.argv.indexOf("PORT") + 1];
   }
 
@@ -56,17 +58,6 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
     }
   });
 
-  process.on('unhandledRejection', ( error, promise ) => {
-    console.log(`UnhandledPromiseRejection detected for promise [${JSON.stringify(promise)}]`);
-    console.log( `Stack Trace: [${error.stack }]`);
-    process.exit(1);
-  } );
+  processHelper.handleProcessExit();
 
-  process.on ('SIGINT', () => {
-    process.exit(0);
-  });
-
-  process.on ('uncaughtException', err => {
-    process.exit(1);
-  });
 });
