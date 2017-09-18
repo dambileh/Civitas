@@ -1,8 +1,8 @@
 'use strict';
 
 var mongoose = require('mongoose');
-var autopopulate = require('mongoose-autopopulate');
 var schema = mongoose.Schema;
+var Address = require('../models/Address');
 
 var statusEnum = [
   'active',
@@ -16,12 +16,17 @@ var user = new schema(
     msisdn: {type: String, required: true},
     email: {type: String, required: false},
     status: {type: String, required: true, enum: statusEnum},
-    friends: [{ type: schema.ObjectId, ref: 'user', autopopulate: true }]
+    friends: [{ type: schema.ObjectId, ref: 'user'}],
+    addresses: [{ type: schema.ObjectId, ref: 'address'}]
   },
   {timestamps: {createdAt: 'createdAt', updatedAt: 'updatedAt'}}
 );
 
-user.plugin(autopopulate);
+user.pre('remove', function(next) {
+  // Remove all the addresses created for this user 
+  Address.remove({owner: this._id}).exec();
+  next();
+});
 
 /**
  * Defines the schema for the user model
