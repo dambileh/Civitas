@@ -4,7 +4,7 @@ const chai = require('chai');
 const ZSchema = require('z-schema');
 const assert = require('assert');
 
-const customFormats = module.exports = function(zSchema) {
+const customFormats = module.exports = function (zSchema) {
 
   // Placeholder file for all custom-formats in known to swagger.json
   // as found on
@@ -13,21 +13,21 @@ const customFormats = module.exports = function(zSchema) {
   const decimalPattern = /^\d{0,8}.?\d{0,4}[0]+$/;
 
   /** Validates floating point as decimal / money (i.e: 12345678.123400..) */
-  zSchema.registerFormat('double', function(val) {
+  zSchema.registerFormat('double', function (val) {
     return !decimalPattern.test(val.toString());
   });
 
   /** Validates value is a 32bit integer */
-  zSchema.registerFormat('int32', function(val) {
+  zSchema.registerFormat('int32', function (val) {
     // the 32bit shift (>>) truncates any bits beyond max of 32
     return Number.isInteger(val) && ((val >> 0) === val);
   });
 
-  zSchema.registerFormat('int64', function(val) {
+  zSchema.registerFormat('int64', function (val) {
     return Number.isInteger(val);
   });
 
-  zSchema.registerFormat('float', function(val) {
+  zSchema.registerFormat('float', function (val) {
     // better parsing for custom "float" format
     if (Number.parseFloat(val)) {
       return true;
@@ -36,23 +36,24 @@ const customFormats = module.exports = function(zSchema) {
     }
   });
 
-  const uuidPattern = /^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/;;
+  const uuidPattern = /^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/;
+  ;
 
   /** Validates uuid */
-  zSchema.registerFormat('uuid', function(val) {
+  zSchema.registerFormat('uuid', function (val) {
     return !uuidPattern.test(val.toString());
   });
 
-  zSchema.registerFormat('date', function(val) {
+  zSchema.registerFormat('date', function (val) {
     // should parse a a date
     return !isNaN(Date.parse(val));
   });
 
-  zSchema.registerFormat('dateTime', function(val) {
+  zSchema.registerFormat('dateTime', function (val) {
     return !isNaN(Date.parse(val));
   });
 
-  zSchema.registerFormat('password', function(val) {
+  zSchema.registerFormat('password', function (val) {
     // should parse as a string
     return typeof val === 'string';
   });
@@ -68,10 +69,54 @@ chai.should();
 
 let createdUser = null;
 
-describe('/user', function() {
+describe('/user', function () {
 
-  describe('post', function() {
-    it('should respond with 201 success response that the...', function(done) {
+  describe('post', function () {
+
+    const postSuccessBody = {
+      "msisdn": "27728120127",
+      "firstName": "hossein",
+      "lastName": "shayesteh",
+      "email": "sdfsd@fsdfsdf.com",
+      "addresses": [
+        {
+          "isPrimary": false,
+          "detail": {
+            "line1": "line1",
+            "city": "city",
+            "country": "country",
+            "province": "country",
+
+
+            "postalCode": "postalCode",
+            "type": "postal"
+          },
+          "location": {
+            "type": "Point",
+            "coordinates": [-180, 90]
+          }
+        },
+        {
+          "isPrimary": true,
+          "detail": {
+            "line1": "line1",
+            "city": "city",
+            "country": "country",
+            "province": "country",
+
+
+            "postalCode": "postalCode",
+            "type": "postal"
+          },
+          "location": {
+            "type": "Point",
+            "coordinates": [-180, 90]
+          }
+        }
+      ]
+    };
+
+    it('should respond with 201 success response that the...', function (done) {
       /*eslint-disable*/
       var schema = {
         "type": "object",
@@ -184,61 +229,20 @@ describe('/user', function() {
 
       /*eslint-enable*/
       api.post('/v1/user')
-      .set('Content-Type', 'application/json')
-      .send({
-        "msisdn": "27728120127",
-        "firstName" : "hossein",
-        "lastName" : "shayesteh",
-        "email" : "sdfsd@fsdfsdf.com",
-        "addresses" : [
-          {
-            "isPrimary" : false,
-            "detail" : {
-              "line1" : "line1",
-              "city" : "city",
-              "country" : "country",
-              "province" : "country",
+        .set('Content-Type', 'application/json')
+        .send(postSuccessBody)
+        .expect(201)
+        .end(function (err, res) {
+          if (err) return done(err);
+          validator.validate(res.body, schema).should.be.true;
 
+          createdUser = res.body;
 
-              "postalCode" : "postalCode",
-              "type" : "postal"
-            },
-            "location": {
-              "type" : "Point",
-              "coordinates" : [-180, 90]
-            }
-          },
-          {
-            "isPrimary" : true,
-            "detail" : {
-              "line1" : "line1",
-              "city" : "city",
-              "country" : "country",
-              "province" : "country",
-
-
-              "postalCode" : "postalCode",
-              "type" : "postal"
-            },
-            "location": {
-              "type" : "Point",
-              "coordinates" : [-180, 90]
-            }
-          }
-        ]
-      })
-      .expect(201)
-      .end(function(err, res) {
-        if (err) return done(err);
-        validator.validate(res.body, schema).should.be.true;
-
-        createdUser = res.body;
-
-        done();
-      });
+          done();
+        });
     });
 
-    it('should respond with 400 Validation Error. Usually...', function(done) {
+    it('should respond with 400 Validation Error. Number already exists', function (done) {
       /*eslint-disable*/
       var schema = {
         "type": "object",
@@ -286,26 +290,1036 @@ describe('/user', function() {
 
       /*eslint-enable*/
       api.post('/v1/user')
-      .set('Content-Type', 'application/json')
-      .send({
-        "msisdn": "27728120157",
-        "firstName" : "hossein",
-        "lastName" : "shayesteh",
-        "email" : "some invalid email"
-      })
-      .expect(400)
-      .end(function(err, res) {
-        if (err) return done(err);
+        .set('Content-Type', 'application/json')
+        .send(postSuccessBody)
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
 
-        validator.validate(res.body, schema).should.be.true;
-        done();
-      });
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            name: 'ValidationError',
+            code: 'MODEL_VALIDATION_FAILED',
+            message: 'Some validation errors occurred.',
+            results: {
+              errors: [
+                {
+                  "code": 100001,
+                  "message": "A user with number [27728120127] already exists.",
+                  "path": ["msisdn"]
+                }
+              ]
+            },
+            status: 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+          done();
+        });
     });
+
+    it('should respond with 400 Validation Error. Address can not be empty', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.post('/v1/user')
+        .set('Content-Type', 'application/json')
+        .send({
+          "msisdn": "27728120100",
+          "firstName": "hossein",
+          "lastName": "shayesteh",
+          "email": "sdfsd@fsdfsdf.com",
+          "addresses": []
+        })
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 100003,
+                "message": "At least one address must be set for the user",
+                "path": ["addresses"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 400 Validation Error. Exactly one primary address must be set', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.post('/v1/user')
+        .set('Content-Type', 'application/json')
+        .send({
+            "msisdn": "27728120111",
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "province": "country",
+
+
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                },
+                "location": {
+                  "type": "Point",
+                  "coordinates": [-180, 90]
+                }
+              },
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "province": "country",
+
+
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                },
+                "location": {
+                  "type": "Point",
+                  "coordinates": [-180, 90]
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 200005,
+                "message": "Exactly one primary address must be set",
+                "path": ["addresses"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 400 Validation Error. Either address location or detail must be set', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.post('/v1/user')
+        .set('Content-Type', 'application/json')
+        .send({
+            "msisdn": "27728120111",
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true
+              },
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "province": "country",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                },
+                "location": {
+                  "type": "Point",
+                  "coordinates": [-180, 90]
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ValidationError",
+              "code": "MODEL_VALIDATION_FAILED",
+              "message": "Some validation errors occurred.",
+              "results": {
+              "errors": [{
+                "code": 200001,
+                "message": "Either [detail] or [location] property needs to be set for all addresses.",
+                "path": ["addresses"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 400 Validation Error. Either address location or detail must be set', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.post('/v1/user')
+        .set('Content-Type', 'application/json')
+        .send({
+            "msisdn": "27728120111",
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true
+              },
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "province": "country",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                },
+                "location": {
+                  "type": "Point",
+                  "coordinates": [-180, 90]
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ValidationError",
+              "code": "MODEL_VALIDATION_FAILED",
+              "message": "Some validation errors occurred.",
+              "results": {
+              "errors": [{
+                "code": 200001,
+                "message": "Either [detail] or [location] property needs to be set for all addresses.",
+                "path": ["addresses"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 400 Validation Error. Location longitude greater than 180', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.post('/v1/user')
+        .set('Content-Type', 'application/json')
+        .send({
+            "msisdn": "27728120111",
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "province": "country",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                },
+                "location": {
+                  "type": "Point",
+                  "coordinates": [181, 90]
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          // Valid longitude values are between -180 and 180, both inclusive.
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 200002,
+                "message": "The passed in coordinates are not in correct format",
+                "path": ["addresses", "location", "coordinates"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 400 Validation Error. Location longitude less than -180', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.post('/v1/user')
+        .set('Content-Type', 'application/json')
+        .send({
+            "msisdn": "27728120111",
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "province": "country",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                },
+                "location": {
+                  "type": "Point",
+                  "coordinates": [-181, 90]
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          // Valid longitude values are between -180 and 180, both inclusive.
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 200002,
+                "message": "The passed in coordinates are not in correct format",
+                "path": ["addresses", "location", "coordinates"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 400 Validation Error. Location latitude greater than 90', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.post('/v1/user')
+        .set('Content-Type', 'application/json')
+        .send({
+            "msisdn": "27728120111",
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "province": "country",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                },
+                "location": {
+                  "type": "Point",
+                  "coordinates": [150, 91]
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          //  Valid latitude values are between -90 and 90 (both inclusive).
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 200002,
+                "message": "The passed in coordinates are not in correct format",
+                "path": ["addresses", "location", "coordinates"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 400 Validation Error. Location latitude less than -90', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.post('/v1/user')
+        .set('Content-Type', 'application/json')
+        .send({
+            "msisdn": "27728120111",
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "province": "country",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                },
+                "location": {
+                  "type": "Point",
+                  "coordinates": [150, -95]
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          //  Valid latitude values are between -90 and 90 (both inclusive).
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 200002,
+                "message": "The passed in coordinates are not in correct format",
+                "path": ["addresses", "location", "coordinates"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 400 Validation Error. Address detail state or province needs to be set', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.post('/v1/user')
+        .set('Content-Type', 'application/json')
+        .send({
+            "msisdn": "27728120111",
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          //  Valid latitude values are between -90 and 90 (both inclusive).
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 200003,
+                "message": "Either [state] or [province] property needs to be set for all addresses.",
+                "path": ["addresses", "detail"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 400 Validation Error. Only one of the state or province must to be set', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.post('/v1/user')
+        .set('Content-Type', 'application/json')
+        .send({
+            "msisdn": "27728120111",
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "state": "some state",
+                  "province": "some province",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          //  Valid latitude values are between -90 and 90 (both inclusive).
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 200004,
+                "message": "Only one of the [state] or [province] property must be set for all addresses.",
+                "path": ["addresses", "detail"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
 
   });
 
-  describe('get', function() {
-    it('should respond with 200 An array of users', function(done) {
+  describe('get', function () {
+    it('should respond with 200 An array of users', function (done) {
       /*eslint-disable*/
       var schema = {
         "type": "array",
@@ -421,18 +1435,18 @@ describe('/user', function() {
 
       /*eslint-enable*/
       api.get('/v1/user')
-      .set('Content-Type', 'application/json')
-      .expect(200)
-      .end(function(err, res) {
-        if (err) return done(err);
-        assert.ok(validator.validate(res.body, schema), 'The expected schema was not returned');
-        validator.validate(res.body, schema);
+        .set('Content-Type', 'application/json')
+        .expect(200)
+        .end(function (err, res) {
+          if (err) return done(err);
+          assert.ok(validator.validate(res.body, schema), 'The expected schema was not returned');
+          validator.validate(res.body, schema);
 
-        done();
-      });
+          done();
+        });
     });
 
-    it('should respond with 405 Method not supported Error...', function(done) {
+    it('should respond with 405 Method not supported Error...', function (done) {
       /*eslint-disable*/
       var schema = {
         "type": "object",
@@ -455,19 +1469,19 @@ describe('/user', function() {
 
       // patch is not supported
       api.patch('/v1/user')
-      .set('Content-Type', 'application/json')
-      .expect(405)
-      .end(function(err, res) {
-        if (err) return done(err);
-        assert.ok(validator.validate(res.body, schema), 'The expected schema was not returned');
-        done();
-      });
+        .set('Content-Type', 'application/json')
+        .expect(405)
+        .end(function (err, res) {
+          if (err) return done(err);
+          assert.ok(validator.validate(res.body, schema), 'The expected schema was not returned');
+          done();
+        });
     });
 
   });
 
-  describe('get single', function() {
-    it('should respond with 200 An array of users', function(done) {
+  describe('get single', function () {
+    it('should respond with 200 An array of users', function (done) {
       var schema = {
         "type": "object",
         "required": [
@@ -580,7 +1594,7 @@ describe('/user', function() {
       api.get(`/v1/user/${createdUser._id}`)
         .set('Content-Type', 'application/json')
         .expect(200)
-        .end(function(err, res) {
+        .end(function (err, res) {
           if (err) return done(err);
 
           validator.validate(res.body, schema).should.be.true;
@@ -590,8 +1604,8 @@ describe('/user', function() {
 
   });
 
-  describe('put', function() {
-    it('should respond with 200 success response that the...', function(done) {
+  describe('put', function () {
+    it('should respond with 200 success response that the...', function (done) {
       /*eslint-disable*/
       var schema = {
         "type": "object",
@@ -704,14 +1718,14 @@ describe('/user', function() {
           firstName: 'some new name'
         })
         .expect(200)
-        .end(function(err, res) {
+        .end(function (err, res) {
           if (err) return done(err);
           validator.validate(res.body, schema).should.be.true;
           done();
         });
     });
 
-    it('should respond with 400 Validation Error. Usually...', function(done) {
+    it('should respond with 400 Validation Error. Exactly one primary address must be set', function (done) {
       /*eslint-disable*/
       var schema = {
         "type": "object",
@@ -761,20 +1775,865 @@ describe('/user', function() {
       api.put(`/v1/user/${createdUser._id}`)
         .set('Content-Type', 'application/json')
         .send({
-          email: 'some invalid email'
-        })
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "province": "country",
+
+
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                },
+                "location": {
+                  "type": "Point",
+                  "coordinates": [-180, 90]
+                }
+              },
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "province": "country",
+
+
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                },
+                "location": {
+                  "type": "Point",
+                  "coordinates": [-180, 90]
+                }
+              }
+            ]
+          }
+        )
         .expect(400)
-        .end(function(err, res) {
+        .end(function (err, res) {
           if (err) return done(err);
+
           validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 200005,
+                "message": "Exactly one primary address must be set",
+                "path": ["addresses"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 400 Validation Error. Either address location or detail must be set', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.put(`/v1/user/${createdUser._id}`)
+        .set('Content-Type', 'application/json')
+        .send({
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true
+              },
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "province": "country",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                },
+                "location": {
+                  "type": "Point",
+                  "coordinates": [-180, 90]
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 200001,
+                "message": "Either [detail] or [location] property needs to be set for all addresses.",
+                "path": ["addresses"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 400 Validation Error. Either address location or detail must be set', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.put(`/v1/user/${createdUser._id}`)
+        .set('Content-Type', 'application/json')
+        .send({
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true
+              },
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "province": "country",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                },
+                "location": {
+                  "type": "Point",
+                  "coordinates": [-180, 90]
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 200001,
+                "message": "Either [detail] or [location] property needs to be set for all addresses.",
+                "path": ["addresses"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 400 Validation Error. Location longitude greater than 180', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.put(`/v1/user/${createdUser._id}`)
+        .set('Content-Type', 'application/json')
+        .send({
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "province": "country",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                },
+                "location": {
+                  "type": "Point",
+                  "coordinates": [181, 90]
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          // Valid longitude values are between -180 and 180, both inclusive.
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 200002,
+                "message": "The passed in coordinates are not in correct format",
+                "path": ["addresses", "location", "coordinates"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 400 Validation Error. Location longitude less than -180', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.put(`/v1/user/${createdUser._id}`)
+        .set('Content-Type', 'application/json')
+        .send({
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "province": "country",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                },
+                "location": {
+                  "type": "Point",
+                  "coordinates": [-181, 90]
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          // Valid longitude values are between -180 and 180, both inclusive.
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 200002,
+                "message": "The passed in coordinates are not in correct format",
+                "path": ["addresses", "location", "coordinates"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 400 Validation Error. Location latitude greater than 90', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.put(`/v1/user/${createdUser._id}`)
+        .set('Content-Type', 'application/json')
+        .send({
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "province": "country",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                },
+                "location": {
+                  "type": "Point",
+                  "coordinates": [150, 91]
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          //  Valid latitude values are between -90 and 90 (both inclusive).
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 200002,
+                "message": "The passed in coordinates are not in correct format",
+                "path": ["addresses", "location", "coordinates"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 400 Validation Error. Location latitude less than -90', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.put(`/v1/user/${createdUser._id}`)
+        .set('Content-Type', 'application/json')
+        .send({
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "province": "country",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                },
+                "location": {
+                  "type": "Point",
+                  "coordinates": [150, -95]
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          //  Valid latitude values are between -90 and 90 (both inclusive).
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 200002,
+                "message": "The passed in coordinates are not in correct format",
+                "path": ["addresses", "location", "coordinates"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 400 Validation Error. Address detail state or province needs to be set', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.put(`/v1/user/${createdUser._id}`)
+        .set('Content-Type', 'application/json')
+        .send({
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          //  Valid latitude values are between -90 and 90 (both inclusive).
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 200003,
+                "message": "Either [state] or [province] property needs to be set for all addresses.",
+                "path": ["addresses", "detail"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 400 Validation Error. Only one of the state or province must to be set', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.put(`/v1/user/${createdUser._id}`)
+        .set('Content-Type', 'application/json')
+        .send({
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "state": "some state",
+                  "province": "some province",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          //  Valid latitude values are between -90 and 90 (both inclusive).
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 200004,
+                "message": "Only one of the [state] or [province] property must be set for all addresses.",
+                "path": ["addresses", "detail"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
           done();
         });
     });
 
   });
 
-  describe('delete', function() {
-    it('should respond with 200', function(done) {
+  describe('delete', function () {
+    it('should respond with 200', function (done) {
       /*eslint-disable*/
       var schema = {
         "type": "object",
@@ -883,7 +2742,7 @@ describe('/user', function() {
       api.del(`/v1/user/${createdUser._id}`)
         .set('Content-Type', 'application/json')
         .expect(200)
-        .end(function(err, res) {
+        .end(function (err, res) {
           if (err) return done(err);
           validator.validate(res.body, schema).should.be.true;
           done();

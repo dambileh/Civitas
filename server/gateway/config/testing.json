@@ -18,6 +18,6 @@
     }
   ],
   "mongo": {
-    "database_hosts" : ["mongodb://localhost:27017/UserTest"]
+    "database_hosts" : ["mongodb://localhost:27017/CivitasTest"]
   }
 }
