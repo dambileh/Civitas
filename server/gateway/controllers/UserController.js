@@ -1,6 +1,6 @@
 'use strict';
 
-var UserService = require('../services/UserService');
+var userService = require('../services/UserService');
 
 /**
  * The User controller module
@@ -16,8 +16,8 @@ module.exports = {
    * @param {IncomingMessage} response - The http response object
    * @param {function} next The callback used to pass control to the next action/middleware
    */
-  createUser: function createNote(request, response, next) {
-    UserService.createUser(request.swagger.params, response, next);
+  createUser: function createUser(request, response, next) {
+    userService.createUser(request.swagger.params, response, next);
   },
 
   /**
@@ -27,8 +27,8 @@ module.exports = {
    * @param {IncomingMessage} response - The http response object
    * @param {function} next The callback used to pass control to the next action/middleware
    */
-  getAllUsers: function getAllNotes(request, response, next) {
-    UserService.getAllUsers(request.swagger.params, response, next);
+  getAllUsers: function getAllUsers(request, response, next) {
+    userService.getAllUsers(request.swagger.params, response, next);
   },
 
   /**
@@ -38,8 +38,8 @@ module.exports = {
    * @param {IncomingMessage} response - The http response object
    * @param {function} next The callback used to pass control to the next action/middleware
    */
-  deleteUser: function deleteNote(request, response, next) {
-    UserService.deleteUser(request.swagger.params, response, next);
+  deleteUser: function deleteUser(request, response, next) {
+    userService.deleteUser(request.swagger.params, response, next);
   },
 
   /**
@@ -49,8 +49,8 @@ module.exports = {
    * @param {IncomingMessage} response - The http response object
    * @param {function} next The callback used to pass control to the next action/middleware
    */
-  getSingleUser: function getNote(request, response, next) {
-    UserService.getSingleUser(request.swagger.params, response, next);
+  getSingleUser: function getSingleUser(request, response, next) {
+    userService.getSingleUser(request.swagger.params, response, next);
   },
 
   /**
@@ -60,18 +60,7 @@ module.exports = {
    * @param {IncomingMessage} response - The http response object
    * @param {function} next The callback used to pass control to the next action/middleware
    */
-  updateUser: function getNote(request, response, next) {
-    UserService.updateUser(request.swagger.params, response, next);
-  },
-
-  /**
-   * Calls the corresponding service layer method to update a user
-   *
-   * @param {ClientRequest} request - The http request object
-   * @param {IncomingMessage} response - The http response object
-   * @param {function} next The callback used to pass control to the next action/middleware
-   */
-  inviteUser: function getNote(request, response, next) {
-    UserService.inviteUser(request.swagger.params, response, next);
+  updateUser: function updateUser(request, response, next) {
+    userService.updateUser(request.swagger.params, response, next);
   }
 };
