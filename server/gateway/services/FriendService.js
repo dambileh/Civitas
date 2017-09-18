@@ -75,21 +75,19 @@ module.exports = {
       "number": invitePayload
     };
     var request = new Message(
-      PubSubChannels.User.External.Event,
+      pubSubChannels.User.External.Event,
       constants.pubSub.messageType.custom,
-      constants.pubSub.messageAction.inviteUser,
-      constants.pubSub.recipients.user,
+      constants.pubSub.messageAction.inviteFriend,
       payload
     );
 
     try {
       let completed =
-        await PubSub.publishAndWaitForResponse(
-          PubSubChannels.User.External.Event,
-          PubSubChannels.User.External.CompletedEvent,
+        await pubSub.publishAndWaitForResponse(
+          pubSubChannels.User.External.Event,
+          pubSubChannels.User.External.CompletedEvent,
           {
-            subscriberType: constants.pubSub.recipients.gateway,
-            subscriberId: process.pid
+            subscriberType: constants.pubSub.recipients.gateway
           },
           request);
 
@@ -99,7 +97,7 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to subscribe to channel [${PubSubChannels.User.External.CompletedEvent}]`, err);
+        `Failed to subscribe to channel [${pubSubChannels.User.External.CompletedEvent}]`, err);
       return next(err);
     }
   }
