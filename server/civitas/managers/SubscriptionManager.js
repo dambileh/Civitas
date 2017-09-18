@@ -2,13 +2,10 @@
 
 var logging = require('../utilities/Logging');
 var appUtil = require('../../libs/AppUtil');
-var events = require('events');
-var internalEmitter = new events.EventEmitter();
 var pubSub = require('../../libs/PubSub/PubSubAdapter');
 var subscriptionHelper = require('../../libs/PubSub/SubscriptionHelper');
 var userChannels = require('../../PubSubChannels').User;
 var constants = require('../../Constants');
-var process = require('process');
 
 module.exports = {
   initialize: async function () {
@@ -34,7 +31,7 @@ module.exports = {
 
       switch (message.type) {
         case constants.pubSub.messageType.crud:
-          subscriptionHelper.emitCRUDEvents(message, userChannels, internalEmitter);
+          subscriptionHelper.emitCRUDEvents(message, userChannels);
           break;
         default:
           logging.logAction(logging.logLevels.ERROR, `Type [${message.type}] is not supported`)
@@ -45,7 +42,6 @@ module.exports = {
       await pubSub.subscribe(
         userChannels.External.Event,
         {
-          subscriberId: process.pid,
           subscriberType: constants.pubSub.recipients.user
         },
         handleMessage
@@ -54,12 +50,5 @@ module.exports = {
       logging.logAction(logging.logLevels.ERROR, `Failed to subscribe to channel [${userChannels.External.Event}]`, e);
       throw e;
     }
-  },
-  emitInternalResponseEvent: function emitInternalResponseEvent(response, event) {
-    this.internalEmitter.emit(
-      event,
-      response
-    );
-  },
-  internalEmitter: internalEmitter
+  }
 };

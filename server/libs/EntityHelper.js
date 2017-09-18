@@ -1,8 +1,12 @@
-/**
- * Created by hossein on 2017/09/05.
- */
 module.exports = {
 
+  /**
+   * Updated a batch of passed in entities
+   *
+   * @param {array} entities - The entities that will be updated
+   *
+   * @returns {Promise}
+   */
   entityBatchUpdate: function entityBatchUpdate(entities) {
     return new Promise(async function (resolve, reject) {
 

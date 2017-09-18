@@ -41,6 +41,7 @@ module.exports = {
   global: {
     error: {
       strictMode: "StrictModeError"
-    }
+    },
+    processExit: "process-exit"
   }
 };
