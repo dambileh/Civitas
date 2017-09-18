@@ -205,12 +205,13 @@ paths:
             schema:
               $ref: "#/definitions/serverErrorModel"
         x-swagger-router-controller: "UserController"
-  /user/{id}/contact:
+
+  /user/{id}/friend:
     post:
       tags:
-      - "user contacts"
-      description: "Creates a contact for the user"
-      operationId: "createContact"
+      - "user friends"
+      description: "Creates a friend for the user"
+      operationId: "createFriend"
       consumes:
       - "application/json"
       produces:
@@ -222,16 +223,16 @@ paths:
         required: true
         type: "string"
       - in: "body"
-        name: "contact"
-        description: "The user contact entity details"
+        name: "friend"
+        description: "The user friend entity details"
         required: true
         schema:
-          $ref: "#/definitions/contactRequest"
+          $ref: "#/definitions/friendRequest"
       responses:
         201:
-          description: "success response that the user contact has been added"
+          description: "success response that the user friend has been added"
           schema:
-            $ref: "#/definitions/contactResponse"
+            $ref: "#/definitions/friendResponse"
         400:
           description: "Validation Error. Usually caused by a missing or invalid parameter."
           schema:
@@ -255,7 +256,7 @@ paths:
           description: "unexpected error"
           schema:
             $ref: "#/definitions/serverErrorModel"
-      x-swagger-router-controller: "ContactController"
+      x-swagger-router-controller: "FriendController"
 
   /user/{id}/invite-user:
     post:
@@ -535,19 +536,21 @@ definitions:
         format: "uuid"
         description: "The id of user's avatar image"
 
-  contactRequest:
+  friendRequest:
     type: "object"
     additionalProperties: false
     required:
-    - "msisdn"
+    - "numbers"
     properties:
-      msisdn:
-        type: "string"
-        pattern: "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
-        maxLength: 128
-        description: "The msisdn of user's contact"
+      numbers:
+        type: "array"
+        items:
+          type: "string"
+          pattern: "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
+          maxLength: 128
+          description: "The msisdn of user's friend"
 
-  contactResponse:
+  friendResponse:
     type: "object"
     required:
     - "msisdn"
@@ -555,7 +558,7 @@ definitions:
     properties:
       msisdn:
         type: "string"
-        description: "The msisdn of user's contact"
+        description: "The msisdn of user's friend"
       userId:
         type: "string"
         description: "The id of the user"

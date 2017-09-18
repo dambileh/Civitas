@@ -90,7 +90,6 @@ module.exports = {
         }
 
       }
-
       pub.quit();
 
       if (!option.subscriberType) {

@@ -11,7 +11,8 @@ module.exports = {
       getSingle: "getSingle",
       getAll: "getAll",
       confirmRegistration: "confirmRegistration",
-      requestRegistration: "requestRegistration"
+      requestRegistration: "requestRegistration",
+      addFriends: "addFriends"
     },
     recipients: {
       gateway: "gateway",
