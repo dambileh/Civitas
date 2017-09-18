@@ -12,7 +12,7 @@ module.exports = {
    * Inserts the passed in addresses in the database
    *
    * @param {array} addresses - The array of new addresses
-   * @param {string} ownerId - The if of address owner
+   * @param {string} ownerId - The id of address owner
    * @param {string} ownerType - The type of address owner
    * 
    * @returns {Promise}

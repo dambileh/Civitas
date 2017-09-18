@@ -3,7 +3,7 @@ module.exports = {
   /**
    * Updated a batch of passed in entities
    *
-   * @param {array} entities
+   * @param {array} entities - The entities that will be updated
    *
    * @returns {Promise}
    */

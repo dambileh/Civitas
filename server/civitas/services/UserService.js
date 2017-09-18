@@ -53,7 +53,7 @@ module.exports = {
 
     request.status = constants.user.status.inactive;
 
-    // get address from the request and unset it so that we can create tje User model
+    // get address from the request and unset it so that we can create the User model
     // Otherwise it will fail the Array of Ids schema validation
     let requestAddresses = request.addresses;
 
@@ -118,7 +118,7 @@ module.exports = {
 
     await userEntity.save();
 
-    // sEt the address objects back on for display
+    // Set the address objects back on for display
     userEntity.addresses = userAddresses;
 
     return subscriptionManager.emitInternalResponseEvent(
