@@ -61,7 +61,7 @@ module.exports = {
   },
 
   /**
-   * Removes a the current process from all channels subscribers list
+   * Removes the current process from all channels subscribers list
    */
   unregisterSubscriberFromAllChannels: async function () {
     return new Promise(async (resolve, reject) => {
@@ -152,7 +152,7 @@ module.exports = {
   },
 
   /**
-   * Removed the passed in message id from the set of messages for a given subscriber type of a channel
+   * Removes the passed in message id from the set of messages for a given subscriber type of a channel
    *
    * @param {string} channel - The channel to which the subscriber is associated with
    * @param {string} type - The type of the subscriber

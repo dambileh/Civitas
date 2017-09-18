@@ -8,6 +8,9 @@ let uniqueId = null;
 
 module.exports = {
 
+  /**
+   * Subscribes to various events that would lead to termination of the process to perform some clean up tasks
+   */
   handleProcessExit: function handleProcessExit() {
     process.on('unhandledRejection', (error, promise) => {
       console.log(`UnhandledPromiseRejection detected for promise [${JSON.stringify(promise)}]`);
@@ -23,6 +26,14 @@ module.exports = {
       internalEmitter.emit(constants.global.processExit, 1);
     });
   },
+
+  /**
+   * Returns an id that can be used to uniquely identify this process
+   *
+   * "process.uid" is not necessarily unique if our app domain spans multiple servers
+   *
+   * @returns {string} - An id that is unique to current process
+   */
   getUniqueId: function getUniqueId() {
     if (!uniqueId) {
       uniqueId = uuidV1();
