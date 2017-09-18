@@ -7,7 +7,7 @@ var appUtil = require('../../libs/AppUtil');
 var logging = require('../utilities/Logging');
 var config = require('config');
 var _ = require('lodash');
-var subscriptionManager = require('../managers/SubscriptionManager');
+var internalEventEmitter = require('../../libs/InternalEventEmitter');
 var addressManager = require('../managers/AddressManager');
 var userChannels = require('../../PubSubChannels').User;
 var errors = require('../../ErrorCodes');
@@ -30,30 +30,30 @@ module.exports = {
     try {
       user = await User.findOne({msisdn: request.msisdn});
     } catch (err) {
-      return subscriptionManager.emitInternalResponseEvent(
+      return internalEventEmitter.emit(
+        userChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 500,
           body: err
-        },
-        userChannels.Internal.CreateCompletedEvent
+        }
       );
     }
 
     var validationResult = await userValidator.validateCreate(user, request);
 
     if (validationResult) {
-      return subscriptionManager.emitInternalResponseEvent(
+      return internalEventEmitter.emit(
+        userChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
           body: validationResult
-        },
-        userChannels.Internal.CreateCompletedEvent
+        }
       );
     }
 
     request.status = constants.user.status.inactive;
 
-    // get address from the request and unset it so that we can create tje User model
+    // get address from the request and unset it so that we can create the User model
     // Otherwise it will fail the Array of Ids schema validation
     let requestAddresses = request.addresses;
 
@@ -64,12 +64,12 @@ module.exports = {
     try {
       userEntity = new User(request);
     } catch (error) {
-      return subscriptionManager.emitInternalResponseEvent(
+      return internalEventEmitter.emit(
+        userChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 500,
           body: error
-        },
-        userChannels.Internal.CreateCompletedEvent
+        }
       );
     }
 
@@ -101,12 +101,12 @@ module.exports = {
       // If there is an error creating the address, we should remove the user record as well
       await userEntity.remove();
 
-      return subscriptionManager.emitInternalResponseEvent(
+      return internalEventEmitter.emit(
+        userChannels.Internal.CreateCompletedEvent,
         {
           statusCode: statusCode,
           body: error
-        },
-        userChannels.Internal.CreateCompletedEvent
+        }
       );
     }
 
@@ -118,15 +118,15 @@ module.exports = {
 
     await userEntity.save();
 
-    // sEt the address objects back on for display
+    // Set the address objects back on for display
     userEntity.addresses = userAddresses;
 
-    return subscriptionManager.emitInternalResponseEvent(
+    return internalEventEmitter.emit(
+      userChannels.Internal.CreateCompletedEvent,
       {
         statusCode: 201,
         body: userEntity
-      },
-      userChannels.Internal.CreateCompletedEvent
+      }
     );
   },
 
@@ -147,38 +147,38 @@ module.exports = {
     try {
       users = await User.find({}).populate('addresses').populate('friends');
     } catch (err) {
-      return subscriptionManager.emitInternalResponseEvent(
+      return internalEventEmitter.emit(
+        userChannels.Internal.GetAllCompletedEvent,
         {
           statusCode: 500,
           body: err
-        },
-        userChannels.Internal.GetAllCompletedEvent
+        }
       );
     }
 
     // If the array is empty we need to return a 204 response.
     if (appUtil.isArrayEmpty(users)) {
-      return subscriptionManager.emitInternalResponseEvent(
+      return internalEventEmitter.emit(
+        userChannels.Internal.GetAllCompletedEvent,
         {
           statusCode: 204,
           header: {
             resultCount: 0
           },
           body: {}
-        },
-        userChannels.Internal.GetAllCompletedEvent
+        }
       );
     } else {
 
-      return subscriptionManager.emitInternalResponseEvent(
+      return internalEventEmitter.emit(
+        userChannels.Internal.GetAllCompletedEvent,
         {
           statusCode: 200,
           header: {
             resultCount: users.length
           },
           body: users
-        },
-        userChannels.Internal.GetAllCompletedEvent
+        }
       );
     }
   },
@@ -201,12 +201,12 @@ module.exports = {
       user = await User.findById(request.id).populate('addresses').populate('friends');
 
     } catch (err) {
-      return subscriptionManager.emitInternalResponseEvent(
+      return internalEventEmitter.emit(
+        userChannels.Internal.GetSingleCompletedEvent,
         {
           statusCode: 500,
           body: err
-        },
-        userChannels.Internal.GetSingleCompletedEvent
+        }
       );
     }
 
@@ -217,21 +217,21 @@ module.exports = {
         `No user with id [${request.id}] was found`
       );
 
-      return subscriptionManager.emitInternalResponseEvent(
+      return internalEventEmitter.emit(
+        userChannels.Internal.GetSingleCompletedEvent,
         {
           statusCode: 404,
           body: notFoundError
-        },
-        userChannels.Internal.GetSingleCompletedEvent
+        }
       );
     }
 
-    return subscriptionManager.emitInternalResponseEvent(
+    return internalEventEmitter.emit(
+      userChannels.Internal.GetSingleCompletedEvent,
       {
         statusCode: 200,
         body: user
-      },
-      userChannels.Internal.GetSingleCompletedEvent
+      }
     );
   },
 
@@ -246,12 +246,12 @@ module.exports = {
     try {
       user = await User.findById(request.id);
     } catch (err) {
-      return subscriptionManager.emitInternalResponseEvent(
+      return internalEventEmitter.emit(
+        userChannels.Internal.DeleteCompletedEvent,
         {
           statusCode: 500,
           body: err
-        },
-        userChannels.Internal.DeleteCompletedEvent
+        }
       );
     }
 
@@ -267,12 +267,12 @@ module.exports = {
         ]
       );
 
-      return subscriptionManager.emitInternalResponseEvent(
+      return internalEventEmitter.emit(
+        userChannels.Internal.DeleteCompletedEvent,
         {
           statusCode: 400,
           body: modelValidationError
-        },
-        userChannels.Internal.DeleteCompletedEvent
+        }
       );
     }
 
@@ -284,21 +284,21 @@ module.exports = {
     try {
       await user.remove();
     } catch (err) {
-      return subscriptionManager.emitInternalResponseEvent(
+      return internalEventEmitter.emit(
+        userChannels.Internal.DeleteCompletedEvent,
         {
           statusCode: 500,
           body: err
-        },
-        userChannels.Internal.DeleteCompletedEvent
+        }
       );
     }
 
-    return subscriptionManager.emitInternalResponseEvent(
+    return internalEventEmitter.emit(
+      userChannels.Internal.DeleteCompletedEvent,
       {
         statusCode: 200,
         body: user
-      },
-      userChannels.Internal.DeleteCompletedEvent
+      }
     );
   },
 
@@ -314,24 +314,24 @@ module.exports = {
     try {
       user = await User.findById(request.id);
     } catch (err) {
-      return subscriptionManager.emitInternalResponseEvent(
+      return internalEventEmitter.emit(
+        userChannels.Internal.UpdateCompletedEvent,
         {
           statusCode: 500,
           body: err
-        },
-        userChannels.Internal.UpdateCompletedEvent
+        }
       );
     }
 
     var validationResult = await userValidator.validateUpdate(user, request);
 
     if (validationResult) {
-      return subscriptionManager.emitInternalResponseEvent(
+      return internalEventEmitter.emit(
+        userChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
-          body: validationResult
-        },
-        userChannels.Internal.CreateCompletedEvent
+          body: validationresult
+        }
       );
     }
 
@@ -357,12 +357,12 @@ module.exports = {
           statusCode = 500;
         }
 
-        return subscriptionManager.emitInternalResponseEvent(
+        return internalEventEmitter.emit(
+          userChannels.Internal.UpdateCompletedEvent,
           {
             statusCode: statusCode,
             body: error
-          },
-          userChannels.Internal.UpdateCompletedEvent
+          }
         );
       }
 
@@ -386,12 +386,12 @@ module.exports = {
     try {
       await user.save();
     } catch (err) {
-      return subscriptionManager.emitInternalResponseEvent(
+      return internalEventEmitter.emit(
+        userChannels.Internal.UpdateCompletedEvent,
         {
           statusCode: 500,
           body: err
-        },
-        userChannels.Internal.UpdateCompletedEvent
+        }
       );
     }
 
@@ -399,12 +399,12 @@ module.exports = {
 
     // set the address objects back on the display response
     user.addresses = userAddresses;
-    return subscriptionManager.emitInternalResponseEvent(
+    return internalEventEmitter.emit(
+      userChannels.Internal.UpdateCompletedEvent,
       {
         statusCode: 200,
         body: user
-      },
-      userChannels.Internal.UpdateCompletedEvent
+      }
     );
   }
 };

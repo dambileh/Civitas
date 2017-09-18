@@ -5,6 +5,14 @@ var validationError = require('../../libs/error/ValidationError');
 var errors = require('../../ErrorCodes');
 
 module.exports = {
+
+  /**
+   * Address detail validator
+   * 
+   * @param {array} addresses - the address entities that will be validated
+
+   * @returns {boolean} - If the validation was successful
+   */
   addressEitherLocationOrDetailValidator: function addressEitherLocationOrDetailValidator(addresses) {
 
     for (let address of addresses) {
@@ -16,6 +24,14 @@ module.exports = {
 
     return true;
   },
+
+  /**
+   * Address detail state or province validator
+   *
+   * @param {array} addresses - the address entities that will be validated
+
+   * @returns {boolean} - If the validation was successful
+   */
   addressDetailEitherProvinceOrStateValidator: function addressDetailEitherProvinceOrStateValidator(addresses) {
 
     for (let address of addresses) {
@@ -30,6 +46,14 @@ module.exports = {
 
     return true;
   },
+
+  /**
+   * Address detail state or province validator
+   *
+   * @param {array} addresses - the address entities that will be validated
+
+   * @returns {boolean} - If the validation was successful
+   */
   addressDetailOnlyProvinceOrStateValidator: function addressDetailOnlyProvinceOrStateValidator(addresses) {
 
     for (let address of addresses) {
@@ -43,6 +67,14 @@ module.exports = {
 
     return true;
   },
+
+  /**
+   * Primary address validator
+   *
+   * @param {array} addresses - the address entities that will be validated
+
+   * @returns {boolean} - If the validation was successful
+   */
   isPrimaryValidator: function isPrimaryValidator(addresses) {
 
     let primaryCounter = 0;
@@ -55,6 +87,14 @@ module.exports = {
 
     return (primaryCounter === 1);
   },
+
+  /**
+   * Location validator
+   *
+   * @param {array} addresses - the address entities that will be validated
+   *
+   * @returns {boolean} - If the validation was successful
+   */
   locationValidator: function locationValidator(addresses) {
 
     for (let address of addresses) {
@@ -82,6 +122,14 @@ module.exports = {
 
     return true;
   },
+
+  /**
+   * Executes all address create validations 
+   *
+   * @param {array} addresses - the address entities that will be validated
+   *
+   * @returns {Promise}
+   */
   validateCreate: async function validateCreate(addresses) {
     let that = this;
     return await new validationChain()
@@ -127,7 +175,7 @@ module.exports = {
             [
               {
                 code: errors.Address.INCORRECT_COORDINATE_FORMAT,
-                message: `the passed in coordinates are not in correct format`,
+                message: `The passed in coordinates are not in correct format`,
                 path: ['addresses', 'location', 'coordinates']
               }
             ]

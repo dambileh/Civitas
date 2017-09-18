@@ -19,8 +19,6 @@ module.exports = {
 
     var regRequest = args.register.value;
 
-    //console.log("Register value ", regRequest);
-
     var request = new message(
       pubSubChannels.Registration.External.CompletedEvent,
       constants.pubSub.messageType.custom,
