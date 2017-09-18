@@ -1,7 +1,10 @@
 'use strict';
 
-var internalEmitter = require('../libs/InternalEventEmitter');
-var constants = require('../Constants');
+const internalEmitter = require('../libs/InternalEventEmitter');
+const constants = require('../Constants');
+const uuidV1 = require('uuid/v1');
+
+let uniqueId = null;
 
 module.exports = {
 
@@ -19,5 +22,12 @@ module.exports = {
     process.on('uncaughtException', err => {
       internalEmitter.emit(constants.global.processExit, 1);
     });
+  },
+  getUniqueId: function getUniqueId() {
+    if (!uniqueId) {
+      uniqueId = uuidV1();
+    } 
+    
+    return uniqueId;
   }
 };

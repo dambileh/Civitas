@@ -5,6 +5,7 @@ let Message = require('./Message');
 let pubSubHelper = require('./PubSubHelper');
 let constants = require('../../Constants');
 var internalEmitter = require('../../libs/InternalEventEmitter');
+var processHelper = require('../../libs/ProcessHelper');
 
 /**
  * An instance of the Pub Sub Adapter
@@ -184,9 +185,13 @@ module.exports = {
  */
 internalEmitter.on(constants.global.processExit, async (exitCode) => {
   try {
-    await pubSubHelper.unregisterSubscriberFromAllChannels(process.pid);
+    await pubSubHelper.unregisterSubscriberFromAllChannels();
   } catch(err) {
     console.error('Error occurred trying to unregister the current process for its subscribed channels')
   }
+  console.log(
+    `Existing process [${process.pid}] with unique id [${processHelper.getUniqueId()}] with exist code [${exitCode}]`
+  );
+
   process.exit(exitCode)
 });

@@ -4,6 +4,7 @@ var redis = require('redis');
 var memStoreAdapter = require('../MemStore/MemStoreAdapter');
 var appUtil = require('../AppUtil');
 var pubSubChannels = require('../../PubSubChannels');
+var processHelper = require('../../libs/ProcessHelper');
 
 /**
  * An instance of the Pub Sub Helper
@@ -38,76 +39,72 @@ module.exports = {
    * @param {string} subscriberType - The type of the subscriber
    */
   registerChannelSubscribers: async function (channel, subscriberType) {
+    const processUniqueId = processHelper.getUniqueId();
+
     let store = await memStoreAdapter.keyValue.get(channel);
     if (store) {
       if (store[subscriberType]) {
-        store[subscriberType].push(process.pid);
+        // Only add if it does not exist already
+        if (!store[subscriberType].includes(processUniqueId)) {
+          store[subscriberType].push(processUniqueId);
+        }
+
       } else {
-        store[subscriberType] = [process.pid];
+        store[subscriberType] = [processUniqueId];
       }
     }
     else {
       store = {};
-      store[subscriberType] = [process.pid];
+      store[subscriberType] = [processUniqueId];
     }
     await memStoreAdapter.keyValue.put({}, channel, store);
   },
 
   /**
-   * Removes a subscriber from the list of subscribers for a given channel
-   *
-   * @param {string} channel - The channel from which the subscriber will be unregistered
-   * @param {string} subscriberType - The type of the subscriber
-   * @param {string} subscriberId - The id of the subscriber
+   * Removes a the current process from all channels subscribers list
    */
-  unregisterSubscriberFromAllChannels: async function (subscriberId) {
+  unregisterSubscriberFromAllChannels: async function () {
     return new Promise(async (resolve, reject) => {
       let allChannelKeys = Object.keys(pubSubChannels);
 
-      try {
+      let allChanelNames = [];
 
-        let store = await memStoreAdapter.keyValue.get('UserEvent');
-        console.log(`store`, store);
-      } catch(err) {
-
-        console.log(`error`, err);
-      }
-
-
-      allChannelKeys.forEach(async key => {
+      for(let key of allChannelKeys) {
         let channel = pubSubChannels[key];
 
         let allChannelEventKeys = Object.keys(channel.External);
 
-        allChannelEventKeys.forEach(async eventKey => {
+        for (let eventKey of allChannelEventKeys) {
 
+          try {
 
-          console.log(`channel [${channel.External[eventKey]}]`);
+            allChanelNames.push(channel.External[eventKey]);
+            let store = await memStoreAdapter.keyValue.get(channel.External[eventKey]);
 
-          // let store = await memStoreAdapter.keyValue.get(channel.External[eventKey]);
-          let store = await memStoreAdapter.keyValue.get('UserEvent');
+            if (store) {
 
-          console.log(`store`, store);
+              let allStoreKeys = Object.keys(store);
 
-        });
+              for (let storeKey of allStoreKeys) {
 
-      });
+                store[storeKey] = appUtil.removeFromArray(
+                  store[storeKey],
+                  processHelper.getUniqueId()
+                );
 
-      resolve(null);
+              }
+
+              await memStoreAdapter.keyValue.put({}, channel.External[eventKey], store);
+            }
+
+          } catch(err) {
+            return reject(err);
+          }
+        }
+      }
+
+      return resolve(null);
     });
-    
-
-
-
-    //
-    // if (store && store[subscriberType]) {
-    //   store[subscriberType] = appUtil.removeFromArray(
-    //     store[subscriberType],
-    //     subscriberId
-    //   );
-    // }
-    //
-    // await memStoreAdapter.keyValue.put({}, channel, store);
   },
 
   /**
