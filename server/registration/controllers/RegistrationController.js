@@ -1,13 +1,13 @@
 'use strict';
 
 var registrationService = require('../services/RegistrationService');
-var subscriptionManager = require('../managers/SubscriptionManager');
 var registrationChannels = require('../../PubSubChannels').Registration;
+var internalEventEmitter = require('../../libs/InternalEventEmitter');
 
 /**
  * Calls the corresponding service layer method to request registration
  */
-subscriptionManager.internalEmitter.on(registrationChannels.Internal.RequestRegistrationEvent, function (event) {
+internalEventEmitter.on(registrationChannels.Internal.RequestRegistrationEvent, function (event) {
     registrationService.requestRegistration(event);
 });
 

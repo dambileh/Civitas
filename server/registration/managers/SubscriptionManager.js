@@ -2,8 +2,6 @@
 
 var logging = require('../utilities/Logging');
 var appUtil = require('../../libs/AppUtil');
-var events = require('events');
-var internalEmitter = new events.EventEmitter();
 var pubSub = require('../../libs/PubSub/PubSubAdapter');
 var subscriptionHelper = require('../../libs/PubSub/SubscriptionHelper');
 var registrationChannels = require('../../PubSubChannels').Registration;
@@ -34,7 +32,7 @@ module.exports = {
 
             switch (message.type) {
                 case constants.pubSub.messageType.custom:
-                    subscriptionHelper.emitRegistrationEvents(message, registrationChannels, internalEmitter);
+                    subscriptionHelper.emitRegistrationEvents(message, registrationChannels);
                     break;
                 default:
                     logging.logAction(logging.logLevels.ERROR, `Type [${message.type}] is not supported`)
@@ -54,12 +52,5 @@ module.exports = {
             logging.logAction(logging.logLevels.ERROR, `Failed to subscribe to channel [${registrationChannels.External.Event}]`, e);
             throw e;
         }
-    },
-    emitInternalResponseEvent: function emitInternalResponseEvent(response, event) {
-        this.internalEmitter.emit(
-            event,
-            response
-        );
-    },
-    internalEmitter: internalEmitter
+    }
 };

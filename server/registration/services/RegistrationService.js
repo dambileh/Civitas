@@ -3,8 +3,8 @@
 var Verification = require('../models/Verification');
 var appUtil = require('../../libs/AppUtil');
 var logging = require('../utilities/Logging');
+var internalEventEmitter = require('../../libs/InternalEventEmitter');
 var _ = require('lodash');
-var subscriptionManager = require('../managers/SubscriptionManager');
 var registrationChannels = require('../../PubSubChannels').Registration;
 var TwilioAuthService = require('node-twilio-verify');
 
@@ -44,12 +44,12 @@ module.exports = {
         registration.code = code;
         registration.updatedAt = new Date();
 
-        return subscriptionManager.emitInternalResponseEvent(
+        return internalEventEmitter.emit(
+          registrationChannels.Internal.RequestRegistrationCompletedEvent,
           {
             statusCode: 200,
             body: registration
-          },
-          registrationChannels.Internal.RequestRegistrationCompletedEvent
+          }
         );
       }
 
@@ -63,7 +63,7 @@ module.exports = {
       );
 
       await registrationEntity.save();
-      
+
       /*
        Uncomment this when ready to test SMS
 
@@ -79,40 +79,40 @@ module.exports = {
        var msgBody = 'Your Civitas registration code: ' + code;
 
        twilioAuthService.sendCode(request.msisdn, msgBody).then(function(results) {
-       return subscriptionManager.emitInternalResponseEvent(
+       return internalEventEmitter.emit(
+       registrationChannels.Internal.CreateCompletedEvent,
        {
        statusCode: 200,
        body: registrationEntity
-       },
-       registrationChannels.Internal.CreateCompletedEvent
+       }
        );
        }, function error(err) {
-       return subscriptionManager.emitInternalResponseEvent(
+       return internalEventEmitter.emit(
+       registrationChannels.Internal.CreateCompletedEvent,
        {
        statusCode: 500,
        body: err
-       },
-       registrationChannels.Internal.CreateCompletedEvent
+       }
        );
        });
        */
 
       // Remove below when above is uncommented
-      return subscriptionManager.emitInternalResponseEvent(
+      return internalEventEmitter.emit(
+        registrationChannels.Internal.RequestRegistrationCompletedEvent,
         {
           statusCode: 200,
           body: registrationEntity
-        },
-        registrationChannels.Internal.RequestRegistrationCompletedEvent
+        }
       );
 
     } catch (err) {
-      return subscriptionManager.emitInternalResponseEvent(
+      return internalEventEmitter.emit(
+        registrationChannels.Internal.RequestRegistrationCompletedEvent,
         {
           statusCode: 500,
           body: err
-        },
-        registrationChannels.Internal.RequestRegistrationCompletedEvent
+        }
       );
     }
 
