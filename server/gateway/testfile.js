@@ -71,12 +71,22 @@ var readTestDir = function readTestDirectory(path) {
   );
 };
 
-var dropDatabase = async function () {
+var dropDatabase = function () {
   config.mongo.database_hosts.forEach(async (host) => {
     try {
-      await mongoose.connect(host);
-      await mongoose.connection.db.dropDatabase();
-      await mongoose.connection.close();
+
+      let connection = mongoose.createConnection(host, function(err) {
+        if (err) {
+          throw err;
+        }
+        connection.db.dropDatabase(function(err) {
+          if (err) {
+            throw err;
+          }
+          connection.close();
+        });
+      });
+
     } catch (error) {
       console.error(`An error occurred while dropping the database with host [${host}]`, error);
     }

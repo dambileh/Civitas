@@ -382,7 +382,7 @@ module.exports = {
     if (request.email) {
       user.email = request.email;
     }
-    
+
     try {
       await user.save();
     } catch (err) {
