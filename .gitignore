@@ -1,5 +1,5 @@
 server/gateway/node_modules/
-server/user/node_modules/
+server/civitas/node_modules/
 node_modules/
 
 .idea/

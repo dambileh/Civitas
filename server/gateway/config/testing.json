@@ -19,8 +19,9 @@
     ],
     "mongo": {
         "database_hosts": [
-            "mongodb://localhost:27017/UserTest",
+            "mongodb://localhost:27017/CivitasTest",
             "mongodb://localhost:27017/RegistrationTest"
         ]
     }
+  }
 }

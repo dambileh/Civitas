@@ -1,8 +1,11 @@
 'use strict';
 
-var redis = require('redis');
-var Message = require('./Message');
-var pubSubHelper = require('./PubSubHelper');
+let redis = require('redis');
+let Message = require('./Message');
+let pubSubHelper = require('./PubSubHelper');
+let constants = require('../../Constants');
+var internalEmitter = require('../../libs/InternalEventEmitter');
+var processHelper = require('../../libs/ProcessHelper');
 
 /**
  * An instance of the Pub Sub Adapter
@@ -31,18 +34,26 @@ module.exports = {
     let subscriberTypes = await pubSubHelper.getSubscriberTypes(channel);
 
     for (let type of subscriberTypes) {
-      // Foreach type, first push the messageId to their list
-      await pubSubHelper.addMessageIdToTypeSet(channel, type, message.header.messageId);
-      message.header.sentAt = new Date();
-      message.recipient = type;
-      client.publish(channel, JSON.stringify(message));
+
+      // Foreach type, first make sure there is at least one subscriber before publishing the message
+      let subscribers = await pubSubHelper.getChannelSubscribersForType(channel, type);
+
+      // Only publish if there are subscribers
+      if (subscribers.length > 0) {
+        // Push the messageId to their list
+        await pubSubHelper.addMessageIdToTypeSet(channel, type, message.header.messageId);
+        message.header.sentAt = new Date();
+        message.recipient = type;
+        client.publish(channel, JSON.stringify(message));
+      }
+
     }
 
     client.quit();
   },
 
   /**
-   * This will publish a message and waits for a response to arrive at a given channel and will return that response 
+   * This will publish a message and waits for a response to arrive at a given channel and will return that response
    * to the client
    *
    * @param {string} channel - The channel to publish the message to
@@ -54,7 +65,7 @@ module.exports = {
    */
   publishAndWaitForResponse: async function publishAndWaitForResponse(channel, responseChannel, option, message) {
     // //TODO retry and then persist a message if there was any error during publish
-    
+
     return new Promise(async function (resolve, reject) {
       let pub = await pubSubHelper.createClient();
       if (!message.tryValidate()) {
@@ -64,14 +75,21 @@ module.exports = {
       let subscriberTypes = await pubSubHelper.getSubscriberTypes(channel);
 
       for (let type of subscriberTypes) {
-        // Foreach type, first push the messageId to their list
-        await pubSubHelper.addMessageIdToTypeSet(channel, type, message.header.messageId);
-        message.header.sentAt = new Date();
-        message.recipient = type;
-        // Then publish the message
-        pub.publish(channel, JSON.stringify(message));
-      }
 
+        // Foreach type, first make sure there is at least one subscriber before publishing the message
+        let subscribers = await pubSubHelper.getChannelSubscribersForType(channel, type);
+
+        // Only publish if there are subscribers
+        if (subscribers.length > 0) {
+          // Push the messageId to their list
+          await pubSubHelper.addMessageIdToTypeSet(channel, type, message.header.messageId);
+          message.header.sentAt = new Date();
+          message.recipient = type;
+          // Then publish the message
+          pub.publish(channel, JSON.stringify(message));
+        }
+
+      }
       pub.quit();
 
       if (!option.subscriberType) {
@@ -82,7 +100,7 @@ module.exports = {
       sub.subscribe(responseChannel);
 
       sub.on('subscribe', async function (channel, count) {
-        await pubSubHelper.registerChannelSubscribers(channel, option.subscriberType, option.subscriberId)
+        await pubSubHelper.registerChannelSubscribers(channel, option.subscriberType)
       });
 
       sub.on('message', async function (channel, response) {
@@ -123,15 +141,16 @@ module.exports = {
    * @returns {object} An instance of the adapter. Used to create a Fluent interface
    */
   subscribe: async function subscribe(channel, option, callback) {
+
     // Check that the subscriberType and subscriberId are set
-    if (!option.subscriberType || !option.subscriberId) {
-      throw new Error('[subscriberType] or [subscriberId] was not set on the config');
+    if (!option.subscriberType) {
+      throw new Error('[subscriberType] was not set on the config');
     }
 
     let sub = await pubSubHelper.createClient();
     sub.subscribe(channel);
     sub.on('subscribe', async function (channel, count) {
-     await pubSubHelper.registerChannelSubscribers(channel, option.subscriberType, option.subscriberId)
+      await pubSubHelper.registerChannelSubscribers(channel, option.subscriberType)
     });
 
     sub.on('message', async function (channel, message) {
@@ -159,3 +178,19 @@ module.exports = {
   }
 
 };
+
+/**
+ * Remove the process from all the channels' subscribers list
+ */
+internalEmitter.on(constants.global.processExit, async (exitCode) => {
+  try {
+    await pubSubHelper.unregisterSubscriberFromAllChannels();
+  } catch(err) {
+    console.error('Error occurred trying to unregister the current process for its subscribed channels')
+  }
+  console.log(
+    `Existing process [${process.pid}] with unique id [${processHelper.getUniqueId()}] with exist code [${exitCode}]`
+  );
+
+  process.exit(exitCode)
+});

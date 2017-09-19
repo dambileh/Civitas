@@ -11,7 +11,9 @@ module.exports = {
       getSingle: "getSingle",
       getAll: "getAll",
       confirmRegistration: "confirmRegistration",
-      requestRegistration: "requestRegistration"
+      requestRegistration: "requestRegistration",
+      addFriends: "addFriends",
+      inviteFriend: "inviteFriend"
     },
     recipients: {
       gateway: "gateway",
@@ -28,5 +30,18 @@ module.exports = {
       active: "active",
       inactive: "inactive"
     }
+  },
+  address: {
+    ownerType: {
+      company: "company",
+      user: "user",
+      person: "person"
+    }
+  },
+  global: {
+    error: {
+      strictMode: "StrictModeError"
+    },
+    processExit: "process-exit"
   }
 };

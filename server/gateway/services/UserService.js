@@ -1,13 +1,10 @@
 'use strict';
 
 var logging = require('../utilities/Logging');
-var _ = require('lodash');
 var pubSub = require('../../libs/PubSub/PubSubAdapter');
 var Message = require('../../libs/PubSub/Message');
 var constants = require('../../Constants');
 var pubSubChannels = require('../../PubSubChannels');
-var process = require('process');
-
 /**
  * The User Service module
  */
@@ -21,7 +18,6 @@ module.exports = {
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
   createUser: async function (args, response, next) {
-
     var userRequest = args.user.value;
 
     var request = new Message(
@@ -37,8 +33,7 @@ module.exports = {
           pubSubChannels.User.External.Event,
           pubSubChannels.User.External.CompletedEvent,
           {
-            subscriberType: constants.pubSub.recipients.gateway,
-            subscriberId: process.pid
+            subscriberType: constants.pubSub.recipients.gateway
           },
           request);
 
@@ -105,8 +100,7 @@ module.exports = {
           pubSubChannels.User.External.Event,
           pubSubChannels.User.External.CompletedEvent,
           {
-            subscriberType: constants.pubSub.recipients.gateway,
-            subscriberId: process.pid
+            subscriberType: constants.pubSub.recipients.gateway
           },
           request);
 
@@ -149,8 +143,7 @@ module.exports = {
           pubSubChannels.User.External.Event,
           pubSubChannels.User.External.CompletedEvent,
           {
-            subscriberType: constants.pubSub.recipients.gateway,
-            subscriberId: process.pid
+            subscriberType: constants.pubSub.recipients.gateway
           },
           request);
 
@@ -191,8 +184,7 @@ module.exports = {
           pubSubChannels.User.External.Event,
           pubSubChannels.User.External.CompletedEvent,
           {
-            subscriberType: constants.pubSub.recipients.gateway,
-            subscriberId: process.pid
+            subscriberType: constants.pubSub.recipients.gateway
           },
           request);
 
@@ -232,8 +224,7 @@ module.exports = {
           pubSubChannels.User.External.Event,
           pubSubChannels.User.External.CompletedEvent,
           {
-            subscriberType: constants.pubSub.recipients.gateway,
-            subscriberId: process.pid
+            subscriberType: constants.pubSub.recipients.gateway
           },
           request);
 

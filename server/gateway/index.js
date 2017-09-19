@@ -8,8 +8,6 @@ var fs = require('fs');
 var serverPort = 4000;
 var config = require('config');
 var errorHandler = require('../libs/error/ErrorHandler');
-
-// swaggerRouter configuration
 var options = {
   swaggerUi: '/swagger.json',
   controllers: './controllers',
@@ -19,6 +17,8 @@ var options = {
 // The Swagger document (require it, build it programmatically, fetch it from a URL, ...)
 var spec = fs.readFileSync('./api/swagger.yaml', 'utf8');
 var swaggerDoc = jsyaml.safeLoad(spec);
+
+var processHelper = require('../libs/ProcessHelper');
 
 /**
  * Initialize the Swagger middleware.
@@ -41,20 +41,23 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
 
   // Serve the Swagger documents and Swagger UI
   if (process.env.NODE_ENV !== 'ci') {
-      app.use(middleware.swaggerUi());
+    app.use(middleware.swaggerUi());
   }
 
   app.use(errorHandler.onError);
 
   // Start the server
-  if(process.argv.indexOf("PORT") != -1){ //does PORT exist?
+  if (process.argv.indexOf("PORT") != -1) { //does PORT exist?
     serverPort = process.argv[process.argv.indexOf("PORT") + 1];
   }
 
   http.createServer(app).listen(serverPort, function () {
-    console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
-      if (process.env.NODE_ENV !== 'ci') {
-          console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
-      }
+    console.log(`Your server is listening on port ${serverPort} (http://localhost:${serverPort})`);
+    if (process.env.NODE_ENV !== 'ci') {
+      console.log(`Swagger-ui is available on http://localhost:${serverPort}/docs`);
+    }
   });
+
+  processHelper.handleProcessExit();
+
 });

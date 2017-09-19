@@ -95,7 +95,7 @@ function _prepareError(error, response, statusCode) {
  * This builds up a new Client side error using the passed in error object.
  *
  * @private
- * 
+ *
  * @param {Error} error - The error object that will be prepared for display
  *
  * @author Hossein Shayesteh <hsh_85@yahoo.com>
@@ -124,7 +124,7 @@ function _prepareClientErrorForDisplay(error) {
  * This builds up a new Server side error using the passed in error object.
  *
  * @private
- * 
+ *
  * @param {Error} error - The error object that will be prepared for display
  * @param {IncomingMessage} response - The http response object
  *
