@@ -66,7 +66,7 @@ describe('/status', function() {
         ],
         "properties": {
           "up_time": {
-            "type": "integer"
+            "type": "number"
           }
         }
       };

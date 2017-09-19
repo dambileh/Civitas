@@ -11,6 +11,7 @@ var config = require('config');
 var errorHandler = require('../libs/error/ErrorHandler');
 var subscriptionManager = require('./managers/SubscriptionManager');
 var logging = require('./utilities/Logging');
+var processHelper = require('../libs/ProcessHelper');
 
 // swaggerRouter configuration
 var options = {
@@ -70,4 +71,5 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
             console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
         }
     });
+    processHelper.handleProcessExit();
 });

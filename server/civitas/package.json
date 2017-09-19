@@ -12,7 +12,6 @@
     "async": "^2.5.0",
     "config": "^1.21.0",
     "connect": "^3.2.0",
-    "geojson-validation": "^0.1.6",
     "js-yaml": "^3.3.0",
     "lodash": "^4.17.4",
     "mongoose": "^4.4.13",

@@ -1,7 +1,5 @@
 'use strict';
 
-var startDate = new Date();
-
 module.exports = {
 
     /**
@@ -15,9 +13,8 @@ module.exports = {
      * @since  14 Aug 2017
      */
     getSystemStatus: function getSystemStatus(args, res, next) {
-        var now = new Date();
         var objStatus = {
-            "up_time": now - startDate
+            "up_time": process.uptime()
         };
 
         res.setHeader('Content-Type', 'application/json');

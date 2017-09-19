@@ -52,7 +52,8 @@ definitions:
     - "up_time"
     properties:
       up_time:
-        type: "integer"
+        type: "number"
+        format: "double"
 
   item:
     type: "object"

@@ -16,7 +16,6 @@
     "winston": "^2.2.0",
     "lodash": "^4.17.4",
     "mongoose": "4.4.13",
-    "mongoose-autopopulate": "^0.6.0",
     "newrelic": "1.28.0",
     "swagger-tools": "0.9.*",
     "z-schema": "3.17.0",
