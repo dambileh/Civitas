@@ -53,8 +53,7 @@ module.exports = {
             pubSubChannels.Registration.External.Event,
             pubSubChannels.Registration.External.CompletedEvent,
             {
-              subscriberType: constants.pubSub.recipients.gateway,
-              subscriberId: process.pid
+              subscriberType: constants.pubSub.recipients.gateway
             },
             registrationRequest
           );
