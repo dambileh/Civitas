@@ -61,7 +61,6 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
   subscriptionManager.initialize();
 
   // Start the server
-
   if(process.argv.indexOf("PORT") != -1){ //does PORT exist?
     serverPort = process.argv[process.argv.indexOf("PORT") + 1];
   }
