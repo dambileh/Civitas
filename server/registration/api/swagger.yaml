@@ -1,14 +1,13 @@
----
 swagger: "2.0"
 info:
-  description: "Civitas Service"
+  description: "Civitas registration service"
   version: "1.0.0"
-  title: "Civitas Service"
-host: "localhost:4010"
+  title: "Civitas Registration"
+host: "localhost:4020"
 basePath: "/v1"
 tags:
-- name: "user"
-  description: "Operations related to entites present in Civita application"
+- name: "registration"
+  description: "Operations related to registration entity"
   externalDocs:
     description: "Find out more"
     url: "http://swagger.io"
@@ -23,7 +22,7 @@ paths:
     get:
       tags:
       - "status"
-      description: "gets the status of the Civitas service"
+      description: "gets the status of the messaging service"
       operationId: "getSystemStatus"
       consumes:
       - "application/json"
@@ -45,6 +44,7 @@ paths:
           schema:
             $ref: "#/definitions/serverErrorModel"
       x-swagger-router-controller: "StatusController"
+
 definitions:
   serverStatusResponse:
     type: "object"
@@ -55,18 +55,6 @@ definitions:
         type: "number"
         format: "double"
 
-  item:
-    type: "object"
-    properties:
-      content:
-        type: "string"
-        description: "The contents of the note"
-      status:
-        type: "string"
-        description: "The status of the note document"
-        enum:
-        - "new"
-        - "complete"
   serverErrorModel:
     type: "object"
     required:
@@ -79,6 +67,7 @@ definitions:
         type: "string"
       stack:
         type: "string"
+
   clientErrorModel:
     type: "object"
     required:
@@ -91,6 +80,7 @@ definitions:
         type: "string"
       stack:
         type: "string"
+
   validationErrorModel:
     type: "object"
     required:

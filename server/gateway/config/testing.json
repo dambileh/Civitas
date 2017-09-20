@@ -1,23 +1,26 @@
 {
-  "mounteBank": {
-    "host": "127.0.0.1",
-    "port": 2525,
-    "http_verb": {
-      "post": "POST",
-      "delete": "DELETE",
-      "head": "HEAD",
-      "put": "PUT",
-      "get": "GET"
+    "mounteBank": {
+        "host": "127.0.0.1",
+        "port": 2525,
+        "http_verb": {
+            "post": "POST",
+            "delete": "DELETE",
+            "head": "HEAD",
+            "put": "PUT",
+            "get": "GET"
+        }
+    },
+    "logging": [
+        {
+            "name": "file",
+            "level": "debug",
+            "filename": "/var/log/civitas/user/application-test.log"
+        }
+    ],
+    "mongo": {
+        "database_hosts": [
+            "mongodb://localhost:27017/CivitasTest",
+            "mongodb://localhost:27017/RegistrationTest"
+        ]
     }
-  },
-  "logging" : [
-    {
-      "name": "file",
-      "level": "debug",
-      "filename": "/var/log/civitas/user/application-test.log"
-    }
-  ],
-  "mongo": {
-    "database_hosts" : ["mongodb://localhost:27017/CivitasTest"]
-  }
 }

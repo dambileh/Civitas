@@ -61,10 +61,12 @@ module.exports = {
       
       // Log given message with log level and any given object.
       // This does not use the app util to prevent a circular dependency.
-      if (!(typeof extraFieldsObject === 'undefined' || extraFieldsObject == undefined)) {
-        logger.log(logLevel, logMessage, extraFieldsObject);
-      } else {
-        logger.log(logLevel, logMessage);
+      if (process.env.NODE_ENV !== 'testing') {
+        if (!(typeof extraFieldsObject === 'undefined' || extraFieldsObject == undefined)) {
+          logger.log(logLevel, logMessage, extraFieldsObject);
+        } else {
+          logger.log(logLevel, logMessage);
+        }
       }
     }
 

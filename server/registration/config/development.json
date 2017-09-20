@@ -1,0 +1,9 @@
+{
+  "logging": [
+    {
+      "name": "file",
+      "level": "debug",
+      "filename": "/Users/kevin/Library/Logs/civitas/gateway/application.log"
+    }
+  ]
+}
