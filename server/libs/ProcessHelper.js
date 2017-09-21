@@ -13,8 +13,8 @@ module.exports = {
    */
   handleProcessExit: function handleProcessExit() {
     process.on('unhandledRejection', (error, promise) => {
-      console.log(`UnhandledPromiseRejection detected for promise [${JSON.stringify(promise)}]`);
-      console.log(`Stack Trace: [${error.stack }]`);
+      console.error('\x1b[31m', `UnhandledPromiseRejection detected for promise [${JSON.stringify(promise)}]`);
+      console.error('\x1b[31m', `Stack Trace: [${error.stack }]`);
       internalEmitter.emit(constants.global.processExit, 1);
     });
 
@@ -23,6 +23,7 @@ module.exports = {
     });
 
     process.on('uncaughtException', err => {
+      console.error('\x1b[31m', `Stack Trace: [${err.stack }]`);
       internalEmitter.emit(constants.global.processExit, 1);
     });
   },
