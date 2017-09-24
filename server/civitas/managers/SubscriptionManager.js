@@ -33,6 +33,9 @@ module.exports = {
         case constants.pubSub.messageType.crud:
           subscriptionHelper.emitCRUDEvents(message, userChannels);
           break;
+        case constants.pubSub.messageType.custom:
+          subscriptionHelper.emitCRUDEvents(message, userChannels);
+          break;
         default:
           logging.logAction(logging.logLevels.ERROR, `Type [${message.type}] is not supported`)
       }

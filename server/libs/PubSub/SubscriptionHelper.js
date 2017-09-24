@@ -31,6 +31,10 @@ function emitCRUDEvents(message, channelDetails) {
     _sendCrudCompleted(message, response, channelDetails, constants.pubSub.messageAction.getAll);
   });
 
+  internalEventEmitter.on(channelDetails.Internal.AddUserFriendsCompletedEvent, function(response){
+    _sendCrudCompleted(message, response, channelDetails, constants.pubSub.messageAction.addFriends);
+  });
+
   switch (message.action) {
     case constants.pubSub.messageAction.create:
       internalEventEmitter.emit(channelDetails.Internal.CreateEvent, message.payload);
@@ -46,6 +50,9 @@ function emitCRUDEvents(message, channelDetails) {
       break;
     case constants.pubSub.messageAction.getAll:
       internalEventEmitter.emit(channelDetails.Internal.GetAllEvent, message.payload);
+      break;
+    case constants.pubSub.messageAction.AddUserFriendsEvent:
+      internalEventEmitter.emit(channelDetails.Internal.AddUserFriendsEvent, message.payload);
       break;
     default:
       console.error(`Type [${message.type}] is not supported`);
