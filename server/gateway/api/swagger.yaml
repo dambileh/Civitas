@@ -20,32 +20,39 @@ produces:
 paths:
   /user:
     get:
-        tags:
-        - "user"
-        description: "returns all the usere records"
-        operationId: "getAllUsers"
-        consumes:
-        - "application/json"
-        produces:
-        - "application/json"
-        parameters: []
-        responses:
-          200:
-            description: "An array of users"
-            schema:
-              type: "array"
-              items:
-                $ref: "#/definitions/userResponse"
-          405:
-            description: "Method not supported Error. Returned if an unsupported http\
-              \ method is used."
-            schema:
-              $ref: "#/definitions/clientErrorModel"
-          default:
-            description: "unexpected error"
-            schema:
-              $ref: "#/definitions/serverErrorModel"
-        x-swagger-router-controller: "UserController"
+      tags:
+      - "user"
+      description: "returns all the user records"
+      operationId: "getAllUsers"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: msisdn
+        in: "query"
+        description: "The msisdn of the user"
+        required: false
+        type: "string"
+        pattern: "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
+        maxLength: 128
+      responses:
+        200:
+          description: "An array of users"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/userResponse"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "UserController"
     post:
       tags:
       - "user"
@@ -357,6 +364,196 @@ paths:
             $ref: "#/definitions/serverErrorModel"
       x-swagger-router-controller: "RegistrationController"
 
+  /person:
+    get:
+      tags:
+      - "person"
+      description: "returns all the person records"
+      operationId: "getAllPersons"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "An array of persons"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/personResponse"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "PersonController"
+
+    post:
+      tags:
+      - "person"
+      description: "Creates a person"
+      operationId: "createPerson"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "person"
+        description: "The person entity details"
+
+        required: true
+        schema:
+          $ref: "#/definitions/personRequest"
+      responses:
+        201:
+          description: "success response that the person has been added"
+          schema:
+            $ref: "#/definitions/personResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "PersonController"
+
+  /person/{id}:
+    put:
+      tags:
+      - "person"
+      description: "Updates a person"
+      operationId: "updatePerson"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "The id of person entity that will be updated"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "person"
+        description: "The person entity details"
+        required: true
+        schema:
+          $ref: "#/definitions/personUpdateRequest"
+      responses:
+        200:
+          description: "A single person"
+          schema:
+            $ref: "#/definitions/personResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "PersonController"
+
+    delete:
+        tags:
+        - "person"
+        description: "Deletes a person"
+        operationId: "deletePerson"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "path"
+          name: "id"
+          description: "The id of person entity that will be deleted"
+          required: true
+          type: "string"
+        responses:
+          200:
+            description: "An array of persons"
+            schema:
+              type: "array"
+              items:
+                $ref: "#/definitions/personResponse"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "PersonController"
+    get:
+        tags:
+        - "user"
+        description: "Returns a person"
+        operationId: "getSinglePerson"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "path"
+          name: "id"
+          description: "The id of person entity that will be returned"
+          required: true
+          type: "string"
+        responses:
+          200:
+            description: "A single person"
+            schema:
+              $ref: "#/definitions/personResponse"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "PersonController"
+
   /status:
     get:
       tags:
@@ -383,6 +580,39 @@ paths:
           schema:
             $ref: "#/definitions/serverErrorModel"
       x-swagger-router-controller: "StatusController"
+
+  /message:
+    post:
+      tags:
+      - "message"
+      description: "gets the status of the messaging service"
+      operationId: "sendMessage"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "message"
+        required: true
+        schema:
+          $ref: "#/definitions/messageRequest"
+      responses:
+        200:
+          description: "The server status will be returned"
+          schema:
+            $ref: "#/definitions/messageResponse"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "MessageController"
+
 
 definitions:
   userRequest:
@@ -562,6 +792,7 @@ definitions:
       userId:
         type: "string"
         description: "The id of the user"
+        format: "uuid"
 
   confirmRegistrationRequest:
     type: "object"
@@ -657,6 +888,9 @@ definitions:
         type: "string"
         enum: ["personal", "business", "home"]
         description: "The type of the landline number"
+      isPrimary:
+        type: "boolean"
+        description: "Indicates if this is the primary phone number"
 
   phoneNumberResponse:
     type: "object"
@@ -671,6 +905,59 @@ definitions:
         type: "string"
         enum: ["personal", "business", "home"]
         description: "The type of the landline number"
+      isPrimary:
+        type: "boolean"
+        description: "Indicates if this is the primary phone number"
+
+  personRequest:
+    additionalProperties: false
+    type: "object"
+    required:
+    - "name"
+    - "addresses"
+    - "phoneNumbers"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the person"
+      addresses:
+        type: array
+        items:
+          $ref: "#/definitions/addressRequest"
+      phoneNumbers:
+        type: array
+        items:
+          $ref: "#/definitions/phoneNumberRequest"
+
+  personUpdateRequest:
+    additionalProperties: false
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the person"
+      addresses:
+        type: array
+        items:
+          $ref: "#/definitions/addressRequest"
+      phoneNumbers:
+        type: array
+        items:
+          $ref: "#/definitions/phoneNumberRequest"
+  personResponse:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the person"
+      addresses:
+        type: array
+        items:
+          $ref: "#/definitions/addressResponse"
+      phoneNumbers:
+        type: array
+        items:
+          $ref: "#/definitions/phoneNumberResponse"
 
   addressDetail:
     additionalProperties: false
@@ -731,6 +1018,19 @@ definitions:
         type: "string"
         enum: ["Point"]
         description: "The longitude and latitude of the location"
+
+  messageResponse:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+
+  messageRequest:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+
 
   serverStatusResponse:
     type: "object"
