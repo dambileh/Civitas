@@ -3,3 +3,4 @@ server/civitas/node_modules/
 node_modules/
 
 .idea/
+/server/registration/config/testing.json

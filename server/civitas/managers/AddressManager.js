@@ -34,8 +34,10 @@ module.exports = {
 
           var addressEntity = new Address(address);
 
-          addressEntity.owner = ownerId;
-          addressEntity.ownerType = ownerType;
+          addressEntity.owner = {
+            item: ownerId,
+            kind: ownerType
+          };
 
           addressEntities.push(addressEntity);
         } catch (error) {
