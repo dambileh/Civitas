@@ -72,4 +72,6 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
         }
     });
     processHelper.handleProcessExit();
+
+    processHelper.bootstrap();
 });

@@ -14,7 +14,7 @@ var options = {
 };
 
 var errorHandler = require('../libs/error/ErrorHandler');
-var headerValidator = require('./middlewares/HeaderValidator');
+var requestValidator = require('./middlewares/RequestValidator');
 
 // The Swagger document (require it, build it programmatically, fetch it from a URL, ...)
 var spec = fs.readFileSync('./api/swagger.yaml', 'utf8');
@@ -39,7 +39,7 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
   app.use(middleware.swaggerValidator());
 
   // Validate the context header
-  app.use(headerValidator.validate);
+  app.use(requestValidator.validate);
 
   // Route validated requests to appropriate controller
   app.use(middleware.swaggerRouter(options));
@@ -65,5 +65,7 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
   });
 
   processHelper.handleProcessExit();
+
+  processHelper.bootstrap();
 
 });

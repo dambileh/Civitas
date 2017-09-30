@@ -20,32 +20,39 @@ produces:
 paths:
   /user:
     get:
-        tags:
-        - "user"
-        description: "returns all the usere records"
-        operationId: "getAllUsers"
-        consumes:
-        - "application/json"
-        produces:
-        - "application/json"
-        parameters: []
-        responses:
-          200:
-            description: "An array of users"
-            schema:
-              type: "array"
-              items:
-                $ref: "#/definitions/userResponse"
-          405:
-            description: "Method not supported Error. Returned if an unsupported http\
-              \ method is used."
-            schema:
-              $ref: "#/definitions/clientErrorModel"
-          default:
-            description: "unexpected error"
-            schema:
-              $ref: "#/definitions/serverErrorModel"
-        x-swagger-router-controller: "UserController"
+      tags:
+      - "user"
+      description: "returns all the user records"
+      operationId: "getAllUsers"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: msisdn
+        in: "query"
+        description: "The msisdn of the user"
+        required: false
+        type: "string"
+        pattern: "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
+        maxLength: 128
+      responses:
+        200:
+          description: "An array of users"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/userResponse"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "UserController"
     post:
       tags:
       - "user"
@@ -108,6 +115,7 @@ paths:
         description: "The id of user entity that will be updated"
         required: true
         type: "string"
+        format: "uuid"
       - in: "body"
         name: "user"
         description: "The user entity details"
@@ -158,6 +166,7 @@ paths:
           description: "The id of user entity that will be deleted"
           required: true
           type: "string"
+          format: "uuid"
         responses:
           200:
             description: "An array of users"
@@ -190,6 +199,7 @@ paths:
           description: "The id of user entity that will be returned"
           required: true
           type: "string"
+          format: "uuid"
         responses:
           200:
             description: "A single user"
@@ -209,7 +219,7 @@ paths:
   /user/{id}/friend:
     post:
       tags:
-      - "user friends"
+      - "user"
       description: "Creates a friend for the user"
       operationId: "createFriend"
       consumes:
@@ -222,6 +232,7 @@ paths:
         description: "The id of user entity"
         required: true
         type: "string"
+        format: "uuid"
       - in: "body"
         name: "friend"
         description: "The user friend entity details"
@@ -261,7 +272,7 @@ paths:
   /user/{id}/invite-friend:
     post:
       tags:
-      - "invite user"
+      - "user"
       description: "Allows user to invite another user"
       operationId: "inviteFriend"
       consumes:
@@ -274,6 +285,7 @@ paths:
         description: "The id of user"
         required: true
         type: "string"
+        format: "uuid"
       - in: "body"
         name: "invite"
         description: "The user invitation details"
@@ -313,7 +325,7 @@ paths:
   /registration/confirm:
     post:
       tags:
-      - "user registration"
+      - "registration"
       description: "Confirms a registration"
       operationId: "confirmRegistration"
       consumes:
@@ -356,6 +368,237 @@ paths:
           schema:
             $ref: "#/definitions/serverErrorModel"
       x-swagger-router-controller: "RegistrationController"
+
+  /company:
+    get:
+      tags:
+      - "company"
+      description: "returns all the company records"
+      operationId: "getAllCompanies"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "context"
+        in: "header"
+        type: "string"
+        description: "The executing context"
+      - name: "context-id"
+        in: "header"
+        type: "string"
+        description: "The executing context id"
+      responses:
+        200:
+          description: "An array of companies"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/companyResponse"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "CompanyController"
+
+    post:
+      tags:
+      - "company"
+      description: "Creates a company"
+      operationId: "createCompany"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "company"
+        description: "The company entity details"
+        required: true
+        schema:
+          $ref: "#/definitions/companyRequest"
+      - name: "context"
+        in: "header"
+        type: "string"
+        description: "The executing context"
+      - name: "context-id"
+        in: "header"
+        type: "string"
+        description: "The executing context id"
+      responses:
+        201:
+          description: "success response that the company has been added"
+          schema:
+            $ref: "#/definitions/companyResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "CompanyController"
+
+  /company/{id}:
+    put:
+      tags:
+      - "company"
+      description: "Updates a company"
+      operationId: "updateCompany"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "The id of company entity that will be updated"
+        required: true
+        type: "string"
+        format: "uuid"
+      - in: "body"
+        name: "company"
+        description: "The company entity details"
+        required: true
+        schema:
+          $ref: "#/definitions/companyUpdateRequest"
+      - name: "context"
+        in: "header"
+        type: "string"
+        description: "The executing context"
+      - name: "context-id"
+        in: "header"
+        type: "string"
+        description: "The executing context id"
+      responses:
+        200:
+          description: "A single company"
+          schema:
+            $ref: "#/definitions/companyResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "CompanyController"
+
+    delete:
+        tags:
+        - "company"
+        description: "Deletes a company"
+        operationId: "deleteCompany"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "path"
+          name: "id"
+          description: "The id of company entity that will be deleted"
+          required: true
+          type: "string"
+          format: "uuid"
+        - name: "context"
+          in: "header"
+          type: "string"
+          description: "The executing context"
+        - name: "context-id"
+          in: "header"
+          type: "string"
+          description: "The executing context id"
+        responses:
+          200:
+            description: "A single company"
+            schema:
+              $ref: "#/definitions/companyResponse"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "CompanyController"
+    get:
+        tags:
+        - "company"
+        description: "Returns a company"
+        operationId: "getSingleCompany"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "path"
+          name: "id"
+          description: "The id of company entity that will be returned"
+          required: true
+          type: "string"
+          format: "uuid"
+        - name: "context"
+          in: "header"
+          type: "string"
+          description: "The executing context"
+        - name: "context-id"
+          in: "header"
+          type: "string"
+          description: "The executing context id"
+        responses:
+          200:
+            description: "A single company"
+            schema:
+              $ref: "#/definitions/companyResponse"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "CompanyController"
 
   /status:
     get:
@@ -562,6 +805,7 @@ definitions:
       userId:
         type: "string"
         description: "The id of the user"
+        format: "uuid"
 
   confirmRegistrationRequest:
     type: "object"
@@ -657,6 +901,9 @@ definitions:
         type: "string"
         enum: ["personal", "business", "home"]
         description: "The type of the landline number"
+      isPrimary:
+        type: "boolean"
+        description: "Indicates if this is the primary phone number"
 
   phoneNumberResponse:
     type: "object"
@@ -671,6 +918,131 @@ definitions:
         type: "string"
         enum: ["personal", "business", "home"]
         description: "The type of the landline number"
+      isPrimary:
+        type: "boolean"
+        description: "Indicates if this is the primary phone number"
+
+  companyRequest:
+    additionalProperties: false
+    type: "object"
+    required:
+    - "name"
+    - "addresses"
+    - "phoneNumbers"
+    - "branch"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the company"
+      branch:
+        type: "string"
+        description: "The name of the branch"
+      type:
+        type: "string"
+        enum: ["user", "es", "ar"]
+        description: "The type of the company"
+      addresses:
+        type: array
+        items:
+          $ref: "#/definitions/addressRequest"
+      phoneNumbers:
+        type: array
+        items:
+          $ref: "#/definitions/phoneNumberRequest"
+      representative:
+        type: array
+        items:
+          $ref: "#/definitions/personRequest"
+
+  companyUpdateRequest:
+    additionalProperties: false
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the company"
+      branch:
+        type: "string"
+        description: "The name of the branch"
+      type:
+        type: "string"
+        enum: ["user", "es", "ar"]
+        description: "The type of the company"
+      addresses:
+        type: array
+        items:
+          $ref: "#/definitions/addressRequest"
+      phoneNumbers:
+        type: array
+        items:
+          $ref: "#/definitions/phoneNumberRequest"
+      representative:
+        type: array
+        items:
+          $ref: "#/definitions/personRequest"
+
+  companyResponse:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the company"
+      branch:
+        type: "string"
+        description: "The name of the branch"
+      type:
+        type: "string"
+        enum: ["user", "es", "ar"]
+        description: "The type of the company"
+      addresses:
+        type: array
+        items:
+          $ref: "#/definitions/addressResponse"
+      phoneNumbers:
+        type: array
+        items:
+          $ref: "#/definitions/phoneNumberResponse"
+      representative:
+        type: array
+        items:
+          $ref: "#/definitions/personResponse"
+
+  personRequest:
+    additionalProperties: false
+    type: "object"
+    required:
+    - "name"
+    - "phoneNumbers"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the person"
+      email:
+        type: "string"
+        format: "email"
+        minLength: 6
+        maxLength: 128
+      phoneNumbers:
+        type: array
+        items:
+          $ref: "#/definitions/phoneNumberRequest"
+
+  personResponse:
+    additionalProperties: false
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the person"
+      email:
+        type: "string"
+        format: "email"
+        minLength: 6
+        maxLength: 128
+      phoneNumbers:
+        type: array
+        items:
+          $ref: "#/definitions/phoneNumberResponse"
 
   addressDetail:
     additionalProperties: false
