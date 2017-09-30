@@ -1,18 +1,20 @@
 'use strict';
 
-var app = require('connect')();
+var app = require('express')();
 var http = require('http');
 var swaggerTools = require('swagger-tools');
 var jsyaml = require('js-yaml');
 var fs = require('fs');
 var serverPort = 4000;
 var config = require('config');
-var errorHandler = require('../libs/error/ErrorHandler');
 var options = {
   swaggerUi: '/swagger.json',
   controllers: './controllers',
   useStubs: process.env.NODE_ENV === 'development' // Conditionally turn on stubs (mock mode)
 };
+
+var errorHandler = require('../libs/error/ErrorHandler');
+var headerValidator = require('./middlewares/HeaderValidator');
 
 // The Swagger document (require it, build it programmatically, fetch it from a URL, ...)
 var spec = fs.readFileSync('./api/swagger.yaml', 'utf8');
@@ -36,6 +38,9 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
   // Validate Swagger requests
   app.use(middleware.swaggerValidator());
 
+  // Validate the context header
+  app.use(headerValidator.validate);
+
   // Route validated requests to appropriate controller
   app.use(middleware.swaggerRouter(options));
 
@@ -44,18 +49,19 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
     app.use(middleware.swaggerUi());
   }
 
-  app.use(errorHandler.onError);
-
   // Start the server
   if (process.argv.indexOf("PORT") != -1) { //does PORT exist?
     serverPort = process.argv[process.argv.indexOf("PORT") + 1];
   }
+
+  app.use(errorHandler.onError);
 
   http.createServer(app).listen(serverPort, function () {
     console.log(`Your server is listening on port ${serverPort} (http://localhost:${serverPort})`);
     if (process.env.NODE_ENV !== 'ci') {
       console.log(`Swagger-ui is available on http://localhost:${serverPort}/docs`);
     }
+
   });
 
   processHelper.handleProcessExit();
