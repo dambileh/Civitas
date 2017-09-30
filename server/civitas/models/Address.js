@@ -14,7 +14,7 @@ var locationType = [
 
 var ownerType = [
   'company',
-  'person',
+  'community',
   'user'
 ];
 

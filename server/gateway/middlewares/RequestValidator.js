@@ -29,15 +29,15 @@ module.exports = {
         }
       )
       .add(
-        _validateIdInPath,
+        _validateIdInRequest,
         {
           parameters: [req],
           error: new validationError(
             'Some validation errors occurred.',
             [
               {
-                code: errors.Global.ID_IN_PATH_NOT_VALID,
-                message: `Invalid [id] found in path`
+                code: errors.Global.ID_IN_REQUEST_NOT_VALID,
+                message: `Invalid [id] found in path or header`
               }
             ]
           )
@@ -83,13 +83,13 @@ function _validateHeader(request) {
 }
 
 /**
- * Validates that the passed in in the path is a valid mongo id
+ * Validates that the passed in in the request is a valid mongo id
  *
  * @param {Object} request - The http request object that carried the header
  *
  * @returns {boolean}
  */
-function _validateIdInPath(request) {
+function _validateIdInRequest(request) {
   let valid = true;
 
   if (request.swagger) {

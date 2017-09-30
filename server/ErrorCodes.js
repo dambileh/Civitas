@@ -14,6 +14,6 @@ module.exports = {
   },
   Global: {
     REQUIRED_HEADER_PARAMS_NOT_SET: 300001,
-    ID_IN_PATH_NOT_VALID: 300002
+    ID_IN_REQUEST_NOT_VALID: 300002
   }
 };
