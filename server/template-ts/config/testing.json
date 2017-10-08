@@ -1,0 +1,26 @@
+{
+  "mounteBank": {
+    "host": "127.0.0.1",
+    "port": 2525,
+    "http_verb": {
+      "post": "POST",
+      "delete": "DELETE",
+      "head": "HEAD",
+      "put": "PUT",
+      "get": "GET"
+    }
+  },
+  "logging" : [
+    {
+      "name": "file",
+      "level": "debug",
+      "filename": "/var/log/civitas/registration/application.log"
+    }
+  ],
+  "mongo": {
+    "database_host" : "mongodb://localhost:27017/RegistrationTest",
+    "options" : {
+      "config":{"autoIndex": true}
+    }
+  }
+}

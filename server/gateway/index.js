@@ -22,6 +22,10 @@ var swaggerDoc = jsyaml.safeLoad(spec);
 
 var processHelper = require('../libs/ProcessHelper');
 
+const morgan = require('morgan');
+
+
+
 /**
  * Initialize the Swagger middleware.
  *
@@ -41,6 +45,8 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
   // Validate the context header
   app.use(requestValidator.validate);
 
+  app.use(morgan('dev'));
+
   // Route validated requests to appropriate controller
   app.use(middleware.swaggerRouter(options));
 
@@ -55,6 +61,8 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
   }
 
   app.use(errorHandler.onError);
+
+
 
   http.createServer(app).listen(serverPort, function () {
     console.log(`Your server is listening on port ${serverPort} (http://localhost:${serverPort})`);

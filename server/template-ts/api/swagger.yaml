@@ -1,0 +1,114 @@
+swagger: "2.0"
+info:
+  description: "{description}"
+  version: "{version}"
+  title: "{title}"
+host: "localhost:5000"
+basePath: "/v1"
+tags:
+- name: "template"
+  description: "{description}"
+  externalDocs:
+    description: "Find out more"
+    url: "http://swagger.io"
+schemes:
+- "http"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+paths:
+  /status:
+    get:
+      tags:
+      - "status"
+      description: "gets the status of the {service name} service"
+      operationId: "getSystemStatus"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "The server status will be returned"
+          schema:
+            $ref: "#/definitions/serverStatusResponse"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "StatusController"
+
+definitions:
+  serverStatusResponse:
+    type: "object"
+    required:
+    - "up_time"
+    properties:
+      up_time:
+        type: "number"
+        format: "double"
+
+  serverErrorModel:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    properties:
+      code:
+        type: "string"
+      message:
+        type: "string"
+      stack:
+        type: "string"
+
+  clientErrorModel:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    properties:
+      code:
+        type: "string"
+      message:
+        type: "string"
+      stack:
+        type: "string"
+
+  validationErrorModel:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    properties:
+      code:
+        type: "string"
+      message:
+        type: "string"
+      errors:
+        type: "array"
+        items:
+          $ref: "#/definitions/validationErrorSingleModel"
+  validationErrorSingleModel:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    - "path"
+    properties:
+      code:
+        type: "string"
+      message:
+        type: "string"
+      path:
+        type: "array"
+        items:
+          type: "string"
+      description:
+        type: "string"

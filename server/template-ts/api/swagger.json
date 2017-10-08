@@ -1,0 +1,56 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Simple Weather API",
+        "description": "API for getting the current weather information.",
+        "version": "1.0"
+    },
+    "produces": ["application/json"],
+    "host": "localhost:5000",
+    "basePath": "/v1",
+    "paths": {
+        "/status": {
+            "get": {
+                "x-swagger-router-controller": "StatusController",
+                "operationId": "getSystemStatus",
+                "tags": ["status"],
+                "description": "Returns the current weather for the requested location using the requested unit.",
+                "parameters": [],
+                "responses": {
+                    "default": {
+                        "description": "Invalid request.",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "200": {
+                        "description": "Successful request.",
+                        "schema": {
+                            "$ref": "#/definitions/serverStatusResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Error": {
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            },
+            "required": ["message"]
+        },
+        "serverStatusResponse": {
+            "type": "object",
+            "properties": {
+                "up_time": {
+                    "type": "string",
+                    "format": "double"
+                }
+            },
+            "required": ["up_time"]
+        }
+    }
+}

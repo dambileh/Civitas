@@ -61,7 +61,7 @@ function _loadExtensions() {
   const extensionsDir = '../libs/Extensions';
   fs.readdir(extensionsDir, (err, files) => {
     files.forEach(file => {
-      require(`${extensionsDir}/${file}`);
+      require(`${extensionsDir}/${file}`).extend();
     });
   })
 }

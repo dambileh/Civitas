@@ -1,0 +1,17 @@
+{
+  "logging": [
+    {
+      "name": "file",
+      "level": "debug",
+      "filename": "/var/log/civitas/registration/application.log"
+    }
+  ],
+  "mongo": {
+    "database_host": "mongodb://localhost:27017/Registration",
+    "options": {
+      "config": {
+        "autoIndex": true
+      }
+    }
+  }
+}

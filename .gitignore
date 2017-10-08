@@ -1,5 +1,9 @@
 server/gateway/node_modules/
 server/civitas/node_modules/
+server/registration/node_modules/
+server/template-ts/node_modules/
+server/template-ts/dist/
+
 node_modules/
 
 .idea/
