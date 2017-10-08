@@ -13,12 +13,14 @@ module.exports = {
       confirmRegistration: "confirmRegistration",
       requestRegistration: "requestRegistration",
       addFriends: "addFriends",
-      inviteFriend: "inviteFriend"
+      inviteFriend: "inviteFriend",
+      sendMessage: "sendMessage"
     },
     recipients: {
       gateway: "gateway",
       user: "user",
-      registration: "registration"
+      registration: "registration",
+      messageHub: "messageHub"
     },
     channelStore: {
       subscribers: "subscribers",

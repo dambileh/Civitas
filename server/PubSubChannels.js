@@ -32,5 +32,15 @@ module.exports = {
       "ConfirmRegistrationEvent": "ConfirmRegistrationEvent",
       "ConfirmRegistrationCompletedEvent": "ConfirmRegistrationCompletedEvent"
     }
+  },
+  "MessageHub": {
+    "External": {
+      "Event": "MessageEvent",
+      "CompletedEvent": "MessageCompletedEvent"
+    },
+    "Internal": {
+      "SendMessageEvent": "SendMessageEvent",
+      "SendMessageCompletedEvent": "SendMessageCompletedEvent"
+    }
   }
 };

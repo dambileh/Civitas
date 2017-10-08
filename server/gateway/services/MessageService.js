@@ -1,7 +1,3 @@
-/**
- * Created by kevinfeng on 2017/08/26.
- */
-
 'use strict';
 
 var logging = require('../utilities/Logging');
@@ -10,26 +6,33 @@ var message = require('../../libs/PubSub/Message');
 var constants = require('../../Constants');
 var pubSubChannels = require('../../PubSubChannels');
 
-/**
- * The Registration Service module
- */
 module.exports = {
 
-  confirmRegistration: async function (args, response, next) {
+  /**
+   * Gets the system status
+   *
+   * @param {object} args - The request arguments passed in from the controller
+   * @param {IncomingMessage} response - The http response object
+   * @param {function} next - The callback used to pass control to the next action/middleware
+   *
+   * @author Hadi Shayesteh <Hadishayesteh@gmail.com>
+   * @since  14 Aug 2017
+   */
+  sendMessage: async function sendMessage(args, response, next) {
 
-    var regRequest = args.register.value;
+    var regRequest = args.message.value;
 
     var request = new message(
-      pubSubChannels.Registration.External.Event,
+      pubSubChannels.MessageHub.External.Event,
       constants.pubSub.messageType.custom,
-      constants.pubSub.messageAction.confirmRegistration,
+      constants.pubSub.messageAction.sendMessage,
       regRequest
     );
-      
+
     try {
       let completed = await pubSub.publishAndWaitForResponse(
-        pubSubChannels.Registration.External.Event,
-        pubSubChannels.Registration.External.CompletedEvent,
+        pubSubChannels.MessageHub.External.Event,
+        pubSubChannels.MessageHub.External.CompletedEvent,
         {
           subscriberType: constants.pubSub.recipients.gateway
         },
@@ -42,8 +45,9 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to publish to channel [${pubSubChannels.Registration.External.Event}]`, err);
+        `Failed to publish to channel [${pubSubChannels.MessageHub.External.Event}]`, err);
       return next(err);
     }
   }
 };
+
