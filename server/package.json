@@ -10,7 +10,8 @@
   "private": true,
   "dependencies": {
     "redis": "^2.1.0",
-    "uuid": "^3.1.0"
+    "uuid": "^3.1.0",
+    "uuid-v4": "^0.1.0"
   },
   "devDependencies": {
     "mocha": "2.4.5",

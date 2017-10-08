@@ -2,7 +2,7 @@
 
 const internalEmitter = require('../libs/InternalEventEmitter');
 const constants = require('../Constants');
-const uuidV1 = require('uuid/v1');
+const uuidV1 = require('uuid-v4');
 
 let uniqueId = null;
 

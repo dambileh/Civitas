@@ -1,53 +1,41 @@
 $(document).ready(function() {
 
-    //Check if the user is rejoining
-    //ps: This value is set by Express if browser session is still valid
-    var user = $('#user').text();
-    // show join box
-    if (user === "") {
-        $('#ask').show();
-        $('#ask input').focus();
-    } else { //rejoin using old session
-        join(user);
-    }
-
-    // join on enter
-    $('#ask input').keydown(function(event) {
-        if (event.keyCode == 13) {
-            $('#ask a').click();
-        }
-    });
-
-    /*
-     When the user joins, hide the join-field, display chat-widget and also call 'join' function that
-     initializes Socket.io and the entire app.
-     */
-    $('#ask a').click(function() {
-        join($('#ask input').val());
-    });
-
-
-    function initSocketIO() {
+   
 
         console.log("initSocketIO");
 
         /*
          Connect to socket.io on the server.
          */
-        var host = "localhost:4030";
-
-        var socket = io.connect('http://' + host, {
+        var host = "localhost:5000";
+        //By using diifferent namespaces we can use one websocket connection even if we have several rooms
+        var socket = io.connect(document.location.origin + '/mynamespace', {
             reconnect: false,
             'try multiple transports': false
         });
+
+
+        //var socket = io(document.location.origin + '/mynamespace');
+        var start = new Date();
+    
+         // on connection to server, ask for user's name with an anonymous callback
+         socket.on('connect', function(){
+             console.log("CONNECTED");
+            var index = socket.io.engine.upgrade ? 1 : 0;
+            $('#connection').text('Connection established in ' + (new Date() - start) + 'msec. ' +
+                'SocketID: ' + socket.id + '. ' +
+                'You are using ' + socket.io.engine.transports[index] + '.');
+            $('input').removeAttr('disabled');
+            $('button').removeAttr('disabled');
+            console.log("#CONNECTION");
+            
+        });
+
+
         var intervalID;
         var reconnectCount = 0;
 
-        socket.on('connect', function() {
-            console.log('connected');
-            // send join message
-            socket.emit('join', JSON.stringify({}));
-        });
+      
         socket.on('connecting', function() {
             console.log('connecting');
         });
@@ -99,81 +87,54 @@ $(document).ready(function() {
         socket.on('my-channel', function(msg) {
 
             console.log("got the message on the client side", msg);
-            var message = JSON.parse(msg);
+            var message = JSON.stringify(msg);
+            //message = JSON.parse(message);
+          
+        }); 
 
-            var action = message.action;
-            var struct = container.find('li.' + action + ':first');
-
-            if (struct.length < 1) {
-                console.log("Could not handle: " + message);
-                return;
+        socket.on('announcements', function(msg) {
+            
+            console.log("Reached announcements", msg);
+            $("textarea#announcementsMessage").val(msg);           
+                      
+         }); 
+    
+        socket.on('message-all', function (data) {
+            $('#message-all > ul').append('<li>' + new Date().toString() + ': ' + data + '</li>');
+        });
+    
+        socket.on('message-room', function (data) {
+            console.log("MESSAGE ROOM", data);
+            $('#message-room > ul').append('<li>' + new Date().toString() + ' - room ' + data.room + ' : ' + data.message + '</li>');
+        });
+    
+        $('#b-all').click(function () {
+            var text = $('#i-all').val();
+            if (text.length > 0) {
+                socket.emit('message-all', text);
+                $('#i-all').val('');
             }
-
-            // get a new message view from struct template
-            var messageView = struct.clone();
-
-            // set time
-            messageView.find('.time').text((new Date()).toString("HH:mm:ss"));
-
-            switch (action) {
-                case 'message':
-                    var matches;
-                    // someone starts chat with /me ...
-                    if (matches = message.msg.match(/^\s*[\/\\]me\s(.*)/)) {
-                        messageView.find('.user').text(message.user + ' ' + matches[1]);
-                        messageView.find('.user').css('font-weight', 'bold');
-                        // normal chat message
-                    } else {
-                        messageView.find('.user').text(message.user);
-                        messageView.find('.message').text(': ' + message.msg);
-                    }
-                    break;
-                case 'control':
-                    messageView.find('.user').text(message.user);
-                    messageView.find('.message').text(message.msg);
-                    messageView.addClass('control');
-                    break;
+        });
+    
+        $('#b-join').click(function () {
+            var text = $('#i-join').val();
+            if (text.length > 0) {
+                socket.emit('join', text);
+                $('#i-join').val('');
             }
-
-            // color own user:
-            if (message.user == name) messageView.find('.user').addClass('self');
-
-            // append to container and scroll
-            container.find('ul').append(messageView.show());
-            container.scrollTop(container.find('ul').innerHeight());
         });
-
-        /*
-         When the user creates a new chat message, send it to server via socket.emit w/ 'chat' event/channel name
-         */
-        $('#channel form').submit(function(event) {
-            event.preventDefault();
-            var input = $(this).find(':input');
-            var msg = input.val();
-            socket.emit('chat', JSON.stringify({
-                action: 'message',
-                msg: msg
-            }));
-            input.val('');
+    
+        $('#b-room').click(function () {
+            var room = $('#i-room-name').val();
+            var message = $('#i-room-message').val();
+            $('#i-room-name').val('');
+            $('#i-room-message').val('');
+    
+            if (room.length > 0 && message.length > 0) {
+                socket.emit('message-room', {
+                    room: room,
+                    message: message
+                });
+            }
         });
-    }
-
-    initSocketIO();
-
-    function join(name) {
-        $('#ask').hide();
-        $('#channel').show();
-        $('input#message').focus();
-
-
-        $.post('/user', {
-            "user": name
-        }).success(function() {
-
-        }).error(function() {
-            console.log("error");
-        });
-    }
-
-
 });

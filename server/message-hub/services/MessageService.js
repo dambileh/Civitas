@@ -20,7 +20,10 @@ module.exports = {
    * @param {object} request - The request arguments passed in from the controller
    */
   sendMessage: async function sendMessage(request) {
-    socketManager.getSocket().emit("my-channel", request);
+    console.log("REQUEST:", request);
+    var socket = socketManager.getSocket();
+    socket.emit("my-channel", request);
+
 
     return internalEventEmitter.emit(
       messageHubChannels.Internal.SendMessageCompletedEvent,

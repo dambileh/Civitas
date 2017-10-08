@@ -13,7 +13,7 @@
         {
             "name": "file",
             "level": "debug",
-            "filename": "/var/log/civitas/gateway/application.log"
+            "filename": "./application.log"
         }
     ]
 }

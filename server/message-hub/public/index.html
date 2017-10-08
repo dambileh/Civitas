@@ -11,5 +11,27 @@
 </head>
 <body>
 
+   <h1>Socket.io &amp; Redis Application</h1>
+   <p id="connection">Connecting...</p>
+   <h3>Broadcast to All</h3>
+   <input id="i-all" type="text" placeholder="Message to all" disabled>
+   <button id="b-all" disabled>submit message</button>
+   <div id="message-all">
+     <ul></ul>
+   </div>
+   <h3>Broadcast to room</h3>
+   <p>
+     <input id="i-join" type="text" placeholder="room name" disabled>
+     <button id="b-join" disabled>join room</button>
+   </p>
+   <p>
+     <input id="i-room-name" type="text" placeholder="room name" disabled>
+     <input id="i-room-message" type="text" placeholder="Message to room" disabled>
+     <button id="b-room" disabled>submit message</button>
+   </p>
+   <div id="message-room">
+      <ul></ul>
+    </div>
+    <textarea id= "announcementsMessage" placeholder="No Announcements yet" cols="30" rows="5"></textarea>
 </body>
 </html>
