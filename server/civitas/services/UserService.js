@@ -3,6 +3,7 @@
 var User = require('../models/User');
 
 var resourceNotFoundError = require('../../libs/error/ResourceNotFoundError');
+var validationError = require('../../libs/error/ValidationError');
 var appUtil = require('../../libs/AppUtil');
 var logging = require('../utilities/Logging');
 var config = require('config');
@@ -330,7 +331,7 @@ module.exports = {
         userChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
-          body: validationresult
+          body: validationResult
         }
       );
     }

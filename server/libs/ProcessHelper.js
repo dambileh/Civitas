@@ -2,7 +2,8 @@
 
 const internalEmitter = require('../libs/InternalEventEmitter');
 const constants = require('../Constants');
-const uuidV1 = require('uuid-v4');
+const uuidV1 = require('uuid/v1');
+const fs = require('fs');
 
 let uniqueId = null;
 
@@ -29,6 +30,13 @@ module.exports = {
   },
 
   /**
+   * Bootstraps dependencies
+   */
+  bootstrap: async function bootstrap() {
+    _loadExtensions();
+  },
+
+  /**
    * Returns an id that can be used to uniquely identify this process
    *
    * "process.uid" is not necessarily unique if our app domain spans multiple servers
@@ -43,3 +51,17 @@ module.exports = {
     return uniqueId;
   }
 };
+
+/**
+ * Loads all the files in the libs/Extensions folder
+ *
+ * @private
+ */
+function _loadExtensions() {
+  const extensionsDir = '../libs/Extensions';
+  fs.readdir(extensionsDir, (err, files) => {
+    files.forEach(file => {
+      require(`${extensionsDir}/${file}`);
+    });
+  })
+}

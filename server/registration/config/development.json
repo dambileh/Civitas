@@ -3,7 +3,7 @@
     {
       "name": "file",
       "level": "debug",
-      "filename": "/Users/kevin/Library/Logs/civitas/gateway/application.log"
+      "filename": "/var/log/civitas/registration/application.log"
     }
   ]
 }

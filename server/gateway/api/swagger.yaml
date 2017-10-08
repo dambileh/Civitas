@@ -115,6 +115,7 @@ paths:
         description: "The id of user entity that will be updated"
         required: true
         type: "string"
+        format: "uuid"
       - in: "body"
         name: "user"
         description: "The user entity details"
@@ -123,7 +124,7 @@ paths:
           $ref: "#/definitions/userUpdateRequest"
       responses:
         200:
-          description: "A single user"
+          description: "Updated user"
           schema:
             $ref: "#/definitions/userResponse"
         400:
@@ -165,13 +166,12 @@ paths:
           description: "The id of user entity that will be deleted"
           required: true
           type: "string"
+          format: "uuid"
         responses:
           200:
-            description: "An array of users"
+            description: "Deleted user"
             schema:
-              type: "array"
-              items:
-                $ref: "#/definitions/userResponse"
+              $ref: "#/definitions/userResponse"
           405:
             description: "Method not supported Error. Returned if an unsupported http\
               \ method is used."
@@ -197,6 +197,7 @@ paths:
           description: "The id of user entity that will be returned"
           required: true
           type: "string"
+          format: "uuid"
         responses:
           200:
             description: "A single user"
@@ -216,7 +217,7 @@ paths:
   /user/{id}/friend:
     post:
       tags:
-      - "user friends"
+      - "user"
       description: "Creates a friend for the user"
       operationId: "createFriend"
       consumes:
@@ -229,6 +230,7 @@ paths:
         description: "The id of user entity"
         required: true
         type: "string"
+        format: "uuid"
       - in: "body"
         name: "friend"
         description: "The user friend entity details"
@@ -268,7 +270,7 @@ paths:
   /user/{id}/invite-friend:
     post:
       tags:
-      - "invite user"
+      - "user"
       description: "Allows user to invite another user"
       operationId: "inviteFriend"
       consumes:
@@ -281,6 +283,7 @@ paths:
         description: "The id of user"
         required: true
         type: "string"
+        format: "uuid"
       - in: "body"
         name: "invite"
         description: "The user invitation details"
@@ -320,7 +323,7 @@ paths:
   /registration/confirm:
     post:
       tags:
-      - "user registration"
+      - "registration"
       description: "Confirms a registration"
       operationId: "confirmRegistration"
       consumes:
@@ -364,23 +367,33 @@ paths:
             $ref: "#/definitions/serverErrorModel"
       x-swagger-router-controller: "RegistrationController"
 
-  /person:
+  /company:
     get:
       tags:
-      - "person"
-      description: "returns all the person records"
-      operationId: "getAllPersons"
+      - "company"
+      description: "returns all the company records"
+      operationId: "getAllCompanies"
       consumes:
       - "application/json"
       produces:
       - "application/json"
+      parameters:
+      - name: "context"
+        in: "header"
+        type: "string"
+        description: "The executing context"
+      - name: "context-id"
+        in: "header"
+        type: "string"
+        format: "uuid"
+        description: "The executing context id"
       responses:
         200:
-          description: "An array of persons"
+          description: "An array of companies"
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/personResponse"
+              $ref: "#/definitions/companyResponse"
         405:
           description: "Method not supported Error. Returned if an unsupported http\
             \ method is used."
@@ -390,30 +403,38 @@ paths:
           description: "unexpected error"
           schema:
             $ref: "#/definitions/serverErrorModel"
-      x-swagger-router-controller: "PersonController"
+      x-swagger-router-controller: "CompanyController"
 
     post:
       tags:
-      - "person"
-      description: "Creates a person"
-      operationId: "createPerson"
+      - "company"
+      description: "Creates a company"
+      operationId: "createCompany"
       consumes:
       - "application/json"
       produces:
       - "application/json"
       parameters:
       - in: "body"
-        name: "person"
-        description: "The person entity details"
-
+        name: "company"
+        description: "The company entity details"
         required: true
         schema:
-          $ref: "#/definitions/personRequest"
+          $ref: "#/definitions/companyRequest"
+      - name: "context"
+        in: "header"
+        type: "string"
+        description: "The executing context"
+      - name: "context-id"
+        in: "header"
+        type: "string"
+        format: "uuid"
+        description: "The executing context id"
       responses:
         201:
-          description: "success response that the person has been added"
+          description: "success response that the company has been added"
           schema:
-            $ref: "#/definitions/personResponse"
+            $ref: "#/definitions/companyResponse"
         400:
           description: "Validation Error. Usually caused by a missing or invalid parameter."
           schema:
@@ -437,14 +458,14 @@ paths:
           description: "unexpected error"
           schema:
             $ref: "#/definitions/serverErrorModel"
-      x-swagger-router-controller: "PersonController"
+      x-swagger-router-controller: "CompanyController"
 
-  /person/{id}:
+  /company/{id}:
     put:
       tags:
-      - "person"
-      description: "Updates a person"
-      operationId: "updatePerson"
+      - "company"
+      description: "Updates a company"
+      operationId: "updateCompany"
       consumes:
       - "application/json"
       produces:
@@ -452,20 +473,30 @@ paths:
       parameters:
       - in: "path"
         name: "id"
-        description: "The id of person entity that will be updated"
+        description: "The id of company entity that will be updated"
         required: true
         type: "string"
+        format: "uuid"
       - in: "body"
-        name: "person"
-        description: "The person entity details"
+        name: "company"
+        description: "The company entity details"
         required: true
         schema:
-          $ref: "#/definitions/personUpdateRequest"
+          $ref: "#/definitions/companyUpdateRequest"
+      - name: "context"
+        in: "header"
+        type: "string"
+        description: "The executing context"
+      - name: "context-id"
+        in: "header"
+        type: "string"
+        description: "The executing context id"
+        format: "uuid"
       responses:
         200:
-          description: "A single person"
+          description: "Updated company"
           schema:
-            $ref: "#/definitions/personResponse"
+            $ref: "#/definitions/companyResponse"
         400:
           description: "Validation Error. Usually caused by a missing or invalid parameter."
           schema:
@@ -489,13 +520,13 @@ paths:
           description: "unexpected error"
           schema:
             $ref: "#/definitions/serverErrorModel"
-      x-swagger-router-controller: "PersonController"
+      x-swagger-router-controller: "CompanyController"
 
     delete:
         tags:
-        - "person"
-        description: "Deletes a person"
-        operationId: "deletePerson"
+        - "company"
+        description: "Deletes a company"
+        operationId: "deleteCompany"
         consumes:
         - "application/json"
         produces:
@@ -503,16 +534,24 @@ paths:
         parameters:
         - in: "path"
           name: "id"
-          description: "The id of person entity that will be deleted"
+          description: "The id of company entity that will be deleted"
           required: true
           type: "string"
+          format: "uuid"
+        - name: "context"
+          in: "header"
+          type: "string"
+          description: "The executing context"
+        - name: "context-id"
+          in: "header"
+          type: "string"
+          description: "The executing context id"
+          format: "uuid"
         responses:
           200:
-            description: "An array of persons"
+            description: "Deleted company"
             schema:
-              type: "array"
-              items:
-                $ref: "#/definitions/personResponse"
+              $ref: "#/definitions/companyResponse"
           405:
             description: "Method not supported Error. Returned if an unsupported http\
               \ method is used."
@@ -522,12 +561,12 @@ paths:
             description: "unexpected error"
             schema:
               $ref: "#/definitions/serverErrorModel"
-        x-swagger-router-controller: "PersonController"
+        x-swagger-router-controller: "CompanyController"
     get:
         tags:
-        - "user"
-        description: "Returns a person"
-        operationId: "getSinglePerson"
+        - "company"
+        description: "Returns a company"
+        operationId: "getSingleCompany"
         consumes:
         - "application/json"
         produces:
@@ -535,14 +574,23 @@ paths:
         parameters:
         - in: "path"
           name: "id"
-          description: "The id of person entity that will be returned"
+          description: "The id of company entity that will be returned"
           required: true
           type: "string"
+          format: "uuid"
+        - name: "context"
+          in: "header"
+          type: "string"
+          description: "The executing context"
+        - name: "context-id"
+          in: "header"
+          type: "string"
+          description: "The executing context id"
         responses:
           200:
-            description: "A single person"
+            description: "A single company"
             schema:
-              $ref: "#/definitions/personResponse"
+              $ref: "#/definitions/companyResponse"
           405:
             description: "Method not supported Error. Returned if an unsupported http\
               \ method is used."
@@ -552,7 +600,242 @@ paths:
             description: "unexpected error"
             schema:
               $ref: "#/definitions/serverErrorModel"
-        x-swagger-router-controller: "PersonController"
+        x-swagger-router-controller: "CompanyController"
+
+  /community:
+    get:
+      tags:
+      - "community"
+      description: "returns all the community records"
+      operationId: "getAllCommunities"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "context"
+        in: "header"
+        type: "string"
+        description: "The executing context"
+      - name: "context-id"
+        in: "header"
+        type: "string"
+        format: "uuid"
+        description: "The executing context id"
+      responses:
+        200:
+          description: "An array of communities"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/communityResponse"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "CommunityController"
+
+    post:
+      tags:
+      - "community"
+      description: "Creates a community"
+      operationId: "createCommunity"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "community"
+        description: "The community entity details"
+        required: true
+        schema:
+          $ref: "#/definitions/communityRequest"
+      - name: "context"
+        in: "header"
+        type: "string"
+        description: "The executing context"
+      - name: "context-id"
+        in: "header"
+        type: "string"
+        format: "uuid"
+        description: "The executing context id"
+      responses:
+        201:
+          description: "success response that the community has been added"
+          schema:
+            $ref: "#/definitions/communityResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "CommunityController"
+
+  /community/{id}:
+    put:
+      tags:
+      - "community"
+      description: "Updates a community"
+      operationId: "updateCommunity"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "The id of community entity that will be updated"
+        required: true
+        type: "string"
+        format: "uuid"
+      - in: "body"
+        name: "community"
+        description: "The community entity details"
+        required: true
+        schema:
+          $ref: "#/definitions/communityUpdateRequest"
+      - name: "context"
+        in: "header"
+        type: "string"
+        description: "The executing context"
+      - name: "context-id"
+        in: "header"
+        type: "string"
+        description: "The executing context id"
+        format: "uuid"
+      responses:
+        200:
+          description: "Updated community"
+          schema:
+            $ref: "#/definitions/communityResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "CommunityController"
+
+    delete:
+        tags:
+        - "community"
+        description: "Deletes a community"
+        operationId: "deleteCommunity"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "path"
+          name: "id"
+          description: "The id of community entity that will be deleted"
+          required: true
+          type: "string"
+          format: "uuid"
+        - name: "context"
+          in: "header"
+          type: "string"
+          description: "The executing context"
+        - name: "context-id"
+          in: "header"
+          type: "string"
+          description: "The executing context id"
+          format: "uuid"
+        responses:
+          200:
+            description: "Deleted community"
+            schema:
+              $ref: "#/definitions/communityResponse"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "CommunityController"
+    get:
+        tags:
+        - "community"
+        description: "Returns a community"
+        operationId: "getSingleCommunity"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "path"
+          name: "id"
+          description: "The id of community entity that will be returned"
+          required: true
+          type: "string"
+          format: "uuid"
+        - name: "context"
+          in: "header"
+          type: "string"
+          description: "The executing context"
+        - name: "context-id"
+          in: "header"
+          type: "string"
+          description: "The executing context id"
+        responses:
+          200:
+            description: "A single community"
+            schema:
+              $ref: "#/definitions/communityResponse"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "CommunityController"
 
   /status:
     get:
@@ -580,39 +863,6 @@ paths:
           schema:
             $ref: "#/definitions/serverErrorModel"
       x-swagger-router-controller: "StatusController"
-
-  /message:
-    post:
-      tags:
-      - "message"
-      description: "gets the status of the messaging service"
-      operationId: "sendMessage"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "message"
-        required: true
-        schema:
-          $ref: "#/definitions/messageRequest"
-      responses:
-        200:
-          description: "The server status will be returned"
-          schema:
-            $ref: "#/definitions/messageResponse"
-        405:
-          description: "Method not supported Error. Returned if an unsupported http\
-            \ method is used."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
-        default:
-          description: "unexpected error"
-          schema:
-            $ref: "#/definitions/serverErrorModel"
-      x-swagger-router-controller: "MessageController"
-
 
 definitions:
   userRequest:
@@ -843,37 +1093,6 @@ definitions:
         type: "string"
         description: "The id of the user"
 
-  addressRequest:
-    additionalProperties: false
-    type: "object"
-    required:
-    - "isPrimary"
-    properties:
-      detail:
-        $ref: "#/definitions/addressDetail"
-      location:
-        $ref: "#/definitions/location"
-      isPrimary:
-        type: "boolean"
-        description: "Indicates if this is the primary address"
-
-  addressResponse:
-    type: "object"
-    properties:
-      detail:
-        $ref: "#/definitions/addressDetail"
-      location:
-        $ref: "#/definitions/location"
-      isPrimary:
-        type: "boolean"
-        description: "Indicates if this is the primary address"
-      createdAt:
-        type: "string"
-        description: "The created date"
-      updatedAt:
-        type: "string"
-        description: "The updated date"
-
   phoneNumberRequest:
     additionalProperties: false
     type: "object"
@@ -909,17 +1128,25 @@ definitions:
         type: "boolean"
         description: "Indicates if this is the primary phone number"
 
-  personRequest:
+  companyRequest:
     additionalProperties: false
     type: "object"
     required:
     - "name"
     - "addresses"
     - "phoneNumbers"
+    - "branch"
     properties:
       name:
         type: "string"
-        description: "The name of the person"
+        description: "The name of the company"
+      branch:
+        type: "string"
+        description: "The name of the branch"
+      type:
+        type: "string"
+        enum: ["ar"]
+        description: "The type of the company"
       addresses:
         type: array
         items:
@@ -928,14 +1155,25 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/phoneNumberRequest"
+      representative:
+        type: array
+        items:
+          $ref: "#/definitions/personRequest"
 
-  personUpdateRequest:
+  companyUpdateRequest:
     additionalProperties: false
     type: "object"
     properties:
       name:
         type: "string"
-        description: "The name of the person"
+        description: "The name of the company"
+      branch:
+        type: "string"
+        description: "The name of the branch"
+      type:
+        type: "string"
+        enum: ["ar"]
+        description: "The type of the company"
       addresses:
         type: array
         items:
@@ -944,12 +1182,24 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/phoneNumberRequest"
-  personResponse:
+      representative:
+        type: array
+        items:
+          $ref: "#/definitions/personRequest"
+
+  companyResponse:
     type: "object"
     properties:
       name:
         type: "string"
-        description: "The name of the person"
+        description: "The name of the company"
+      branch:
+        type: "string"
+        description: "The name of the branch"
+      type:
+        type: "string"
+        enum: ["ar"]
+        description: "The type of the company"
       addresses:
         type: array
         items:
@@ -958,6 +1208,196 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/phoneNumberResponse"
+      representative:
+        type: array
+        items:
+          $ref: "#/definitions/personResponse"
+
+  communityRequest:
+    additionalProperties: false
+    type: "object"
+    required:
+    - "name"
+    - "address"
+    - "entities"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the community"
+      address:
+        $ref: "#/definitions/addressRequest"
+      entities:
+        type: array
+        items:
+          $ref: "#/definitions/entityRequest"
+
+  communityUpdateRequest:
+    additionalProperties: false
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the community"
+      address:
+        $ref: "#/definitions/addressRequest"
+      entities:
+        type: array
+        items:
+          $ref: "#/definitions/entityUpdateRequest"
+
+  communityResponse:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the community"
+      address:
+        $ref: "#/definitions/addressResponse"
+      entities:
+        type: array
+        items:
+          $ref: "#/definitions/entityResponse"
+
+  entityRequest:
+    additionalProperties: false
+    type: "object"
+    required:
+    - "name"
+    - "addresses"
+    - "phoneNumbers"
+    - "branch"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the entity"
+      branch:
+        type: "string"
+        description: "The name of the branch"
+      addresses:
+        type: array
+        items:
+          $ref: "#/definitions/addressDetail"
+      phoneNumbers:
+        type: array
+        items:
+          $ref: "#/definitions/phoneNumberRequest"
+      representative:
+        type: array
+        items:
+          $ref: "#/definitions/personRequest"
+
+  entityUpdateRequest:
+    additionalProperties: false
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the entity"
+      branch:
+        type: "string"
+        description: "The name of the branch"
+      addresses:
+        type: array
+        items:
+          $ref: "#/definitions/addressDetail"
+      phoneNumbers:
+        type: array
+        items:
+          $ref: "#/definitions/phoneNumberRequest"
+      representative:
+        type: array
+        items:
+          $ref: "#/definitions/personRequest"
+
+  entityResponse:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the entity"
+      branch:
+        type: "string"
+        description: "The name of the branch"
+      addresses:
+        type: array
+        items:
+          $ref: "#/definitions/addressDetail"
+      phoneNumbers:
+        type: array
+        items:
+          $ref: "#/definitions/phoneNumberResponse"
+      representative:
+        type: array
+        items:
+          $ref: "#/definitions/personResponse"
+
+  personRequest:
+    additionalProperties: false
+    type: "object"
+    required:
+    - "name"
+    - "phoneNumbers"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the person"
+      email:
+        type: "string"
+        format: "email"
+        minLength: 6
+        maxLength: 128
+      phoneNumbers:
+        type: array
+        items:
+          $ref: "#/definitions/phoneNumberRequest"
+
+  personResponse:
+    additionalProperties: false
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the person"
+      email:
+        type: "string"
+        format: "email"
+        minLength: 6
+        maxLength: 128
+      phoneNumbers:
+        type: array
+        items:
+          $ref: "#/definitions/phoneNumberResponse"
+
+  addressRequest:
+    additionalProperties: false
+    type: "object"
+    required:
+    - "isPrimary"
+    properties:
+      detail:
+        $ref: "#/definitions/addressDetail"
+      location:
+        $ref: "#/definitions/location"
+      isPrimary:
+        type: "boolean"
+        description: "Indicates if this is the primary address"
+
+  addressResponse:
+    type: "object"
+    properties:
+      detail:
+        $ref: "#/definitions/addressDetail"
+      location:
+        $ref: "#/definitions/location"
+      isPrimary:
+        type: "boolean"
+        description: "Indicates if this is the primary address"
+      createdAt:
+        type: "string"
+        description: "The created date"
+      updatedAt:
+        type: "string"
+        description: "The updated date"
 
   addressDetail:
     additionalProperties: false
@@ -1018,19 +1458,6 @@ definitions:
         type: "string"
         enum: ["Point"]
         description: "The longitude and latitude of the location"
-
-  messageResponse:
-    type: "object"
-    properties:
-      status:
-        type: "string"
-
-  messageRequest:
-    type: "object"
-    properties:
-      message:
-        type: "string"
-
 
   serverStatusResponse:
     type: "object"

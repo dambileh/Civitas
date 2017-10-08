@@ -14,14 +14,16 @@ var locationType = [
 
 var ownerType = [
   'company',
-  'person',
+  'community',
   'user'
 ];
 
 var address = new schema(
   {
-    "owner": {type: schema.ObjectId, required: true},
-    "ownerType": {type: String, required: true, enum: ownerType},
+    "owner": {
+      "kind": {type: String, required: true, enum: ownerType},
+      "item": { type: schema.ObjectId, refPath: "owner.kind" }
+    },
     "detail": {
       "line1": {type: String, required: true},
       "line2": {type: String, required: false},

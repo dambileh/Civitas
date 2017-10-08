@@ -1481,7 +1481,7 @@ describe('/user', function () {
   });
 
   describe('get single', function () {
-    it('should respond with 200 An array of users', function (done) {
+    it('should respond with 200 - A single user', function (done) {
       var schema = {
         "type": "object",
         "required": [
@@ -1598,6 +1598,45 @@ describe('/user', function () {
           if (err) return done(err);
 
           validator.validate(res.body, schema).should.be.true;
+          done();
+        });
+    });
+
+    it('should respond with 404 - No user was found', function (done) {
+      var schema = {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "stack": {
+            "type": "string"
+          }
+        }
+      };
+
+      const randomId = '59cf6c819c9b352e239bd4fa';
+      /*eslint-enable*/
+      api.get(`/v1/user/${randomId}`)
+        .set('Content-Type', 'application/json')
+        .expect(404)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ResourceNotFound",
+            "message": "Resource not found.",
+            "exception_message": `No user with id [${randomId}] was found`,
+            "status": 404
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
           done();
         });
     });
@@ -2630,9 +2669,204 @@ describe('/user', function () {
         });
     });
 
+    it('should respond with 400 Validation Error. User not found', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      const randomId = '59cf6c819c9b352e239bd4fa';
+
+      /*eslint-enable*/
+      api.put(`/v1/user/${randomId}`)
+        .set('Content-Type', 'application/json')
+        .send({
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "state": "some state",
+                  "province": "some province",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 100002,
+                "message": "No user with id [59cf6c819c9b352e239bd4fa] was found.",
+                "path": ["id"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
   });
 
   describe('delete', function () {
+
+    it('should respond with 400 Validation Error. User not found', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      const randomId = '59cf6c819c9b352e239bd4fa';
+
+      /*eslint-enable*/
+      api.del(`/v1/user/${randomId}`)
+        .set('Content-Type', 'application/json')
+        .send({
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "state": "some state",
+                  "province": "some province",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 100002,
+                "message": "No user with id [59cf6c819c9b352e239bd4fa] was found.",
+                "path": ["id"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
     it('should respond with 200', function (done) {
       /*eslint-disable*/
       var schema = {
@@ -2749,6 +2983,15 @@ describe('/user', function () {
         });
     });
 
+    it('should respond with 204. No content', function (done) {
+      api.get('/v1/user')
+        .set('Content-Type', 'application/json')
+        .expect(204)
+        .end(function (err, res) {
+          if (err) return done(err);
+          done();
+        });
+    });
   });
 
 });
