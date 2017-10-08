@@ -21,8 +21,10 @@ module.exports = {
    */
   sendMessage: async function sendMessage(request) {
     console.log("REQUEST:", request);
-    var socket = socketManager.getSocket();
-    socket.emit("my-channel", request);
+    const io_s = socketManager.getSocket();
+    const io = io_s.of('mynamespace');
+
+    io.emit("my-channel", request);
 
 
     return internalEventEmitter.emit(

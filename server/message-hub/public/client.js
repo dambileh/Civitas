@@ -107,7 +107,11 @@ $(document).ready(function() {
             console.log("MESSAGE ROOM", data);
             $('#message-room > ul').append('<li>' + new Date().toString() + ' - room ' + data.room + ' : ' + data.message + '</li>');
         });
-    
+
+        socket.on('my-channel', function (data) {
+            console.log("Message from Gateway", data);
+        });
+
         $('#b-all').click(function () {
             var text = $('#i-all').val();
             if (text.length > 0) {

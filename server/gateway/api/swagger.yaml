@@ -837,6 +837,38 @@ paths:
               $ref: "#/definitions/serverErrorModel"
         x-swagger-router-controller: "CommunityController"
 
+  /message:
+    post:
+      tags:
+      - "message"
+      description: "gets the status of the messaging service"
+      operationId: "sendMessage"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "message"
+        required: true
+        schema:
+          $ref: "#/definitions/messageRequest"
+      responses:
+        200:
+          description: "The server status will be returned"
+          schema:
+            $ref: "#/definitions/messageResponse"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "MessageController"
+
   /status:
     get:
       tags:
@@ -1458,6 +1490,18 @@ definitions:
         type: "string"
         enum: ["Point"]
         description: "The longitude and latitude of the location"
+
+  messageResponse:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+
+  messageRequest:
+    type: "object"
+    properties:
+      message:
+        type: "string"
 
   serverStatusResponse:
     type: "object"

@@ -53,7 +53,7 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
 
     subscriptionManager.initialize();
 
-    app.set('port', process.env.PORT || 3000);
+    app.set('port', process.env.PORT || 4030);
     
     const server = app.listen(app.get('port'), () => {
         console.log('Express server listening on port ' + app.get('port'));
@@ -76,7 +76,7 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
     // });
     processHelper.handleProcessExit();
 
-    //socketManager.setSocket(server);
+
 
     // development error handler
     // will print stacktrace
@@ -98,9 +98,10 @@ swaggerTools.initializeMiddleware(swaggerDoc, function callback(middleware) {
     });
 
     console.log("INSIDE GENREAL CODE");
-   
-    
-    const io_s = require('socket.io')(server);
+
+    socketManager.setSocket(server);
+
+    const io_s = socketManager.getSocket();
     
     io_s.adapter(redis({
         host: '127.0.0.1',

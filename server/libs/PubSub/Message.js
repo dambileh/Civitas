@@ -1,7 +1,7 @@
 'use strict';
 
 var appUtil = require('../AppUtil');
-const uuidV1 = require('uuid-v4');
+const uuidV1 = require('uuid/v1');
 
 module.exports = function Message(channel, type, action, payload, id = uuidV1()) {
   var that = this;
