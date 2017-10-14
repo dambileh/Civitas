@@ -45,6 +45,59 @@ paths:
           schema:
             $ref: "#/definitions/serverErrorModel"
       x-swagger-router-controller: "StatusController"
+
+  /user/{id}/friend:
+      post:
+        tags:
+        - "user friends"
+        description: "Creates a friend for the user"
+        operationId: "createFriend"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "path"
+          name: "id"
+          description: "The id of user entity"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "friend"
+          description: "The user friend entity details"
+          required: true
+          schema:
+            $ref: "#/definitions/friendRequest"
+        responses:
+          201:
+            description: "success response that the user friend has been added"
+            schema:
+              $ref: "#/definitions/friendResponse"
+          400:
+            description: "Validation Error. Usually caused by a missing or invalid parameter."
+            schema:
+              $ref: "#/definitions/validationErrorModel"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          406:
+            description: "Content type not supported Error. Returned if an unsupported\
+              \ content type is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          413:
+            description: "Message content too big. Returned if the entity body's size\
+              \ is over the allowed limit."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "FriendController"
+
 definitions:
   serverStatusResponse:
     type: "object"
@@ -67,6 +120,7 @@ definitions:
         enum:
         - "new"
         - "complete"
+
   serverErrorModel:
     type: "object"
     required:
@@ -79,6 +133,7 @@ definitions:
         type: "string"
       stack:
         type: "string"
+
   clientErrorModel:
     type: "object"
     required:
@@ -91,6 +146,7 @@ definitions:
         type: "string"
       stack:
         type: "string"
+
   validationErrorModel:
     type: "object"
     required:
@@ -105,6 +161,7 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/validationErrorSingleModel"
+
   validationErrorSingleModel:
     type: "object"
     required:
@@ -122,3 +179,31 @@ definitions:
           type: "string"
       description:
         type: "string"
+
+  friendRequest:
+    type: "object"
+    additionalProperties: false
+    required:
+    - "numbers"
+    properties:
+      numbers:
+        type: "array"
+        items:
+          type: "string"
+          pattern: "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$"
+          maxLength: 128
+          description: "The msisdn of user's friend"
+
+  friendResponse:
+    type: "object"
+    required:
+    - "msisdn"
+    - "userId"
+    properties:
+      msisdn:
+        type: "string"
+        description: "The msisdn of user's friend"
+      userId:
+        type: "string"
+        description: "The id of the user"
+        format: "uuid"
