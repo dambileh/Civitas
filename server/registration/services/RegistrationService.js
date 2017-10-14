@@ -7,7 +7,7 @@ var internalEventEmitter = require('../../libs/InternalEventEmitter');
 var _ = require('lodash');
 var registrationChannels = require('../../PubSubChannels').Registration;
 var TwilioAuthService = require('node-twilio-verify');
-
+var Errors  = require("../../ErrorCodes");
 /**
  * The Registration Service module
  */
@@ -115,6 +115,112 @@ module.exports = {
         }
       );
     }
+  },
 
+  /**
+   * Confirm registration
+   *
+   * @param {object} request - The request that was sent from the controller
+   */
+  confirmRegistration: async function confirmRegistration(request) {
+
+    let registration = null;
+
+    try {
+      registration = await Verification.findOne(
+        {
+          msisdn: request.msisdn
+        }
+      );
+
+      // check if there is an existing registration code
+      if (appUtil.isNullOrUndefined(registration)) {
+        return internalEventEmitter.emit(
+          registrationChannels.Internal.ConfirmRegistrationCompletedEvent,
+          {
+            statusCode: 400,
+            body: '' // send empty?
+          }
+        );
+      }
+
+      // registration already confirmed previously
+      if (registration.status == true) {
+
+        logging.logAction(
+          logging.logLevels.INFO,
+          'Registration for ' + request.msisdn + ' already confirmed previously'
+        );
+
+        var modelValidationError = new ValidationError(
+          'Registration already confirmed',
+          [
+            {
+              code: Errors.Registration.ALREADY_CONFIRMED,
+              message: `Registration has already been confirmed previously`,
+              path: ['code']
+            }
+          ]
+        );
+
+        return SubscriptionManager.emitInternalResponseEvent(
+          {
+            statusCode: 400,
+            body: modelValidationError
+          },
+          registrationChannels.Internal.ConfirmRegistrationCompletedEvent
+        );
+      }
+
+      // check if code matches
+      if (request.code == registration.code) {
+        registration.status = true;
+        registration.save();
+
+        logging.logAction(
+          logging.logLevels.INFO,
+          'Registration for ' + request.msisdn + ' confirmed'
+        );
+
+        return internalEventEmitter.emit(
+          registrationChannels.Internal.ConfirmRegistrationCompletedEvent,
+          {
+            statusCode: 200,
+            body: {
+              "msisdn" : request.msisdn,
+              "code": request.code
+            }
+          }
+        );
+      } else {
+
+        var modelValidationError = new ValidationError(
+          'Registration confirmation code does not match',
+          [
+            {
+              code: Errors.Registration.CODE_MISMATCH,
+              message: `An incorrect confirmation code [${request.code}] received.`,
+              path: ['code']
+            }
+          ]
+        );
+
+        return SubscriptionManager.emitInternalResponseEvent(
+          {
+            statusCode: 400,
+            body: modelValidationError
+          },
+          registrationChannels.Internal.ConfirmRegistrationCompletedEvent
+        );
+      }
+    } catch (err) {
+      return internalEventEmitter.emit(
+        registrationChannels.Internal.RequestRegistrationCompletedEvent,
+        {
+          statusCode: 500,
+          body: err
+        }
+      );
+    }
   }
 };
