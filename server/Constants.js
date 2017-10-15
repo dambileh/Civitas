@@ -1,7 +1,7 @@
 module.exports = {
   pubSub: {
     messageType: {
-      crud: "crud"
+      crud: "crud",
       custom: "custom"
     },
     messageAction: {
