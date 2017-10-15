@@ -8,7 +8,7 @@ var deref = require('json-schema-deref');
 var config = {
   assertionFormat: 'should',
   testModule: 'supertest',
-  pathName: [],
+  pathName: ['/company', '/company/{id}'],
 //  loadTest: [{pathName:'/user', operation:'get', load:{requests: 1000, concurrent: 100}}, { /* ... */ }],
   maxLen: 80
 };
@@ -21,19 +21,8 @@ try {
   return;
 }
 
-// Temporary DeRef the JSON references, until https://github.com/apigee-127/swagger-test-templates/issues/92 is resolved
-deref(reffedSwagger, function(err, swagerDef) {
-  if (err) {
-    console.log(e);
-    return;
-  }
-
-  swagger = swagerDef;
-
-  // Generates an array of JavaScript test files following specified configuration
-  var arrTests = stt.testGen(swagger, config);
-  for (var i=0; i < arrTests.length; i++) {
-    fs.writeFileSync(path+arrTests[i].name,arrTests[i].test,'utf8')
-  }
-
-});
+// Generates an array of JavaScript test files following specified configuration
+var arrTests = stt.testGen(reffedSwagger, config);
+for (var i=0; i < arrTests.length; i++) {
+  fs.writeFileSync(path+arrTests[i].name,arrTests[i].test,'utf8')
+}

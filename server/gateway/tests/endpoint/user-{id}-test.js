@@ -37,6 +37,7 @@ const customFormats = function (zSchema) {
   });
 
   const uuidPattern = /^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/;
+  ;
 
   /** Validates uuid */
   zSchema.registerFormat('uuid', function (val) {
@@ -68,12 +69,11 @@ chai.should();
 
 let createdUser = null;
 
-describe('/user', function () {
+describe('/user/{id}', function () {
 
-  describe('post', function () {
-
+  before(function(done){
     const postSuccessBody = {
-      "msisdn": "27728120127",
+      "msisdn": "27728120000",
       "firstName": "hossein",
       "lastName": "shayesteh",
       "email": "sdfsd@fsdfsdf.com",
@@ -115,8 +115,19 @@ describe('/user', function () {
       ]
     };
 
-    it('should respond with 201 success response that the...', function (done) {
-      /*eslint-disable*/
+    api.post('/v1/user')
+      .set('Content-Type', 'application/json')
+      .send(postSuccessBody)
+      .end(function (err, res) {
+        if (err) return done(err);
+        createdUser = res.body;
+        done();
+      });
+
+  });
+
+  describe('get single', function () {
+    it('should respond with 200 - A single user', function (done) {
       var schema = {
         "type": "object",
         "required": [
@@ -221,97 +232,181 @@ describe('/user', function () {
               "active",
               "inactive"
             ],
-            "description": "The firstname of the user"
+            "description": "The first name of the user"
           }
         }
       };
 
       /*eslint-enable*/
-      api.post('/v1/user')
+      api.get(`/v1/user/${createdUser._id}`)
         .set('Content-Type', 'application/json')
-        .send(postSuccessBody)
-        .expect(201)
+        .expect(200)
         .end(function (err, res) {
           if (err) return done(err);
+
           validator.validate(res.body, schema).should.be.true;
-          createdUser = res.body;
           done();
         });
     });
 
-    it('should respond with 400 Validation Error. Number already exists', function (done) {
-      /*eslint-disable*/
+    it('should respond with 404 - No user was found', function (done) {
       var schema = {
         "type": "object",
         "required": [
-          "code",
           "message"
         ],
         "properties": {
-          "code": {
-            "type": "string"
-          },
           "message": {
             "type": "string"
           },
-          "errors": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": [
-                "code",
-                "message",
-                "path"
-              ],
-              "properties": {
-                "code": {
-                  "type": "string"
-                },
-                "message": {
-                  "type": "string"
-                },
-                "path": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "description": {
-                  "type": "string"
-                }
-              }
-            }
+          "stack": {
+            "type": "string"
           }
         }
       };
 
+      const randomId = '59cf6c819c9b352e239bd4fa';
       /*eslint-enable*/
-      api.post('/v1/user')
+      api.get(`/v1/user/${randomId}`)
         .set('Content-Type', 'application/json')
-        .send(postSuccessBody)
-        .expect(400)
+        .expect(404)
         .end(function (err, res) {
           if (err) return done(err);
 
           validator.validate(res.body, schema).should.be.true;
 
           const expectedResponse = {
-            name: 'ValidationError',
-            code: 'MODEL_VALIDATION_FAILED',
-            message: 'Some validation errors occurred.',
-            results: {
-              errors: [
-                {
-                  "code": 100001,
-                  "message": "A user with number [27728120127] already exists.",
-                  "path": ["msisdn"]
-                }
-              ]
-            },
-            status: 400
+            "name": "ResourceNotFound",
+            "message": "Resource not found.",
+            "exception_message": `No user with id [${randomId}] was found`,
+            "status": 404
           };
 
           assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+  });
+
+  describe('put', function () {
+    it('should respond with 200 success response that the...', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "The firstname of the user"
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "The lastname of the user"
+          },
+          "msisdn": {
+            "type": "string",
+            "pattern": "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$",
+            "maxLength": 128,
+            "description": "The user's contact number"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "minLength": 6,
+            "maxLength": 128,
+            "description": "The email of the user"
+          },
+          "address": {
+            "type": "object",
+            "required": [
+              "line1",
+              "city",
+              "country",
+              "postalCode"
+            ],
+            "properties": {
+              "line1": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "The first line of address"
+              },
+              "line2": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "The second line of address"
+              },
+              "city": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "The city"
+              },
+              "state": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "The state"
+              },
+              "province": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "The province"
+              },
+              "country": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "The country"
+              },
+              "postalCode": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "The postal code"
+              }
+            }
+          },
+          "arCompanies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ids of the AR companies that service the user"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ids of the images on user's phone that are linked to his or her profile"
+          },
+          "avatarId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The id of user's avatar image"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "description": "The firstname of the user"
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.put(`/v1/user/${createdUser._id}`)
+        .set('Content-Type', 'application/json')
+        .send({
+          firstName: 'some new name'
+        })
+        .expect(200)
+        .end(function (err, res) {
+          if (err) return done(err);
+          validator.validate(res.body, schema).should.be.true;
           done();
         });
     });
@@ -363,10 +458,9 @@ describe('/user', function () {
       };
 
       /*eslint-enable*/
-      api.post('/v1/user')
+      api.put(`/v1/user/${createdUser._id}`)
         .set('Content-Type', 'application/json')
         .send({
-            "msisdn": "27728120111",
             "firstName": "hossein",
             "lastName": "shayesteh",
             "email": "sdfsd@fsdfsdf.com",
@@ -481,10 +575,9 @@ describe('/user', function () {
       };
 
       /*eslint-enable*/
-      api.post('/v1/user')
+      api.put(`/v1/user/${createdUser._id}`)
         .set('Content-Type', 'application/json')
         .send({
-            "msisdn": "27728120111",
             "firstName": "hossein",
             "lastName": "shayesteh",
             "email": "sdfsd@fsdfsdf.com",
@@ -536,7 +629,7 @@ describe('/user', function () {
         });
     });
 
-    it('should respond with 400 Validation Error. Either address location or detail must be set. Both set', function (done) {
+    it('should respond with 400 Validation Error. Either address location or detail must be set', function (done) {
       /*eslint-disable*/
       var schema = {
         "type": "object",
@@ -583,10 +676,9 @@ describe('/user', function () {
       };
 
       /*eslint-enable*/
-      api.post('/v1/user')
+      api.put(`/v1/user/${createdUser._id}`)
         .set('Content-Type', 'application/json')
         .send({
-            "msisdn": "27728120111",
             "firstName": "hossein",
             "lastName": "shayesteh",
             "email": "sdfsd@fsdfsdf.com",
@@ -685,10 +777,9 @@ describe('/user', function () {
       };
 
       /*eslint-enable*/
-      api.post('/v1/user')
+      api.put(`/v1/user/${createdUser._id}`)
         .set('Content-Type', 'application/json')
         .send({
-            "msisdn": "27728120111",
             "firstName": "hossein",
             "lastName": "shayesteh",
             "email": "sdfsd@fsdfsdf.com",
@@ -785,10 +876,9 @@ describe('/user', function () {
       };
 
       /*eslint-enable*/
-      api.post('/v1/user')
+      api.put(`/v1/user/${createdUser._id}`)
         .set('Content-Type', 'application/json')
         .send({
-            "msisdn": "27728120111",
             "firstName": "hossein",
             "lastName": "shayesteh",
             "email": "sdfsd@fsdfsdf.com",
@@ -885,10 +975,9 @@ describe('/user', function () {
       };
 
       /*eslint-enable*/
-      api.post('/v1/user')
+      api.put(`/v1/user/${createdUser._id}`)
         .set('Content-Type', 'application/json')
         .send({
-            "msisdn": "27728120111",
             "firstName": "hossein",
             "lastName": "shayesteh",
             "email": "sdfsd@fsdfsdf.com",
@@ -985,10 +1074,9 @@ describe('/user', function () {
       };
 
       /*eslint-enable*/
-      api.post('/v1/user')
+      api.put(`/v1/user/${createdUser._id}`)
         .set('Content-Type', 'application/json')
         .send({
-            "msisdn": "27728120111",
             "firstName": "hossein",
             "lastName": "shayesteh",
             "email": "sdfsd@fsdfsdf.com",
@@ -1085,10 +1173,9 @@ describe('/user', function () {
       };
 
       /*eslint-enable*/
-      api.post('/v1/user')
+      api.put(`/v1/user/${createdUser._id}`)
         .set('Content-Type', 'application/json')
         .send({
-            "msisdn": "27728120111",
             "firstName": "hossein",
             "lastName": "shayesteh",
             "email": "sdfsd@fsdfsdf.com",
@@ -1180,10 +1267,9 @@ describe('/user', function () {
       };
 
       /*eslint-enable*/
-      api.post('/v1/user')
+      api.put(`/v1/user/${createdUser._id}`)
         .set('Content-Type', 'application/json')
         .send({
-            "msisdn": "27728120111",
             "firstName": "hossein",
             "lastName": "shayesteh",
             "email": "sdfsd@fsdfsdf.com",
@@ -1230,138 +1316,7 @@ describe('/user', function () {
         });
     });
 
-
-  });
-
-  describe('get', function () {
-    it('should respond with 200 An array of users', function (done) {
-      /*eslint-disable*/
-      var schema = {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "required": [
-            "firstName",
-            "lastName",
-            "msisdn"
-          ],
-          "properties": {
-            "firstName": {
-              "type": "string",
-              "maxLength": 128,
-              "description": "The firstname of the user"
-            },
-            "lastName": {
-              "type": "string",
-              "maxLength": 128,
-              "description": "The lastname of the user"
-            },
-            "msisdn": {
-              "type": "string",
-              "pattern": "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$",
-              "maxLength": 128,
-              "description": "The user's contact number"
-            },
-            "email": {
-              "type": "string",
-              "format": "email",
-              "minLength": 6,
-              "maxLength": 128,
-              "description": "The email of the user"
-            },
-            "address": {
-              "type": "object",
-              "required": [
-                "line1",
-                "city",
-                "country",
-                "postalCode"
-              ],
-              "properties": {
-                "line1": {
-                  "type": "string",
-                  "maxLength": 128,
-                  "description": "The first line of address"
-                },
-                "line2": {
-                  "type": "string",
-                  "maxLength": 128,
-                  "description": "The second line of address"
-                },
-                "city": {
-                  "type": "string",
-                  "maxLength": 128,
-                  "description": "The city"
-                },
-                "state": {
-                  "type": "string",
-                  "maxLength": 128,
-                  "description": "The state"
-                },
-                "province": {
-                  "type": "string",
-                  "maxLength": 128,
-                  "description": "The province"
-                },
-                "country": {
-                  "type": "string",
-                  "maxLength": 128,
-                  "description": "The country"
-                },
-                "postalCode": {
-                  "type": "string",
-                  "maxLength": 128,
-                  "description": "The postal code"
-                }
-              }
-            },
-            "arCompanies": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uuid"
-              },
-              "description": "The ids of the AR companies that service the user"
-            },
-            "images": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uuid"
-              },
-              "description": "The ids of the images on user's phone that are linked to his or her profile"
-            },
-            "avatarId": {
-              "type": "string",
-              "format": "uuid",
-              "description": "The id of user's avatar image"
-            },
-            "status": {
-              "type": "string",
-              "enum": [
-                "active",
-                "inactive"
-              ],
-              "description": "The first name of the user"
-            }
-          }
-        }
-      };
-
-      /*eslint-enable*/
-      api.get('/v1/user')
-        .set('Content-Type', 'application/json')
-        .expect(200)
-        .end(function (err, res) {
-          if (err) return done(err);
-          assert.ok(validator.validate(res.body, schema), 'The expected schema was not returned');
-          validator.validate(res.body, schema);
-
-          done();
-        });
-    });
-
-    it('should respond with 405 Method not supported Error...', function (done) {
+    it('should respond with 400 Validation Error. User not found', function (done) {
       /*eslint-disable*/
       var schema = {
         "type": "object",
@@ -1376,22 +1331,305 @@ describe('/user', function () {
           "message": {
             "type": "string"
           },
-          "stack": {
-            "type": "string"
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       };
 
-      // patch is not supported
-      api.patch('/v1/user')
+      const randomId = '59cf6c819c9b352e239bd4fa';
+
+      /*eslint-enable*/
+      api.put(`/v1/user/${randomId}`)
         .set('Content-Type', 'application/json')
-        .expect(405)
+        .send({
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "state": "some state",
+                  "province": "some province",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
         .end(function (err, res) {
           if (err) return done(err);
-          assert.ok(validator.validate(res.body, schema), 'The expected schema was not returned');
+
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 100002,
+                "message": "No user with id [59cf6c819c9b352e239bd4fa] was found.",
+                "path": ["id"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
           done();
         });
     });
 
   });
+
+  describe('delete', function () {
+
+    it('should respond with 400 Validation Error. User not found', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      const randomId = '59cf6c819c9b352e239bd4fa';
+
+      /*eslint-enable*/
+      api.del(`/v1/user/${randomId}`)
+        .set('Content-Type', 'application/json')
+        .send({
+            "firstName": "hossein",
+            "lastName": "shayesteh",
+            "email": "sdfsd@fsdfsdf.com",
+            "addresses": [
+              {
+                "isPrimary": true,
+                "detail": {
+                  "line1": "line1",
+                  "city": "city",
+                  "country": "country",
+                  "state": "some state",
+                  "province": "some province",
+                  "postalCode": "postalCode",
+                  "type": "postal"
+                }
+              }
+            ]
+          }
+        )
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 100002,
+                "message": "No user with id [59cf6c819c9b352e239bd4fa] was found.",
+                "path": ["id"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+
+    it('should respond with 200', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "The firstname of the user"
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "The lastname of the user"
+          },
+          "msisdn": {
+            "type": "string",
+            "pattern": "^27((60[3-9]|64[0-5])\\d{6}|(7[1-4689]|6[1-3]|8[1-4])\\d{7})$",
+            "maxLength": 128,
+            "description": "The user's contact number"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "minLength": 6,
+            "maxLength": 128,
+            "description": "The email of the user"
+          },
+          "address": {
+            "type": "object",
+            "required": [
+              "line1",
+              "city",
+              "country",
+              "postalCode"
+            ],
+            "properties": {
+              "line1": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "The first line of address"
+              },
+              "line2": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "The second line of address"
+              },
+              "city": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "The city"
+              },
+              "state": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "The state"
+              },
+              "province": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "The province"
+              },
+              "country": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "The country"
+              },
+              "postalCode": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "The postal code"
+              }
+            }
+          },
+          "arCompanies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ids of the AR companies that service the user"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ids of the images on user's phone that are linked to his or her profile"
+          },
+          "avatarId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The id of user's avatar image"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "description": "The firstname of the user"
+          }
+        }
+      };
+      /*eslint-enable*/
+      api.del(`/v1/user/${createdUser._id}`)
+        .set('Content-Type', 'application/json')
+        .expect(200)
+        .end(function (err, res) {
+          if (err) return done(err);
+          validator.validate(res.body, schema).should.be.true;
+          done();
+        });
+    });
+
+  });
+
 });

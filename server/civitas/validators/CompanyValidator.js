@@ -68,7 +68,7 @@ module.exports = {
               {
                 code: errors.Company.COMPANY_ALREADY_EXISTS,
                 message: `A company with the same name and primary phone number already exists.`,
-                path: ['name', 'phoneNumbers']
+                path: ['name']
               }
             ]
           ),
