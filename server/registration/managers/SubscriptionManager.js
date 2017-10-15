@@ -32,7 +32,11 @@ module.exports = {
 
       switch (message.type) {
         case constants.pubSub.messageType.custom:
-          subscriptionHelper.emitRegistrationEvents(message, registrationChannels);
+          if (message.action == constants.pubSub.messageAction.requestRegistration) {
+            subscriptionHelper.emitRegistrationEvents(message, registrationChannels);
+          } else if (message.action == constants.pubSub.messageAction.confirmRegistration) {
+            subscriptionHelper.emitConfirmRegistrationEvents(message, registrationChannels);
+          }
           break;
         default:
           logging.logAction(logging.logLevels.ERROR, `Type [${message.type}] is not supported`)

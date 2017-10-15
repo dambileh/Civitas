@@ -105,16 +105,9 @@ function emitRegistrationEvents(message, channelDetails) {
     _sendRegistrationCompleted(message, response, channelDetails, constants.pubSub.messageAction.requestRegistration);
   });
 
-  internalEventEmitter.on(channelDetails.Internal.ConfirmRegistrationCompletedEvent, function(response){
-    _sendRegistrationCompleted(message, response, channelDetails, constants.pubSub.messageAction.confirmRegistration);
-  });
-
   switch (message.action) {
     case constants.pubSub.messageAction.requestRegistration:
       internalEventEmitter.emit(channelDetails.Internal.RequestRegistrationEvent, message.payload);
-      break;
-    case constants.pubSub.messageAction.confirmRegistration:
-      internalEventEmitter.emit(channelDetails.Internal.RequestRegistrationCompletedEvent, message.payload);
       break;
     default:
       console.error(`Type [${message.type}] is not supported`);
@@ -156,10 +149,68 @@ function _sendRegistrationCompleted(request, response, channelDetails, action) {
  */
 function _removeAllRegistrationListeners(channelDetails) {
   internalEventEmitter.removeAllListeners(channelDetails.Internal.RequestRegistrationCompletedEvent);
+}
+
+/**
+ * Emits the passed message as an internal Confirm Registration events
+ *
+ * @param {object} message - The message that will be emitted
+ * @param {array} channelDetails - Contains the external channelDetails details
+ */
+function emitConfirmRegistrationEvents(message, channelDetails) {
+
+  internalEventEmitter.on(channelDetails.Internal.ConfirmRegistrationCompletedEvent, function(response){
+    _sendConfirmRegistration(message, response, channelDetails, constants.pubSub.messageAction.confirmRegistration);
+  });
+
+  switch (message.action) {
+    case constants.pubSub.messageAction.confirmRegistration:
+      internalEventEmitter.emit(channelDetails.Internal.ConfirmRegistrationCompletedEvent, message.payload);
+      break;
+    default:
+      console.error(`Type [${message.type}] is not supported`);
+  }
+}
+
+/**
+ * Publishes an external Confirm Registration event
+ *
+ * @param {object} request - The original Registration request object
+ * @param {object} response - The Registration response object
+ * @param {array} channelDetails - Contains the external channelDetails details
+ * @param {string} action - The Registration action that was specified on the request
+ *
+ * @private
+ */
+function _sendConfirmRegistration(request, response, channelDetails, action) {
+
+  // pass the same messageId that was set on the request so that the gateway can map the completed event back to
+  // the original event
+  var completedResponse = new Message(
+    channelDetails.External.CompletedEvent,
+    constants.pubSub.messageType.custom,
+    action,
+    response,
+    request.header.messageId
+  );
+
+  pubSub.publish(completedResponse, channelDetails.External.CompletedEvent);
+  _removeAllConfirmRegistrationListeners(channelDetails);
+}
+
+/**
+ * Removed the internal event listeners
+ *
+ * @param {array} channelDetails - Contains the external channelDetails details
+ *
+ * @private
+ */
+function _removeAllConfirmRegistrationListeners(channelDetails) {
   internalEventEmitter.removeAllListeners(channelDetails.Internal.ConfirmRegistrationCompletedEvent);
 }
 
 module.exports = {
   emitCRUDEvents: emitCRUDEvents,
-  emitRegistrationEvents: emitRegistrationEvents
+  emitRegistrationEvents: emitRegistrationEvents,
+  emitConfirmRegistrationEvents: emitConfirmRegistrationEvents
 };

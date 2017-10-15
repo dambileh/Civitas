@@ -11,3 +11,10 @@ internalEventEmitter.on(registrationChannels.Internal.RequestRegistrationEvent, 
     registrationService.requestRegistration(event);
 });
 
+/**
+ * Calls the corresponding service layer method to request confirm registration
+ */
+internalEventEmitter.on(registrationChannels.Internal.ConfirmRegistrationEvent, function (event) {
+  registrationService.confirmRegistration(event);
+});
+

@@ -15,5 +15,9 @@ module.exports = {
   Global: {
     REQUIRED_HEADER_PARAMS_NOT_SET: 300001,
     ID_IN_REQUEST_NOT_VALID: 300002
-  }
+  },
+  Registration: {
+    CODE_MISMATCH: 400001,
+    ALREADY_CONFIRMED: 400002
+  },
 };
