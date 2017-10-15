@@ -837,6 +837,531 @@ paths:
               $ref: "#/definitions/serverErrorModel"
         x-swagger-router-controller: "CommunityController"
 
+  /chat:
+    get:
+      tags:
+      - "chat"
+      description: "returns all the chat records"
+      operationId: "getAllChats"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "context"
+        in: "header"
+        type: "string"
+        description: "The executing context"
+      - name: "context-id"
+        in: "header"
+        type: "string"
+        format: "uuid"
+        description: "The executing context id"
+      responses:
+        200:
+          description: "An array of chats"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/chatResponse"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "ChatController"
+
+    post:
+      tags:
+      - "chat"
+      description: "Creates a chat"
+      operationId: "createChat"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "chat"
+        description: "The chat entity details"
+        required: true
+        schema:
+          $ref: "#/definitions/chatRequest"
+      - name: "context"
+        in: "header"
+        type: "string"
+        description: "The executing context"
+      - name: "context-id"
+        in: "header"
+        type: "string"
+        format: "uuid"
+        description: "The executing context id"
+      responses:
+        201:
+          description: "success response that the chat has been added"
+          schema:
+            $ref: "#/definitions/chatResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "ChatController"
+
+  /chat/{id}:
+    put:
+      tags:
+      - "chat"
+      description: "Updates a chat"
+      operationId: "updateChat"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "The id of chat entity that will be updated"
+        required: true
+        type: "string"
+        format: "uuid"
+      - in: "body"
+        name: "chat"
+        description: "The chat entity details"
+        required: true
+        schema:
+          $ref: "#/definitions/chatUpdateRequest"
+      - name: "context"
+        in: "header"
+        type: "string"
+        description: "The executing context"
+      - name: "context-id"
+        in: "header"
+        type: "string"
+        description: "The executing context id"
+        format: "uuid"
+      responses:
+        200:
+          description: "Updated chat"
+          schema:
+            $ref: "#/definitions/chatResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "ChatController"
+
+    delete:
+        tags:
+        - "chat"
+        description: "Deletes a chat"
+        operationId: "deleteChat"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "path"
+          name: "id"
+          description: "The id of chat entity that will be deleted"
+          required: true
+          type: "string"
+          format: "uuid"
+        - name: "context"
+          in: "header"
+          type: "string"
+          description: "The executing context"
+        - name: "context-id"
+          in: "header"
+          type: "string"
+          description: "The executing context id"
+          format: "uuid"
+        responses:
+          200:
+            description: "Deleted chat"
+            schema:
+              $ref: "#/definitions/chatResponse"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "ChatController"
+    get:
+        tags:
+        - "chat"
+        description: "Returns a chat"
+        operationId: "getSingleChat"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "path"
+          name: "id"
+          description: "The id of chat entity that will be returned"
+          required: true
+          type: "string"
+          format: "uuid"
+        - name: "context"
+          in: "header"
+          type: "string"
+          description: "The executing context"
+        - name: "context-id"
+          in: "header"
+          type: "string"
+          description: "The executing context id"
+        responses:
+          200:
+            description: "A single chat"
+            schema:
+              $ref: "#/definitions/chatResponse"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "ChatController"
+
+  /chat/{id}/message:
+    post:
+      tags:
+      - "chat"
+      description: "Sends a message to a chat"
+      operationId: "sendChatMessage"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "The id of chat entity that owns the message"
+        required: true
+        type: "string"
+        format: "uuid"
+      - in: "body"
+        name: "chatMessage"
+        description: "The chat message entity details"
+        required: true
+        schema:
+          $ref: "#/definitions/chatMessageRequest"
+      - name: "context"
+        in: "header"
+        type: "string"
+        description: "The executing context"
+      - name: "context-id"
+        in: "header"
+        type: "string"
+        format: "uuid"
+        description: "The executing context id"
+      responses:
+        201:
+          description: "success response that the message has been sent to a chat"
+          schema:
+            $ref: "#/definitions/chatResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "ChatMessageController"
+
+  /chat/{id}/message/{messageId}:
+    delete:
+        tags:
+        - "chat"
+        description: "Deletes a chat message"
+        operationId: "deleteChatMessage"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "path"
+          name: "id"
+          description: "The id of chat entity that owns the message"
+          required: true
+          type: "string"
+          format: "uuid"
+        - in: "path"
+          name: "messageId"
+          description: "The id of chat message entity that will be deleted"
+          required: true
+          type: "string"
+          format: "uuid"
+        - name: "context"
+          in: "header"
+          type: "string"
+          description: "The executing context"
+        - name: "context-id"
+          in: "header"
+          type: "string"
+          description: "The executing context id"
+          format: "uuid"
+        responses:
+          200:
+            description: "Deleted chat message"
+            schema:
+              $ref: "#/definitions/chatResponse"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "ChatMessageController"
+
+  /chat-participant:
+    get:
+      tags:
+      - "chat-participant"
+      description: "returns all the chat participant records"
+      operationId: "getAllChatParticipants"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "context"
+        in: "header"
+        type: "string"
+        description: "The executing context"
+      - name: "context-id"
+        in: "header"
+        type: "string"
+        format: "uuid"
+        description: "The executing context id"
+      responses:
+        200:
+          description: "An array of chat participants"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/chatParticipantResponse"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "ChatParticipantController"
+
+  /chat-participant/{id}:
+    put:
+      tags:
+      - "chat-participant"
+      description: "Updates a chat participant"
+      operationId: "updateChatParticipant"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "The id of chat participant entity that will be updated"
+        required: true
+        type: "string"
+        format: "uuid"
+      - in: "body"
+        name: "chatParticipant"
+        description: "The chat participant entity details"
+        required: true
+        schema:
+          $ref: "#/definitions/chatParticipantUpdateRequest"
+      - name: "context"
+        in: "header"
+        type: "string"
+        description: "The executing context"
+      - name: "context-id"
+        in: "header"
+        type: "string"
+        description: "The executing context id"
+        format: "uuid"
+      responses:
+        200:
+          description: "Updated chat participant"
+          schema:
+            $ref: "#/definitions/chatParticipantResponse"
+        400:
+          description: "Validation Error. Usually caused by a missing or invalid parameter."
+          schema:
+            $ref: "#/definitions/validationErrorModel"
+        405:
+          description: "Method not supported Error. Returned if an unsupported http\
+            \ method is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        406:
+          description: "Content type not supported Error. Returned if an unsupported\
+            \ content type is used."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        413:
+          description: "Message content too big. Returned if the entity body's size\
+            \ is over the allowed limit."
+          schema:
+            $ref: "#/definitions/clientErrorModel"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/serverErrorModel"
+      x-swagger-router-controller: "ChatParticipantController"
+
+    delete:
+        tags:
+        - "chat"
+        description: "Deletes a chat participant"
+        operationId: "deleteChatParticipant"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "path"
+          name: "id"
+          description: "The id of chat participant entity that will be deleted"
+          required: true
+          type: "string"
+          format: "uuid"
+        - name: "context"
+          in: "header"
+          type: "string"
+          description: "The executing context"
+        - name: "context-id"
+          in: "header"
+          type: "string"
+          description: "The executing context id"
+          format: "uuid"
+        responses:
+          200:
+            description: "Deleted chat participant"
+            schema:
+              $ref: "#/definitions/chatParticipantResponse"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "ChatParticipantController"
+    get:
+        tags:
+        - "chat-participant"
+        description: "Returns a chat participant"
+        operationId: "getSingleChatParticipant"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "path"
+          name: "id"
+          description: "The id of chat participant entity that will be returned"
+          required: true
+          type: "string"
+          format: "uuid"
+        - name: "context"
+          in: "header"
+          type: "string"
+          description: "The executing context"
+        - name: "context-id"
+          in: "header"
+          type: "string"
+          description: "The executing context id"
+        responses:
+          200:
+            description: "A single chat participant"
+            schema:
+              $ref: "#/definitions/chatParticipantResponse"
+          405:
+            description: "Method not supported Error. Returned if an unsupported http\
+              \ method is used."
+            schema:
+              $ref: "#/definitions/clientErrorModel"
+          default:
+            description: "unexpected error"
+            schema:
+              $ref: "#/definitions/serverErrorModel"
+        x-swagger-router-controller: "ChatParticipantController"
+
   /status:
     get:
       tags:
@@ -1155,7 +1680,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/phoneNumberRequest"
-      representative:
+      representatives:
         type: array
         items:
           $ref: "#/definitions/personRequest"
@@ -1182,7 +1707,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/phoneNumberRequest"
-      representative:
+      representatives:
         type: array
         items:
           $ref: "#/definitions/personRequest"
@@ -1208,7 +1733,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/phoneNumberResponse"
-      representative:
+      representatives:
         type: array
         items:
           $ref: "#/definitions/personResponse"
@@ -1258,6 +1783,148 @@ definitions:
         items:
           $ref: "#/definitions/entityResponse"
 
+  chatRequest:
+    additionalProperties: false
+    type: "object"
+    required:
+    - "type"
+    - "participants"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the chat"
+      description:
+        type: "string"
+        description: "The description of the chat"
+      avatarId:
+        type: "string"
+        description: "The id of the chat avatar stored on user's device"
+      participants:
+        type: "array"
+        items:
+          type: "string"
+          format: "uuid"
+        description: "The ids of the users that participate in the chat"
+      type:
+        type: "string"
+        enum: ["friend", "group"]
+        description: "The type of the chat"
+
+  chatUpdateRequest:
+    additionalProperties: false
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the chat"
+      description:
+        type: "string"
+        description: "The description of the chat"
+      avatarId:
+        type: "string"
+        description: "The id of the chat avatar stored on user's device"
+      participants:
+        type: "array"
+        items:
+          type: "string"
+          format: "uuid"
+        description: "The ids of the users that participate in the chat"
+
+  chatResponse:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the chat"
+      description:
+        type: "string"
+        description: "The description of the chat"
+      avatarId:
+        type: "string"
+        description: "The id of the chat avatar stored on user's device"
+      participants:
+        type: "array"
+        items:
+          type: "string"
+          format: "uuid"
+        description: "The ids of the users that participate in the chat"
+      type:
+        type: "string"
+        enum: ["friend", "group"]
+        description: "The type of the chat"
+      messageLane:
+        type: array
+        items:
+          $ref: "#/definitions/chatMessageResponse"
+
+  chatParticipantUpdateRequest:
+    additionalProperties: false
+    type: "object"
+    properties:
+      status:
+        type: "string"
+        enum: ["mute", "unmute"]
+        description: "The status of the chat participant"
+
+  chatParticipantResponse:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+        enum: ["mute", "unmute"]
+        description: "The status of the chat participant"
+      user:
+        $ref: "#/definitions/userResponse"
+      chat:
+        $ref: "#/definitions/chatResponse"
+
+  chatMessageRequest:
+    additionalProperties: false
+    type: "object"
+    required:
+    - "content"
+    - "contentType"
+    - "sender"
+    properties:
+      content:
+        type: "string"
+        description: "The content of the message"
+      contentType:
+        type: "string"
+        enum: ["text", "image", "audio", "video"]
+        description: "The type of the content"
+      sender:
+        $ref: "#/definitions/messageSender"
+
+  chatMessageResponse:
+    type: "object"
+    properties:
+      content:
+        type: "string"
+        description: "The content of the message"
+      contentType:
+        type: "string"
+        enum: ["text", "image", "audio", "video"]
+        description: "The type of the content"
+      sender:
+        $ref: "#/definitions/messageSender"
+      status:
+        type: "string"
+        enum: ["delivered", "sent", "read", "acknowledged", "failed"]
+        description: "The status of the message"
+
+  messageSender:
+    type: "object"
+    properties:
+      item:
+        type: "string"
+        format: "uuid"
+        description: "The id of the sender"
+      kind:
+        type: "string"
+        enum: ["user", "community"]
+        description: "The type of the sender"
+
   entityRequest:
     additionalProperties: false
     type: "object"
@@ -1281,7 +1948,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/phoneNumberRequest"
-      representative:
+      representatives:
         type: array
         items:
           $ref: "#/definitions/personRequest"
@@ -1304,7 +1971,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/phoneNumberRequest"
-      representative:
+      representatives:
         type: array
         items:
           $ref: "#/definitions/personRequest"
@@ -1326,7 +1993,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/phoneNumberResponse"
-      representative:
+      representatives:
         type: array
         items:
           $ref: "#/definitions/personResponse"
@@ -1337,6 +2004,7 @@ definitions:
     required:
     - "name"
     - "phoneNumbers"
+    - "email"
     properties:
       name:
         type: "string"
@@ -1350,6 +2018,9 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/phoneNumberRequest"
+      isPrimary:
+        type: "boolean"
+        description: "Indicates if this is the primary person"
 
   personResponse:
     additionalProperties: false
@@ -1367,6 +2038,9 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/phoneNumberResponse"
+      isPrimary:
+        type: "boolean"
+        description: "Indicates if this is the primary person"
 
   addressRequest:
     additionalProperties: false

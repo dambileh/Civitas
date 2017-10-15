@@ -11,7 +11,7 @@ module.exports = {
   /**
    * Inserts the passed in addresses in the database
    *
-   * @param {array} addresses - The array of new addresses
+   * @param {Array} addresses - The array of new addresses
    * @param {string} ownerId - The id of address owner
    * @param {string} ownerType - The type of address owner
    * 
@@ -20,18 +20,16 @@ module.exports = {
   createAddresses: async function (addresses, ownerId, ownerType) {
 
     return new Promise(async function (resolve, reject) {
+      try {
+        var validationResult = await addressValidator.validateCreate(addresses);
 
-      var validationResult = await addressValidator.validateCreate(addresses); 
+        if (validationResult) {
+          return reject(validationResult);
+        }
 
-      if (validationResult) {
-        return reject(validationResult);
-      }
+        let addressEntities = [];
 
-      let addressEntities = [];
-
-      for (let address of addresses) {
-        try {
-
+        for (let address of addresses) {
           var addressEntity = new Address(address);
 
           addressEntity.owner = {
@@ -40,29 +38,86 @@ module.exports = {
           };
 
           addressEntities.push(addressEntity);
-        } catch (error) {
-          return reject(error);
         }
-      }
 
-      let savedAddresses = null;
+        let savedAddresses = await entityHelper.entityBatchCreate(addressEntities);
 
-      try {
-        savedAddresses = await entityHelper.entityBatchUpdate(addressEntities);
-
+        return resolve(savedAddresses);
       } catch (error) {
         return reject(error);
       }
-
-      return resolve(savedAddresses);
     });
 
   },
 
   /**
+   * Inserts the passed in addresses in the database and removes the old ones
+   *
+   * @param {Array} newAddresses - The array of new addresses
+   * @param {Array} oldAddresses - The array of old addresses
+   * @param {string} ownerId - The id of address owner
+   * @param {string} ownerType - The type of address owner
+   *
+   * @returns {Promise}
+   */
+  updateAddresses: async function (newAddresses, oldAddresses, ownerId, ownerType) {
+    const that = this;
+    
+    return new Promise(async function (resolve, reject) {
+        try {
+          var validationResult = await addressValidator.validateUpdate(newAddresses);
+
+          if (validationResult) {
+            return reject(validationResult);
+          }
+
+          let newAddressEntities = [];
+
+          for (let address of newAddresses) {
+            var addressEntity = new Address(address);
+
+            addressEntity.owner = {
+              item: ownerId,
+              kind: ownerType
+            };
+
+            newAddressEntities.push(addressEntity);
+          }
+
+          let savedAddresses = await entityHelper.entityBatchCreate(newAddressEntities);
+
+          // Now remove the old address records
+          if (oldAddresses.length > 0) {
+            try {
+
+              await that.removeAddresses(
+                oldAddresses
+              );
+            } catch (error) {
+
+              // If there is an error removing the old addresses, the new addresses should be removed as well
+              if (savedAddresses.length > 0) {
+                await that.removeAddresses(
+                  savedAddresses.map((address) => {
+                    return address.id;
+                  })
+                );
+              }
+              return reject(error);
+            }
+          }
+          
+          return resolve(savedAddresses);
+        } catch (error) {
+          return reject(error);
+        }
+    });
+
+  },
+  /**
    * Removes the passed in addresses from the database
    *
-   * @param {array} addressIds - The ids  of the addresses that will be removed 
+   * @param {Array} addressIds - The ids  of the addresses that will be removed 
    *
    * @returns {Promise}
    */

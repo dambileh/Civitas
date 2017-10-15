@@ -11,142 +11,135 @@ var pubSubChannels = require('../../PubSubChannels');
 module.exports = {
 
   /**
-   * Creates a user
+   * Creates a company
    *
    * @param {object} args - The request arguments passed in from the controller
    * @param {IncomingMessage} response - The http response object
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
-  createUser: async function (args, response, next) {
-    var userRequest = args.user.value;
+  createCompany: async function createCompany(args, response, next) {
+    let companyRequest = args.company.value;
 
-    var request = new Message(
-      pubSubChannels.User.External.Event,
+    companyRequest.owner = {
+      kind: args.context.value,
+      item: args['context-id'].value
+    };
+
+    let request = new Message(
+      pubSubChannels.Company.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.create,
-      userRequest
+      companyRequest
     );
 
     try {
-      let userEventCompleted =
+      let companyEventCompleted =
         await pubSub.publishAndWaitForResponse(
-          pubSubChannels.User.External.Event,
-          pubSubChannels.User.External.CompletedEvent,
+          pubSubChannels.Company.External.Event,
+          pubSubChannels.Company.External.CompletedEvent,
           {
             subscriberType: constants.pubSub.recipients.gateway
           },
-          request);
-
-      // publish a new event to registration channel
-
-      try {
-        var registrationRequest = new Message(
-          pubSubChannels.Registration.External.Event,
-          constants.pubSub.messageType.custom,
-          constants.pubSub.messageAction.requestRegistration,
-          {
-            msisdn : userRequest.msisdn
-          }
+          request
         );
 
-          await pubSub.publishAndWaitForResponse(
-            pubSubChannels.Registration.External.Event,
-            pubSubChannels.Registration.External.CompletedEvent,
-            {
-              subscriberType: constants.pubSub.recipients.gateway
-            },
-            registrationRequest
-          );
-
-      } catch (err) {
-        logging.logAction(
-          logging.logLevels.ERROR,
-          `Failed to subscribe to channel [${pubSubChannels.Registration.External.CompletedEvent}]`, err);
-        return next(err);
-      }
-
-      response.statusCode = userEventCompleted.payload.statusCode;
+      response.statusCode = companyEventCompleted.payload.statusCode;
       response.setHeader('Content-Type', 'application/json');
-      return response.end(JSON.stringify(userEventCompleted.payload.body));
+      return response.end(JSON.stringify(companyEventCompleted.payload.body));
 
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to publish to channel [${pubSubChannels.User.External.CompletedEvent}]`, err);
+        `Failed to publish to channel [${pubSubChannels.Company.External.CompletedEvent}]`, err);
       return next(err);
     }
   },
 
   /**
-   * Returns all users
+   * Returns all companies
    *
    * @param {object} args - The request arguments passed in from the controller
    * @param {IncomingMessage} response - The http response object
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
-  getAllUsers: async function (args, response, next) {
+  getAllCompanies: async function getAllCompanies(args, response, next) {
 
-    var request = new Message(
-      pubSubChannels.User.External.Event,
+    let companyRequest = {
+      owner: {
+        kind: args.context.value,
+        item: args['context-id'].value
+      }
+    };
+
+    let request = new Message(
+      pubSubChannels.Company.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.getAll,
-      {}
+      companyRequest
     );
 
     try {
       let completed =
         await pubSub.publishAndWaitForResponse(
-          pubSubChannels.User.External.Event,
-          pubSubChannels.User.External.CompletedEvent,
+          pubSubChannels.Company.External.Event,
+          pubSubChannels.Company.External.CompletedEvent,
           {
             subscriberType: constants.pubSub.recipients.gateway
           },
-          request);
+          request
+        );
 
       response.statusCode = completed.payload.statusCode;
       response.setHeader('Content-Type', 'application/json');
+
       if (completed.payload.header && completed.payload.header.resultCount) {
         response.setHeader('X-Result-Count', completed.payload.header.resultCount);
       }
+
       return response.end(JSON.stringify(completed.payload.body));
 
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to publish to channel [${pubSubChannels.User.External.CompletedEvent}]`, err);
+        `Failed to publish to channel [${pubSubChannels.Company.External.CompletedEvent}]`, err);
       return next(err);
     }
   },
 
   /**
-   * Returns a single user
+   * Returns a single company
    *
    * @param {object} args - The request arguments passed in from the controller
    * @param {IncomingMessage} response - The http response object
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
-  getSingleUser: async function (args, response, next) {
+  getSingleCompany: async function getSingleCompany(args, response, next) {
 
-    var userId = args.id.value;
+    let companyRequest = {
+      id: args.id.value,
+      owner: {
+        kind: args.context.value,
+        item: args['context-id'].value
+      }
+    };
 
-    var request = new Message(
-      pubSubChannels.User.External.Event,
+    let request = new Message(
+      pubSubChannels.Company.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.getSingle,
-      {
-        id: userId
-      }
+      companyRequest
     );
 
     try {
       let completed =
         await pubSub.publishAndWaitForResponse(
-          pubSubChannels.User.External.Event,
-          pubSubChannels.User.External.CompletedEvent,
+          pubSubChannels.Company.External.Event,
+          pubSubChannels.Company.External.CompletedEvent,
           {
             subscriberType: constants.pubSub.recipients.gateway
           },
-          request);
+          request
+        );
 
       response.statusCode = completed.payload.statusCode;
       response.setHeader('Content-Type', 'application/json');
@@ -155,39 +148,45 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to publish to channel [${pubSubChannels.User.External.CompletedEvent}]`, err);
+        `Failed to publish to channel [${pubSubChannels.Company.External.CompletedEvent}]`, err);
       return next(err);
     }
 
   },
   /**
-   * Deletes a user
+   * Deletes a company
    *
    * @param {object} args - The request arguments passed in from the controller
    * @param {IncomingMessage} response - The http response object
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
-  deleteUser: async function (args, response, next) {
-    var userId = args.id.value;
+  deleteCompany: async function deleteCompany(args, response, next) {
 
-    var request = new Message(
-      pubSubChannels.User.External.Event,
+    let companyRequest = {
+      id: args.id.value,
+      owner: {
+        kind: args.context.value,
+        item: args['context-id'].value
+      }
+    };
+
+    let request = new Message(
+      pubSubChannels.Company.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.delete,
-      {
-        id: userId
-      }
+      companyRequest
     );
 
     try {
       let completed =
         await pubSub.publishAndWaitForResponse(
-          pubSubChannels.User.External.Event,
-          pubSubChannels.User.External.CompletedEvent,
+          pubSubChannels.Company.External.Event,
+          pubSubChannels.Company.External.CompletedEvent,
           {
             subscriberType: constants.pubSub.recipients.gateway
           },
-          request);
+          request
+        );
 
       response.statusCode = completed.payload.statusCode;
       response.setHeader('Content-Type', 'application/json');
@@ -196,38 +195,44 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to publish to channel [${pubSubChannels.User.External.CompletedEvent}]`, err);
+        `Failed to publish to channel [${pubSubChannels.Company.External.CompletedEvent}]`, err);
       return next(err);
     }
   },
 
   /**
-   * Updates a user
+   * Updates a company
    *
    * @param {object} args - The request arguments passed in from the controller
    * @param {IncomingMessage} response - The http response object
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
-  updateUser: async function (args, response, next) {
-    var userRequest = args.user.value;
-    userRequest.id = args.id.value;
+  updateCompany: async function updateCompany(args, response, next) {
 
-    var request = new Message(
-      pubSubChannels.User.External.Event,
+    let companyRequest = args.company.value;
+    companyRequest.id = args.id.value;
+    companyRequest.owner = {
+      kind: args.context.value,
+      item: args['context-id'].value
+    };
+
+    let request = new Message(
+      pubSubChannels.Company.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.update,
-      userRequest
+      companyRequest
     );
 
     try {
       let completed =
         await pubSub.publishAndWaitForResponse(
-          pubSubChannels.User.External.Event,
-          pubSubChannels.User.External.CompletedEvent,
+          pubSubChannels.Company.External.Event,
+          pubSubChannels.Company.External.CompletedEvent,
           {
             subscriberType: constants.pubSub.recipients.gateway
           },
-          request);
+          request
+        );
 
       response.statusCode = completed.payload.statusCode;
       response.setHeader('Content-Type', 'application/json');
@@ -235,7 +240,7 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to publish to channel [${pubSubChannels.User.External.CompletedEvent}]`, err);
+        `Failed to publish to channel [${pubSubChannels.Company.External.CompletedEvent}]`, err);
       return next(err);
     }
   }

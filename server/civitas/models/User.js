@@ -24,7 +24,7 @@ var user = new schema(
 
 user.pre('remove', function(next) {
   // Remove all the addresses created for this user 
-  Address.remove({owner: this._id}).exec();
+  Address.remove({'owner.item': this._id}).exec();
   next();
 });
 

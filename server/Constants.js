@@ -18,6 +18,7 @@ module.exports = {
     recipients: {
       gateway: "gateway",
       user: "user",
+      company: "company",
       registration: "registration"
     },
     channelStore: {

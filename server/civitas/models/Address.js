@@ -64,7 +64,7 @@ module.exports = mongoose.model('address', address);
  statusCode: 500,
  body: err
  },
- userChannels.Internal.GetAllCompletedEvent
+ companyChannels.Internal.GetAllCompletedEvent
  );
  }
  */

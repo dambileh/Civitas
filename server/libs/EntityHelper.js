@@ -1,13 +1,13 @@
 module.exports = {
 
   /**
-   * Updated a batch of passed in entities
+   * Creates a batch of passed in entities
    *
-   * @param {array} entities - The entities that will be updated
+   * @param {Array} entities - The entities that will be updated
    *
    * @returns {Promise}
    */
-  entityBatchUpdate: function entityBatchUpdate(entities) {
+  entityBatchCreate: function entityBatchCreate(entities) {
     return new Promise(async function (resolve, reject) {
 
       let savedEntities = [];
