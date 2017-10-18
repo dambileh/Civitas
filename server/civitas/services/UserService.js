@@ -235,7 +235,7 @@ module.exports = {
 
     let user = null;
     try {
-      user = await User.findById(request.id);
+      user = await User.findById(request.id).populate('addresses').populate('friends');
     } catch (err) {
       return internalEventEmitter.emit(
         userChannels.Internal.DeleteCompletedEvent,
@@ -303,7 +303,7 @@ module.exports = {
     let user = null;
 
     try {
-      user = await User.findById(request.id);
+      user = await User.findById(request.id).populate('addresses').populate('friends');
     } catch (err) {
       return internalEventEmitter.emit(
         userChannels.Internal.UpdateCompletedEvent,
@@ -331,7 +331,7 @@ module.exports = {
       `Attempting to update a user document with id [${user.id}]`
     );
 
-    let userAddresses = null;
+    let userAddresses = user.addresses;
 
     // First update the address
     if (request.addresses) {

@@ -410,7 +410,7 @@ describe('/user/{id}', function () {
           done();
         });
     });
-
+    
     it('should respond with 400 Validation Error. Exactly one primary address must be set', function (done) {
       /*eslint-disable*/
       var schema = {

@@ -10,13 +10,14 @@ module.exports = {
   /**
    * Validates that no company with the same name and primary phone number already exist
    *
-   * @param {Object} companyRequest - The company entity that will be validated
+   * @param {string} name - The name of the company that will be validated
+   * @param {Array} phoneNumbers - The array of phone numbers that will be validated
    *
    * @returns {boolean} - If the validation was successful
    */
-  newCompanyValidator: async function newCompanyValidator(companyRequest) {
+  newCompanyValidator: async function newCompanyValidator(name, phoneNumbers) {
 
-    let primaryNumber = companyRequest.phoneNumbers.find((number) => {
+    let primaryNumber = phoneNumbers.find((number) => {
       return number.isPrimary;
     });
 
@@ -24,7 +25,7 @@ module.exports = {
     try {
       company = await Company.findOne(
         {
-          name: companyRequest.name,
+          name: name,
           'phoneNumbers.isPrimary': true,
           'phoneNumbers.number': primaryNumber.number
         }
@@ -61,7 +62,7 @@ module.exports = {
       .add(
         that.newCompanyValidator,
         {
-          parameters: [request],
+          parameters: [request.name, request.phoneNumbers],
           error: new validationError(
             'Some validation errors occurred.',
             [
@@ -88,7 +89,6 @@ module.exports = {
    */
   validateUpdate: async function validateCreate(company, request) {
     let that = this;
-
     return await new validationChain()
       .add(
         that.existingCompanyValidator,
@@ -105,7 +105,7 @@ module.exports = {
             ]
           )
         }
-      )
-      .validate({mode: validationChain.modes.EXIT_ON_ERROR});
+      ).validate({mode: validationChain.modes.EXIT_ON_ERROR});
+
   }
 };

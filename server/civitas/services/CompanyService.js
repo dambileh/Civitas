@@ -315,7 +315,11 @@ module.exports = {
 
     let company = null;
     try {
-      company = await Company.findById(request.id);
+      company = await Company
+        .findById(request.id)
+        .populate('addresses')
+        .populate('owner.item');
+
     } catch (err) {
       return internalEventEmitter.emit(
         companyChannels.Internal.DeleteCompletedEvent,
@@ -350,7 +354,7 @@ module.exports = {
     // Validate the existing owner
     let existingOwnerValidationResult = await ownerValidator.validateExisting(
       request.owner.item,
-      company.owner.item
+      company.owner.item._id
     );
 
     if (existingOwnerValidationResult) {
@@ -410,7 +414,11 @@ module.exports = {
     let company = null;
 
     try {
-      company = await Company.findById(request.id);
+      company = await Company
+        .findById(request.id)
+        .populate('addresses')
+        .populate('owner.item');
+
     } catch (err) {
       return internalEventEmitter.emit(
         companyChannels.Internal.UpdateCompletedEvent,
@@ -436,7 +444,7 @@ module.exports = {
     // Validate the existing owner
     let existingOwnerValidationResult = await ownerValidator.validateExisting(
       request.owner.item,
-      company.owner.item
+      company.owner.item._id
     );
 
     if (existingOwnerValidationResult) {
@@ -454,7 +462,7 @@ module.exports = {
       `Attempting to update a company document with id [${company.id}]`
     );
 
-    let companyAddresses = null;
+    let companyAddresses = company.addresses;
 
     // First update the address
     if (request.addresses) {
@@ -486,10 +494,6 @@ module.exports = {
       company.addresses = companyAddresses.map((userAddress) => {
         return userAddress.id;
       });
-    }
-
-    if (request.name) {
-      company.name = request.name;
     }
 
     if (request.branch) {

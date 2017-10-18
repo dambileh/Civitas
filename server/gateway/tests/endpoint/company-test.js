@@ -58,11 +58,13 @@ var api = supertest('http://localhost:4000'); // supertest init;
 chai.should();
 
 let createdUser = null;
+let createdUserTwo = null;
 let createdCompany = null;
+let createdCompanyTwo = null;
 
 describe('/company', function() {
   before(function(done){
-    const postSuccessBody = {
+    const userOneBody = {
       "msisdn": "27728120001",
       "firstName": "hossein",
       "lastName": "shayesteh",
@@ -104,22 +106,161 @@ describe('/company', function() {
         }
       ]
     };
+    const userTwoBody = {
+      "msisdn": "27722220001",
+      "firstName": "hossein",
+      "lastName": "shayesteh",
+      "email": "sdfsd@fsdfsdf.com",
+      "addresses": [
+        {
+          "isPrimary": false,
+          "detail": {
+            "line1": "line1",
+            "city": "city",
+            "country": "country",
+            "province": "country",
 
+
+            "postalCode": "postalCode",
+            "type": "postal"
+          },
+          "location": {
+            "type": "Point",
+            "coordinates": [-180, 90]
+          }
+        },
+        {
+          "isPrimary": true,
+          "detail": {
+            "line1": "line1",
+            "city": "city",
+            "country": "country",
+            "province": "country",
+
+
+            "postalCode": "postalCode",
+            "type": "postal"
+          },
+          "location": {
+            "type": "Point",
+            "coordinates": [-180, 90]
+          }
+        }
+      ]
+    };
     api.post('/v1/user')
       .set('Content-Type', 'application/json')
-      .send(postSuccessBody)
+      .send(userOneBody)
       .end(function (err, res) {
         if (err) return done(err);
         createdUser = res.body;
-        done();
+
+        api.post('/v1/user')
+          .set('Content-Type', 'application/json')
+          .send(userTwoBody)
+          .end(function (err, res) {
+            if (err) return done(err);
+            createdUserTwo = res.body;
+            done();
+          });
+
       });
 
   });
 
   describe('post', function() {
 
-    const successfulPostBody = {
+    const companyOneBody = {
       "name": "adt",
+      "branch": "durbanville",
+      "type": "ar",
+      "addresses": [
+        {
+          "isPrimary": false,
+          "detail": {
+            "line1": "line1",
+            "city": "city",
+            "country": "country",
+            "province": "country",
+
+
+            "postalCode": "postalCode",
+            "type": "postal"
+          },
+          "location": {
+            "type": "Point",
+            "coordinates": [-180, 90]
+          }
+        },
+        {
+          "isPrimary": true,
+          "detail": {
+            "line1": "line1",
+            "city": "city",
+            "country": "country",
+            "province": "country",
+
+
+            "postalCode": "postalCode",
+            "type": "postal"
+          },
+          "location": {
+            "type": "Point",
+            "coordinates": [-180, 90]
+          }
+        }
+      ],
+      "phoneNumbers": [
+        {
+          "number": "021456966",
+          "type": "business",
+          "isPrimary": true
+        },
+        {
+          "number": "021456967",
+          "type": "business",
+          "isPrimary": false
+        }
+      ],
+      "representatives": [
+        {
+          "name": "hossein shayesteh",
+          "email": "hsh_85@yahoo.com",
+          "isPrimary": true,
+          "phoneNumbers": [
+            {
+              "number": "07281200899",
+              "type": "personal",
+              "isPrimary": true
+            },
+            {
+              "number": "07281200891",
+              "type": "personal",
+              "isPrimary": false
+            }
+          ]
+        },
+        {
+          "name": "hossein shayesteh",
+          "email": "hsh_856@yahoo.com",
+          "isPrimary": false,
+          "phoneNumbers": [
+            {
+              "number": "07281200899",
+              "type": "personal",
+              "isPrimary": true
+            },
+            {
+              "number": "07281200891",
+              "type": "personal",
+              "isPrimary": false
+            }
+          ]
+        }
+      ]
+    };
+    const companyTwoBody = {
+      "name": "adt2",
       "branch": "durbanville",
       "type": "ar",
       "addresses": [
@@ -416,14 +557,29 @@ describe('/company', function() {
         'context': 'user',
         'context-id': createdUser._id
       })
-      .send(successfulPostBody)
+      .send(companyOneBody)
       .expect(201)
       .end(function(err, res) {
         if (err) return done(err);
         validator.validate(res.body, schema).should.be.true;
         createdCompany = res.body;
-        done();
+
+        api.post('/v1/company')
+          .set('Content-Type', 'application/json')
+          .set({
+            'context': 'user',
+            'context-id': createdUserTwo._id
+          })
+          .send(companyTwoBody)
+          .expect(201)
+          .end(function(err, res) {
+            if (err) return done(err);
+            validator.validate(res.body, schema).should.be.true;
+            createdCompanyTwo = res.body;
+            done();
+          });
       });
+
     });
 
     it('should respond with 400 Validation Error. Invalid Owner Type', function(done) {
@@ -674,133 +830,7 @@ describe('/company', function() {
       });
     });
 
-    it('should respond with 400 Validation Error. Company already exists', function(done) {
-      /*eslint-disable*/
-      var schema = {
-        "type": "object",
-        "required": [
-          "code",
-          "message"
-        ],
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          },
-          "errors": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": [
-                "code",
-                "message",
-                "path"
-              ],
-              "properties": {
-                "code": {
-                  "type": "string"
-                },
-                "message": {
-                  "type": "string"
-                },
-                "path": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "description": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      };
-
-      const postBody = {
-        "name": "adt",
-        "branch": "durbanville",
-        "type": "ar",
-        "addresses": [
-          {
-            "isPrimary": true,
-            "detail": {
-              "line1": "line1",
-              "city": "city",
-              "country": "country",
-              "province": "country",
-
-
-              "postalCode": "postalCode",
-              "type": "postal"
-            },
-            "location": {
-              "type": "Point",
-              "coordinates": [-180, 90]
-            }
-          }
-        ],
-        "phoneNumbers": [
-          {
-            "number": "021456966",
-            "type": "business",
-            "isPrimary": true
-          }
-        ],
-        "representatives": [
-          {
-            "name": "hossein shayesteh",
-            "email": "hsh_85@yahoo.com",
-            "isPrimary": true,
-            "phoneNumbers": [
-              {
-                "number": "07281200899",
-                "type": "personal",
-                "isPrimary": true
-              }
-            ]
-          }
-        ]
-      };
-
-      /*eslint-enable*/
-      api.post('/v1/company')
-      .set('Content-Type', 'application/json')
-      .set({
-        'context': 'user',
-        'context-id': createdUser._id
-      })
-      .send(postBody)
-      .expect(400)
-      .end(function(err, res) {
-        if (err) return done(err);
-
-        validator.validate(res.body, schema).should.be.true;
-
-        const expectedResponse = {
-          "name": "ValidationError",
-          "code": "MODEL_VALIDATION_FAILED",
-          "message": "Some validation errors occurred.",
-          "results": {
-            "errors": [{
-              "code": 600000,
-              "message": "A company with the same name and primary phone number already exists.",
-              "path": ["name"]
-            }]
-          },
-          "status": 400
-        }
-
-        assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
-
-        done();
-      });
-    });
-
-    it('should respond with 400 Validation Error. Exactly one primary address must be set for company', function(done) {
+    it('should respond with 400 Validation Error. Exactly one primary address must be set for company. Two Addresses', function(done) {
       /*eslint-disable*/
       var schema = {
         "type": "object",
@@ -938,8 +968,231 @@ describe('/company', function() {
         done();
       });
     });
+    it('should respond with 400 Validation Error. Exactly one primary address must be set for company. No Address', function(done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
 
-    it('should respond with 400 Validation Error. Exactly one primary phone number must be set for company', function(done) {
+      const postBody = {
+        "name": "adts",
+        "branch": "durbanville",
+        "type": "ar",
+        "addresses": [],
+        "phoneNumbers": [
+          {
+            "number": "021456966",
+            "type": "business",
+            "isPrimary": true
+          }
+        ],
+        "representatives": [
+          {
+            "name": "hossein shayesteh",
+            "email": "hsh_85@yahoo.com",
+            "isPrimary": true,
+            "phoneNumbers": [
+              {
+                "number": "07281200899",
+                "type": "personal",
+                "isPrimary": true
+              }
+            ]
+          }
+        ]
+      };
+
+      /*eslint-enable*/
+      api.post('/v1/company')
+      .set('Content-Type', 'application/json')
+      .set({
+        'context': 'user',
+        'context-id': createdUser._id
+      })
+      .send(postBody)
+      .expect(400)
+      .end(function(err, res) {
+        if (err) return done(err);
+
+        validator.validate(res.body, schema).should.be.true;
+
+        const expectedResponse = {
+          "name": "ValidationError",
+          "code": "MODEL_VALIDATION_FAILED",
+          "message": "Some validation errors occurred.",
+          "results": {
+            "errors": [{
+              "code": 200005,
+              "message": "Exactly one primary address must be set",
+              "path": ["addresses"]
+            }]
+          },
+          "status": 400
+        };
+
+        assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+        done();
+      });
+    });
+
+    it('should respond with 400 Validation Error. Exactly one primary phone number must be set for company. No number', function(done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      const postBody = {
+        "name": "adt325",
+        "branch": "durbanville",
+        "type": "ar",
+        "addresses": [
+          {
+            "isPrimary": true,
+            "detail": {
+              "line1": "line1",
+              "city": "city",
+              "country": "country",
+              "province": "country",
+              "postalCode": "postalCode",
+              "type": "postal"
+            },
+            "location": {
+              "type": "Point",
+              "coordinates": [-180, 90]
+            }
+          }
+        ],
+        "phoneNumbers": [],
+        "representatives": [
+          {
+            "name": "hossein shayesteh",
+            "email": "hsh_85@yahoo.com",
+            "isPrimary": true,
+            "phoneNumbers": [
+              {
+                "number": "07281200899",
+                "type": "personal",
+                "isPrimary": true
+              }
+            ]
+          }
+        ]
+      };
+
+      /*eslint-enable*/
+      api.post('/v1/company')
+        .set('Content-Type', 'application/json')
+        .set({
+          'context': 'user',
+          'context-id': createdUser._id
+        })
+        .send(postBody)
+        .expect(400)
+        .end(function(err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 500000,
+                "message": "Exactly one primary phone number must be set",
+                "path": ["phoneNumbers"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+    it('should respond with 400 Validation Error. Exactly one primary phone number must be set for company. Two numbers', function(done) {
       /*eslint-disable*/
       var schema = {
         "type": "object",
@@ -1067,7 +1320,7 @@ describe('/company', function() {
         });
     });
 
-    it('should respond with 400 Validation Error. Exactly one primary phone number must be set for representative', function(done) {
+    it('should respond with 400 Validation Error. Exactly one primary phone number must be set for representative. Two numbers', function(done) {
       /*eslint-disable*/
       var schema = {
         "type": "object",
@@ -1158,6 +1411,122 @@ describe('/company', function() {
                 "isPrimary": true
               }
             ]
+          }
+        ]
+      };
+
+      /*eslint-enable*/
+      api.post('/v1/company')
+        .set('Content-Type', 'application/json')
+        .set({
+          'context': 'user',
+          'context-id': createdUser._id
+        })
+        .send(postBody)
+        .expect(400)
+        .end(function(err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 500000,
+                "message": "Exactly one primary phone number must be set for person",
+                "path": ["representatives", "phoneNumbers"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+    it('should respond with 400 Validation Error. Exactly one primary phone number must be set for representative. No number', function(done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      const postBody = {
+        "name": "adt325",
+        "branch": "durbanville",
+        "type": "ar",
+        "addresses": [
+          {
+            "isPrimary": true,
+            "detail": {
+              "line1": "line1",
+              "city": "city",
+              "country": "country",
+              "province": "country",
+              "postalCode": "postalCode",
+              "type": "postal"
+            },
+            "location": {
+              "type": "Point",
+              "coordinates": [-180, 90]
+            }
+          }
+        ],
+        "phoneNumbers": [
+          {
+            "number": "021456966",
+            "type": "business",
+            "isPrimary": true
+          }
+        ],
+        "representatives": [
+          {
+            "name": "hossein shayesteh",
+            "email": "hsh_85@yahoo.com",
+            "isPrimary": true,
+            "phoneNumbers": []
           }
         ]
       };
@@ -1456,7 +1825,7 @@ describe('/company', function() {
         });
     });
 
-    it('should respond with 400 Validation Error. Exactly one primary person must be set for company', function(done) {
+    it('should respond with 400 Validation Error. Exactly one primary person must be set for company. Two persons', function(done) {
       /*eslint-disable*/
       var schema = {
         "type": "object",
@@ -1556,6 +1925,115 @@ describe('/company', function() {
             ]
           }
         ]
+      };
+
+      /*eslint-enable*/
+      api.post('/v1/company')
+        .set('Content-Type', 'application/json')
+        .set({
+          'context': 'user',
+          'context-id': createdUser._id
+        })
+        .send(postBody)
+        .expect(400)
+        .end(function(err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 700000,
+                "message": "Exactly one primary representative must be set",
+                "path": ["representatives"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+    });
+    it('should respond with 400 Validation Error. Exactly one primary person must be set for company. No person', function(done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      const postBody = {
+        "name": "adt325",
+        "branch": "durbanville",
+        "type": "ar",
+        "addresses": [
+          {
+            "isPrimary": true,
+            "detail": {
+              "line1": "line1",
+              "city": "city",
+              "country": "country",
+              "province": "country",
+              "postalCode": "postalCode",
+              "type": "postal"
+            },
+            "location": {
+              "type": "Point",
+              "coordinates": [-180, 90]
+            }
+          }
+        ],
+        "phoneNumbers": [
+          {
+            "number": "021456966",
+            "type": "business",
+            "isPrimary": true
+          }
+        ],
+        "representatives": []
       };
 
       /*eslint-enable*/
@@ -1728,6 +2206,164 @@ describe('/company', function() {
   });
 
   describe('get', function() {
+    it('should respond with 400 Validation Error. Invalid Owner Type', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      api.get(`/v1/company`)
+        .set('Content-Type', 'application/json')
+        .set({
+          'context': 'community',
+          'context-id': createdUser._id
+        })
+        .send({
+          "branch": "bellville"
+        })
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 400000,
+                "message": "The owner type [community] is not valid for this entity."
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+
+    });
+    it('should respond with 400 Validation Error. Owner not found', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      api.get(`/v1/company`)
+        .set('Content-Type', 'application/json')
+        .set({
+          'context': 'user',
+          'context-id': createdCompany._id
+        })
+        .send({
+          "branch": "bellville"
+        })
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "message": `An owner with id [${createdCompany._id}] could not be found`
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+
+    });
+
     it('should respond with 200 An array of companies', function(done) {
       /*eslint-disable*/
       var schema = {
@@ -1944,6 +2580,8 @@ describe('/company', function() {
         if (err) return done(err);
 
         validator.validate(res.body, schema).should.be.true;
+
+        assert.equal(res.body.length, 1, 'Expected only one company to have been returned for this user');
         done();
       });
     });

@@ -84,16 +84,6 @@ paths:
             \ method is used."
           schema:
             $ref: "#/definitions/clientErrorModel"
-        406:
-          description: "Content type not supported Error. Returned if an unsupported\
-            \ content type is used."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
-        413:
-          description: "Message content too big. Returned if the entity body's size\
-            \ is over the allowed limit."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
         default:
           description: "unexpected error"
           schema:
@@ -134,16 +124,6 @@ paths:
         405:
           description: "Method not supported Error. Returned if an unsupported http\
             \ method is used."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
-        406:
-          description: "Content type not supported Error. Returned if an unsupported\
-            \ content type is used."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
-        413:
-          description: "Message content too big. Returned if the entity body's size\
-            \ is over the allowed limit."
           schema:
             $ref: "#/definitions/clientErrorModel"
         default:
@@ -251,16 +231,6 @@ paths:
             \ method is used."
           schema:
             $ref: "#/definitions/clientErrorModel"
-        406:
-          description: "Content type not supported Error. Returned if an unsupported\
-            \ content type is used."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
-        413:
-          description: "Message content too big. Returned if the entity body's size\
-            \ is over the allowed limit."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
         default:
           description: "unexpected error"
           schema:
@@ -304,16 +274,6 @@ paths:
             \ method is used."
           schema:
             $ref: "#/definitions/clientErrorModel"
-        406:
-          description: "Content type not supported Error. Returned if an unsupported\
-            \ content type is used."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
-        413:
-          description: "Message content too big. Returned if the entity body's size\
-            \ is over the allowed limit."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
         default:
           description: "unexpected error"
           schema:
@@ -349,16 +309,6 @@ paths:
         405:
           description: "Method not supported Error. Returned if an unsupported http\
             \ method is used."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
-        406:
-          description: "Content type not supported Error. Returned if an unsupported\
-            \ content type is used."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
-        413:
-          description: "Message content too big. Returned if the entity body's size\
-            \ is over the allowed limit."
           schema:
             $ref: "#/definitions/clientErrorModel"
         default:
@@ -444,16 +394,6 @@ paths:
             \ method is used."
           schema:
             $ref: "#/definitions/clientErrorModel"
-        406:
-          description: "Content type not supported Error. Returned if an unsupported\
-            \ content type is used."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
-        413:
-          description: "Message content too big. Returned if the entity body's size\
-            \ is over the allowed limit."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
         default:
           description: "unexpected error"
           schema:
@@ -506,16 +446,10 @@ paths:
             \ method is used."
           schema:
             $ref: "#/definitions/clientErrorModel"
-        406:
-          description: "Content type not supported Error. Returned if an unsupported\
-            \ content type is used."
+        401:
+          description: "Unauthorized Access"
           schema:
-            $ref: "#/definitions/clientErrorModel"
-        413:
-          description: "Message content too big. Returned if the entity body's size\
-            \ is over the allowed limit."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
+            $ref: "#/definitions/authorizationErrorModel"
         default:
           description: "unexpected error"
           schema:
@@ -557,6 +491,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          401:
+            description: "Unauthorized Access"
+            schema:
+              $ref: "#/definitions/authorizationErrorModel"
           default:
             description: "unexpected error"
             schema:
@@ -596,6 +534,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          401:
+            description: "Unauthorized Access"
+            schema:
+              $ref: "#/definitions/authorizationErrorModel"
           default:
             description: "unexpected error"
             schema:
@@ -679,16 +621,6 @@ paths:
             \ method is used."
           schema:
             $ref: "#/definitions/clientErrorModel"
-        406:
-          description: "Content type not supported Error. Returned if an unsupported\
-            \ content type is used."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
-        413:
-          description: "Message content too big. Returned if the entity body's size\
-            \ is over the allowed limit."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
         default:
           description: "unexpected error"
           schema:
@@ -741,16 +673,10 @@ paths:
             \ method is used."
           schema:
             $ref: "#/definitions/clientErrorModel"
-        406:
-          description: "Content type not supported Error. Returned if an unsupported\
-            \ content type is used."
+        401:
+          description: "Unauthorized Access"
           schema:
-            $ref: "#/definitions/clientErrorModel"
-        413:
-          description: "Message content too big. Returned if the entity body's size\
-            \ is over the allowed limit."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
+            $ref: "#/definitions/authorizationErrorModel"
         default:
           description: "unexpected error"
           schema:
@@ -792,6 +718,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          401:
+            description: "Unauthorized Access"
+            schema:
+              $ref: "#/definitions/authorizationErrorModel"
           default:
             description: "unexpected error"
             schema:
@@ -831,6 +761,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          401:
+            description: "Unauthorized Access"
+            schema:
+              $ref: "#/definitions/authorizationErrorModel"
           default:
             description: "unexpected error"
             schema:
@@ -914,16 +848,6 @@ paths:
             \ method is used."
           schema:
             $ref: "#/definitions/clientErrorModel"
-        406:
-          description: "Content type not supported Error. Returned if an unsupported\
-            \ content type is used."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
-        413:
-          description: "Message content too big. Returned if the entity body's size\
-            \ is over the allowed limit."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
         default:
           description: "unexpected error"
           schema:
@@ -976,16 +900,10 @@ paths:
             \ method is used."
           schema:
             $ref: "#/definitions/clientErrorModel"
-        406:
-          description: "Content type not supported Error. Returned if an unsupported\
-            \ content type is used."
+        401:
+          description: "Unauthorized Access"
           schema:
-            $ref: "#/definitions/clientErrorModel"
-        413:
-          description: "Message content too big. Returned if the entity body's size\
-            \ is over the allowed limit."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
+            $ref: "#/definitions/authorizationErrorModel"
         default:
           description: "unexpected error"
           schema:
@@ -1027,6 +945,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          401:
+            description: "Unauthorized Access"
+            schema:
+              $ref: "#/definitions/authorizationErrorModel"
           default:
             description: "unexpected error"
             schema:
@@ -1066,6 +988,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          401:
+            description: "Unauthorized Access"
+            schema:
+              $ref: "#/definitions/authorizationErrorModel"
           default:
             description: "unexpected error"
             schema:
@@ -1118,16 +1044,10 @@ paths:
             \ method is used."
           schema:
             $ref: "#/definitions/clientErrorModel"
-        406:
-          description: "Content type not supported Error. Returned if an unsupported\
-            \ content type is used."
+        401:
+          description: "Unauthorized Access"
           schema:
-            $ref: "#/definitions/clientErrorModel"
-        413:
-          description: "Message content too big. Returned if the entity body's size\
-            \ is over the allowed limit."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
+            $ref: "#/definitions/authorizationErrorModel"
         default:
           description: "unexpected error"
           schema:
@@ -1176,6 +1096,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          401:
+            description: "Unauthorized Access"
+            schema:
+              $ref: "#/definitions/authorizationErrorModel"
           default:
             description: "unexpected error"
             schema:
@@ -1266,16 +1190,10 @@ paths:
             \ method is used."
           schema:
             $ref: "#/definitions/clientErrorModel"
-        406:
-          description: "Content type not supported Error. Returned if an unsupported\
-            \ content type is used."
+        401:
+          description: "Unauthorized Access"
           schema:
-            $ref: "#/definitions/clientErrorModel"
-        413:
-          description: "Message content too big. Returned if the entity body's size\
-            \ is over the allowed limit."
-          schema:
-            $ref: "#/definitions/clientErrorModel"
+            $ref: "#/definitions/authorizationErrorModel"
         default:
           description: "unexpected error"
           schema:
@@ -1317,6 +1235,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          401:
+            description: "Unauthorized Access"
+            schema:
+              $ref: "#/definitions/authorizationErrorModel"
           default:
             description: "unexpected error"
             schema:
@@ -1356,6 +1278,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          401:
+            description: "Unauthorized Access"
+            schema:
+              $ref: "#/definitions/authorizationErrorModel"
           default:
             description: "unexpected error"
             schema:
@@ -1689,9 +1615,6 @@ definitions:
     additionalProperties: false
     type: "object"
     properties:
-      name:
-        type: "string"
-        description: "The name of the company"
       branch:
         type: "string"
         description: "The name of the branch"
@@ -2166,6 +2089,16 @@ definitions:
       message:
         type: "string"
       stack:
+        type: "string"
+  authorizationErrorModel:
+    type: "object"
+    required:
+    - "name"
+    - "message"
+    properties:
+      name:
+        type: "string"
+      message:
         type: "string"
 
   validationErrorModel:
