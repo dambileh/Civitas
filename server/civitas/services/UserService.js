@@ -91,12 +91,10 @@ module.exports = {
       );
     } catch (error) {
 
-      let statusCode = 0;
+      let statusCode = 500;
 
       if (error.status === 400) {
         statusCode = 400;
-      } else {
-        statusCode = 500;
       }
 
       // If there is an error creating the address, we should remove the user record as well
@@ -157,31 +155,23 @@ module.exports = {
       );
     }
 
+    let statusCode = 200;
+
     // If the array is empty we need to return a 204 response.
     if (appUtil.isArrayEmpty(users)) {
-      return internalEventEmitter.emit(
-        userChannels.Internal.GetAllCompletedEvent,
-        {
-          statusCode: 204,
-          header: {
-            resultCount: 0
-          },
-          body: {}
-        }
-      );
-    } else {
-
-      return internalEventEmitter.emit(
-        userChannels.Internal.GetAllCompletedEvent,
-        {
-          statusCode: 200,
-          header: {
-            resultCount: users.length
-          },
-          body: users
-        }
-      );
+      statusCode = 204;
     }
+    
+    return internalEventEmitter.emit(
+      userChannels.Internal.GetAllCompletedEvent,
+      {
+        statusCode: statusCode,
+        header: {
+          resultCount: users.length
+        },
+        body: users
+      }
+    );
   },
 
   /**
@@ -245,7 +235,7 @@ module.exports = {
 
     let user = null;
     try {
-      user = await User.findById(request.id);
+      user = await User.findById(request.id).populate('addresses').populate('friends');
     } catch (err) {
       return internalEventEmitter.emit(
         userChannels.Internal.DeleteCompletedEvent,
@@ -313,7 +303,7 @@ module.exports = {
     let user = null;
 
     try {
-      user = await User.findById(request.id);
+      user = await User.findById(request.id).populate('addresses').populate('friends');
     } catch (err) {
       return internalEventEmitter.emit(
         userChannels.Internal.UpdateCompletedEvent,
@@ -341,23 +331,26 @@ module.exports = {
       `Attempting to update a user document with id [${user.id}]`
     );
 
-    let userAddresses = null;
+    let userAddresses = user.addresses;
 
     // First update the address
     if (request.addresses) {
 
       try {
-        userAddresses = await _updateUserAddress(user, request);
+        userAddresses = await addressManager.updateAddresses(
+          request.addresses,
+          user.addresses,
+          user.id,
+          constants.address.ownerType.user
+        );
       } catch (error) {
 
-        let statusCode = 0;
+        let statusCode = 500;
 
         if (error.status === 400) {
           statusCode = 400;
-        } else {
-          statusCode = 500;
         }
-
+        
         return internalEventEmitter.emit(
           userChannels.Internal.UpdateCompletedEvent,
           {
@@ -409,46 +402,3 @@ module.exports = {
     );
   }
 };
-
-function _updateUserAddress(user, request) {
-
-  return new Promise(async function (resolve, reject) {
-    // It is easier just to remove the existing addresses and insert the new ones
-
-    // First create the new address records so we can return the validation errors
-    let userAddresses = null;
-    try {
-      userAddresses = await addressManager.createAddresses(
-        request.addresses,
-        user.id,
-        constants.address.ownerType.user
-      );
-    } catch (error) {
-      return reject(error);
-    }
-
-    // Now remove the old address records
-    if (user.addresses.length > 0) {
-      try {
-
-        await addressManager.removeAddresses(
-          user.addresses
-        );
-      } catch (error) {
-
-        // If there is an error removing the old addresses, the new addresses should be removed as well
-        if (userAddresses.length > 0) {
-          await addressManager.removeAddresses(
-            userAddresses.map((address) => {
-              return address.id;
-            })
-          );
-        }
-        return reject(error);
-      }
-    }
-
-    return resolve(userAddresses);
-
-  });
-}

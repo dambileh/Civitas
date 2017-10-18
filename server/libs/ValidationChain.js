@@ -103,6 +103,7 @@ function _exitOnError(validators) {
       } else {
         result = validator.fn(...validator.parameters);
       }
+      
       if (!result) {
         if (validator.error) {
           return resolve(validator.error);

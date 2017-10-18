@@ -21,6 +21,23 @@ module.exports = {
       "InviteFriendEventCompletedEvent": "InviteFriendEventCompletedEvent"
     }
   },
+  "Company": {
+    "External": {
+      "Event": "CompanyEvent",
+      "CompletedEvent": "CompanyCompletedEvent"
+    },
+    "Internal": {
+      "CreateEvent": "CompanyCreateEvent",
+      "CreateCompletedEvent": "CompanyCreateCompletedEvent",
+      "UpdateEvent": "CompanyUpdateEvent",
+      "UpdateCompletedEvent": "CompanyUpdateCompletedEvent",
+      "DeleteEvent": "CompanyDeleteEvent",
+      "DeleteCompletedEvent": "CompanyDeleteCompletedEvent",
+      "GetSingleEvent": "CompanyGetSingleEvent",
+      "GetSingleCompletedEvent": "CompanyGetSingleCompletedEvent",
+      "GetAllEvent": "CompanyGetAllEvent"
+    }
+  },
   "Registration": {
     "External": {
       "Event": "RegistrationEvent",
