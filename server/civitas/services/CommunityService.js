@@ -1,6 +1,6 @@
 'use strict';
 
-const Company = require('../models/Company');
+const Community = require('../models/Community');
 const resourceNotFoundError = require('../../libs/error/ResourceNotFoundError');
 const validationError = require('../../libs/error/ValidationError');
 const appUtil = require('../../libs/AppUtil');
@@ -8,47 +8,34 @@ const logging = require('../utilities/Logging');
 const config = require('config');
 const internalEventEmitter = require('../../libs/InternalEventEmitter');
 const addressManager = require('../managers/AddressManager');
-const companyChannels = require('../../PubSubChannels').Company;
+const communityChannels = require('../../PubSubChannels').Community;
 const errors = require('../../ErrorCodes');
 const constants = require('../../Constants');
 const ownerValidator = require('../validators/OwnerValidator');
-const companyValidator = require('../validators/CompanyValidator');
-const phoneNumberValidator = require('../validators/PhoneNumberValidator');
+const communityValidator = require('../validators/CommunityValidator');
 const personValidator = require('../validators/PersonValidator');
+const entityValidator = require('../validators/EntityValidator');
 
 /**
- * The Company Service module
+ * The Community Service module
  */
 module.exports = {
 
   /**
-   * Creates a company
+   * Creates a community
    *
    * @param {object} request - The request that was sent from the controller
    */
-  createCompany: async function createCompany(request) {
+  createCommunity: async function createCommunity(request) {
     //Validate the owner
     let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user']);
 
     if (ownerValidationResult) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
+        communityChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
           body: ownerValidationResult
-        }
-      );
-    }
-
-    // Validate the phone numbers
-    let phoneNumberValidationResult = await phoneNumberValidator.validate(request.phoneNumbers);
-
-    if (phoneNumberValidationResult) {
-      return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
-        {
-          statusCode: 400,
-          body: phoneNumberValidationResult
         }
       );
     }
@@ -57,7 +44,7 @@ module.exports = {
     let personValidationResult = await personValidator.validate(request.representatives);
     if (personValidationResult) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
+        communityChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
           body: personValidationResult
@@ -65,32 +52,48 @@ module.exports = {
       );
     }
 
-    // Validate the request
-    var companyValidationResult = await companyValidator.validateCreate(request);
+    // Validate the entities
+    var entityValidationResult = await entityValidator.validate(request.entities);
 
-    if (companyValidationResult) {
+    if (entityValidationResult) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
+        communityChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
-          body: companyValidationResult
+          body: entityValidationResult
+        }
+      );
+    }
+    
+    // Validate the request
+    var communityValidationResult = await communityValidator.validateCreate(request);
+
+    if (communityValidationResult) {
+      return internalEventEmitter.emit(
+        communityChannels.Internal.CreateCompletedEvent,
+        {
+          statusCode: 400,
+          body: communityValidationResult
         }
       );
     }
 
-    // get address from the request and unset it so that we can create the Company model
+    // get address from the request and unset it so that we can create the Community model
     // Otherwise it will fail the Array of Ids schema validation
-    let requestAddresses = request.addresses;
 
-    request.addresses = [];
+    // Set it to true since there is only one address
+    request.address.isPrimary = true;
+    let requestAddresses = [request.address];
 
-    let companyModel = null;
+    request.address = null;
+
+    let communityModel = null;
 
     try {
-      companyModel = new Company(request);
+      communityModel = new Community(request);
     } catch (error) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
+        communityChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 500,
           body: error
@@ -100,18 +103,20 @@ module.exports = {
 
     logging.logAction(
       logging.logLevels.INFO,
-      'Attempting to save a new Company document'
+      'Attempting to save a new Community document'
     );
 
-    await companyModel.save();
 
-    let companyAddresses = null;
+
+    await communityModel.save();
+
+    let communityAddresses = null;
 
     try {
-      companyAddresses = await addressManager.createAddresses(
+      communityAddresses = await addressManager.createAddresses(
         requestAddresses,
-        companyModel.id,
-        constants.address.ownerType.company
+        communityModel.id,
+        constants.address.ownerType.community
       );
     } catch (error) {
 
@@ -121,11 +126,11 @@ module.exports = {
         statusCode = 400;
       }
 
-      // If there is an error creating the address, we should remove the company record as well
-      await companyModel.remove();
+      // If there is an error creating the address, we should remove the community record as well
+      await communityModel.remove();
 
       return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
+        communityChannels.Internal.CreateCompletedEvent,
         {
           statusCode: statusCode,
           body: error
@@ -133,37 +138,37 @@ module.exports = {
       );
     }
 
-    // Now that we have created the addresses, we should set them on the user record
+    // Now that we have created the address, we should set them on the user record
     // We only save the ids
-    companyModel.addresses = companyAddresses.map((address) => {
+    communityModel.address = communityAddresses.map((address) => {
       return address.id;
-    });
+    })[0];
 
-    await companyModel.save();
+    await communityModel.save();
 
     // Set the address objects back on for display
-    companyModel.addresses = companyAddresses;
+    communityModel.address = communityAddresses[0];
 
     return internalEventEmitter.emit(
-      companyChannels.Internal.CreateCompletedEvent,
+      communityChannels.Internal.CreateCompletedEvent,
       {
         statusCode: 201,
-        body: companyModel
+        body: communityModel
       }
     );
   },
 
   /**
-   * Returns all companies
+   * Returns all communities
    *
    * @param {object} request - The request arguments passed in from the controller
    */
-  getAllCompanies: async function getAllCompanies(request) {
+  getAllCommunities: async function getAllCommunites(request) {
     //Validate the owner
     let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user']);
     if (ownerValidationResult) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
+        communityChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
           body: ownerValidationResult
@@ -173,20 +178,20 @@ module.exports = {
 
     logging.logAction(
       logging.logLevels.INFO,
-      'Attempting to retrieve all companies'
+      'Attempting to retrieve all communities'
     );
 
-    let companies = null;
+    let communities = null;
 
     try {
-      companies = await Company
+      communities = await Community
         .find({'owner.item': request.owner.item})
-        .populate('addresses')
+        .populate('address')
         .populate('owner.item');
 
     } catch (err) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.GetAllCompletedEvent,
+        communityChannels.Internal.GetAllCompletedEvent,
         {
           statusCode: 500,
           body: err
@@ -197,33 +202,33 @@ module.exports = {
     let statusCode = 200;
 
     // If the array is empty we need to return a 204 response.
-    if (appUtil.isArrayEmpty(companies)) {
+    if (appUtil.isArrayEmpty(communities)) {
       statusCode = 204;
     }
 
     return internalEventEmitter.emit(
-      companyChannels.Internal.GetAllCompletedEvent,
+      communityChannels.Internal.GetAllCompletedEvent,
       {
         statusCode: statusCode,
         header: {
-          resultCount: companies.length
+          resultCount: communities.length
         },
-        body: companies
+        body: communities
       }
     );
   },
 
   /**
-   * Returns a single company
+   * Returns a single community
    *
    * @param {object} request - The request that was sent from the controller
    */
-  getSingleCompany: async function getSingleCompany(request) {
+  getSingleCommunity: async function getSingleCommunity(request) {
     //Validate the owner
     let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user']);
     if (ownerValidationResult) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
+        communityChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
           body: ownerValidationResult
@@ -233,20 +238,20 @@ module.exports = {
 
     logging.logAction(
       logging.logLevels.INFO,
-      'Attempting to get a single company'
+      'Attempting to get a single community'
     );
 
-    let company = null;
+    let community = null;
 
     try {
-      company = await Company
+      community = await Community
         .findById(request.id)
-        .populate('addresses')
+        .populate('address')
         .populate('owner.item');
 
     } catch (err) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.GetSingleCompletedEvent,
+        communityChannels.Internal.GetSingleCompletedEvent,
         {
           statusCode: 500,
           body: err
@@ -254,15 +259,15 @@ module.exports = {
       );
     }
 
-    if (appUtil.isNullOrUndefined(company)) {
+    if (appUtil.isNullOrUndefined(community)) {
 
       var notFoundError = new resourceNotFoundError(
         'Resource not found.',
-        `No company with id [${request.id}] was found`
+        `No community with id [${request.id}] was found`
       );
 
       return internalEventEmitter.emit(
-        companyChannels.Internal.GetSingleCompletedEvent,
+        communityChannels.Internal.GetSingleCompletedEvent,
         {
           statusCode: 404,
           body: notFoundError
@@ -273,12 +278,12 @@ module.exports = {
     // Validate the existing owner
     let existingOwnerValidationResult = await ownerValidator.validateExisting(
       request.owner.item,
-      company.owner.item._id
+      community.owner.item._id
     );
 
     if (existingOwnerValidationResult) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
+        communityChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 401,
           body: existingOwnerValidationResult
@@ -287,25 +292,25 @@ module.exports = {
     }
 
     return internalEventEmitter.emit(
-      companyChannels.Internal.GetSingleCompletedEvent,
+      communityChannels.Internal.GetSingleCompletedEvent,
       {
         statusCode: 200,
-        body: company
+        body: community
       }
     );
   },
 
   /**
-   * Deletes a company
+   * Deletes a community
    *
    * @param {object} request - The request arguments passed in from the controller
    */
-  deleteCompany: async function deleteCompany(request) {
+  deleteCommunity: async function deleteCommunity(request) {
     //Validate the owner
     let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user']);
     if (ownerValidationResult) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
+        communityChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
           body: ownerValidationResult
@@ -313,16 +318,16 @@ module.exports = {
       );
     }
 
-    let company = null;
+    let community = null;
     try {
-      company = await Company
+      community = await Community
         .findById(request.id)
-        .populate('addresses')
+        .populate('address')
         .populate('owner.item');
 
     } catch (err) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.DeleteCompletedEvent,
+        communityChannels.Internal.DeleteCompletedEvent,
         {
           statusCode: 500,
           body: err
@@ -330,20 +335,20 @@ module.exports = {
       );
     }
 
-    if (appUtil.isNullOrUndefined(company)) {
+    if (appUtil.isNullOrUndefined(community)) {
       var modelValidationError = new validationError(
         'Some validation errors occurred.',
         [
           {
-            code: errors.Company.COMPANY_NOT_FOUND,
-            message: `No company with id [${request.id}] was found.`,
+            code: errors.Community.COMMUNITY_NOT_FOUND,
+            message: `No community with id [${request.id}] was found.`,
             path: ['id']
           }
         ]
       );
 
       return internalEventEmitter.emit(
-        companyChannels.Internal.DeleteCompletedEvent,
+        communityChannels.Internal.DeleteCompletedEvent,
         {
           statusCode: 400,
           body: modelValidationError
@@ -354,12 +359,12 @@ module.exports = {
     // Validate the existing owner
     let existingOwnerValidationResult = await ownerValidator.validateExisting(
       request.owner.item,
-      company.owner.item._id
+      community.owner.item._id
     );
 
     if (existingOwnerValidationResult) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
+        communityChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 401,
           body: existingOwnerValidationResult
@@ -369,14 +374,14 @@ module.exports = {
 
     logging.logAction(
       logging.logLevels.INFO,
-      'Attempting to remove a company document'
+      'Attempting to remove a community document'
     );
 
     try {
-      await company.remove();
+      await community.remove();
     } catch (err) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.DeleteCompletedEvent,
+        communityChannels.Internal.DeleteCompletedEvent,
         {
           statusCode: 500,
           body: err
@@ -385,25 +390,25 @@ module.exports = {
     }
 
     return internalEventEmitter.emit(
-      companyChannels.Internal.DeleteCompletedEvent,
+      communityChannels.Internal.DeleteCompletedEvent,
       {
         statusCode: 200,
-        body: company
+        body: community
       }
     );
   },
 
   /**
-   * Updates a company
+   * Updates a community
    *
    * @param {object} request - The request arguments passed in from the controller
    */
-  updateCompany: async function updateCompany(request) {
+  updateCommunity: async function updateCommunity(request) {
     //Validate the owner
     let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user']);
     if (ownerValidationResult) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
+        communityChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
           body: ownerValidationResult
@@ -411,17 +416,17 @@ module.exports = {
       );
     }
 
-    let company = null;
+    let community = null;
 
     try {
-      company = await Company
+      community = await Community
         .findById(request.id)
-        .populate('addresses')
+        .populate('address')
         .populate('owner.item');
 
     } catch (err) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.UpdateCompletedEvent,
+        communityChannels.Internal.UpdateCompletedEvent,
         {
           statusCode: 500,
           body: err
@@ -429,11 +434,11 @@ module.exports = {
       );
     }
 
-    var validationResult = await companyValidator.validateUpdate(company, request);
+    var validationResult = await communityValidator.validateUpdate(community, request);
 
     if (validationResult) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
+        communityChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
           body: validationResult
@@ -444,12 +449,12 @@ module.exports = {
     // Validate the existing owner
     let existingOwnerValidationResult = await ownerValidator.validateExisting(
       request.owner.item,
-      company.owner.item._id
+      community.owner.item._id
     );
 
     if (existingOwnerValidationResult) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
+        communityChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 401,
           body: existingOwnerValidationResult
@@ -459,20 +464,23 @@ module.exports = {
 
     logging.logAction(
       logging.logLevels.INFO,
-      `Attempting to update a company document with id [${company.id}]`
+      `Attempting to update a community document with id [${community.id}]`
     );
 
-    let companyAddresses = company.addresses;
+    let communityAddresses = [community.address];
 
     // First update the address
-    if (request.addresses) {
+    if (request.address) {
+
+      // Set it to true since there is only one address
+      request.address.isPrimary = true;
 
       try {
-        companyAddresses = await addressManager.updateAddresses(
-          request.addresses,
-          company.addresses,
-          company.id,
-          constants.address.ownerType.company
+        communityAddresses = await addressManager.updateAddresses(
+          [request.address],
+          [community.address],
+          community.id,
+          constants.address.ownerType.community
         );
       } catch (error) {
 
@@ -483,7 +491,7 @@ module.exports = {
         } 
         
         return internalEventEmitter.emit(
-          companyChannels.Internal.UpdateCompletedEvent,
+          communityChannels.Internal.UpdateCompletedEvent,
           {
             statusCode: statusCode,
             body: error
@@ -491,34 +499,25 @@ module.exports = {
         );
       }
 
-      company.addresses = companyAddresses.map((address) => {
-        return address.id;
-      });
+      community.address = communityAddresses.map((userAddress) => {
+        return userAddress.id;
+      })[0];
     }
 
-    if (request.branch) {
-      company.branch = request.branch;
-    }
+    if (request.entities) {
+      // Validate the entities
+      var entityValidationResult = await entityValidator.validate(request.entities);
 
-    if (request.type) {
-      company.type = request.type;
-    }
-
-    if (request.phoneNumbers) {
-      // Validate the phone numbers
-      let phoneNumberValidationResult = await phoneNumberValidator.validate(request.phoneNumbers);
-
-      if (phoneNumberValidationResult) {
+      if (entityValidationResult) {
         return internalEventEmitter.emit(
-          companyChannels.Internal.CreateCompletedEvent,
+          communityChannels.Internal.CreateCompletedEvent,
           {
             statusCode: 400,
-            body: phoneNumberValidationResult
+            body: entityValidationResult
           }
         );
       }
-
-      company.phoneNumbers = request.phoneNumbers;
+      community.entities = request.entities;
     }
 
     if (request.representatives) {
@@ -526,21 +525,21 @@ module.exports = {
       let personValidationResult = await personValidator.validate(request.representatives);
       if (personValidationResult) {
         return internalEventEmitter.emit(
-          companyChannels.Internal.CreateCompletedEvent,
+          communityChannels.Internal.CreateCompletedEvent,
           {
             statusCode: 400,
             body: personValidationResult
           }
         );
       }
-      company.representatives = request.representatives;
+      community.representatives = request.representatives;
     }
 
     try {
-      await company.save();
+      await community.save();
     } catch (err) {
       return internalEventEmitter.emit(
-        companyChannels.Internal.UpdateCompletedEvent,
+        communityChannels.Internal.UpdateCompletedEvent,
         {
           statusCode: 500,
           body: err
@@ -548,15 +547,15 @@ module.exports = {
       );
     }
 
-    company.updatedAt = new Date();
+    community.updatedAt = new Date();
 
     // set the address objects back on the display response
-    company.addresses = companyAddresses;
+    community.address = communityAddresses[0];
     return internalEventEmitter.emit(
-      companyChannels.Internal.UpdateCompletedEvent,
+      communityChannels.Internal.UpdateCompletedEvent,
       {
         statusCode: 200,
-        body: company
+        body: community
       }
     );
   }

@@ -2190,6 +2190,7 @@ describe('/company', function() {
             "message": "Some validation errors occurred.",
             "results": {
               "errors": [{
+                "code": 700001,
                 "message": "Persons email address must be unique",
                 "path": ["representatives", "email"]
               }]

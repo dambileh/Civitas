@@ -1633,7 +1633,7 @@ definitions:
       representatives:
         type: array
         items:
-          $ref: "#/definitions/personRequest"
+          $ref: "#/definitions/personUpdateRequest"
 
   companyResponse:
     type: "object"
@@ -1668,6 +1668,7 @@ definitions:
     - "name"
     - "address"
     - "entities"
+    - "representatives"
     properties:
       name:
         type: "string"
@@ -1678,20 +1679,25 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/entityRequest"
+      representatives:
+        type: array
+        items:
+          $ref: "#/definitions/personResponse"
 
   communityUpdateRequest:
     additionalProperties: false
     type: "object"
     properties:
-      name:
-        type: "string"
-        description: "The name of the community"
       address:
         $ref: "#/definitions/addressRequest"
       entities:
         type: array
         items:
           $ref: "#/definitions/entityUpdateRequest"
+      representatives:
+        type: array
+        items:
+          $ref: "#/definitions/personUpdateRequest"
 
   communityResponse:
     type: "object"
@@ -1705,6 +1711,10 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/entityResponse"
+      representatives:
+        type: array
+        items:
+          $ref: "#/definitions/personResponse"
 
   chatRequest:
     additionalProperties: false
@@ -1856,6 +1866,7 @@ definitions:
     - "addresses"
     - "phoneNumbers"
     - "branch"
+    - "representatives"
     properties:
       name:
         type: "string"
@@ -1928,6 +1939,26 @@ definitions:
     - "name"
     - "phoneNumbers"
     - "email"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the person"
+      email:
+        type: "string"
+        format: "email"
+        minLength: 6
+        maxLength: 128
+      phoneNumbers:
+        type: array
+        items:
+          $ref: "#/definitions/phoneNumberRequest"
+      isPrimary:
+        type: "boolean"
+        description: "Indicates if this is the primary person"
+
+  personUpdateRequest:
+    additionalProperties: false
+    type: "object"
     properties:
       name:
         type: "string"

@@ -7,7 +7,7 @@ var internalEventEmitter = require('../../libs/InternalEventEmitter');
  * Emits the passed message as an internal CRUD events
  *
  * @param {object} message - The message that will be emitted
- * @param {string} channelDetails - Contains the external channelDetails details
+ * @param {object} channelDetails - Contains the external channelDetails details
  */
 function emitCRUDEvents(message, channelDetails) {
 
@@ -57,7 +57,7 @@ function emitCRUDEvents(message, channelDetails) {
  *
  * @param {object} request - The original CRUD request object
  * @param {object} response - The CRUD response object
- * @param {array} channelDetails - Contains the external channelDetails details
+ * @param {object} channelDetails - Contains the external channelDetails details
  * @param {string} action - The CRUD action that was specified on the request
  *
  * @private
@@ -81,7 +81,7 @@ function _sendCrudCompleted(request, response, channelDetails, action) {
 /**
  * Removed the internal event listeners
  *
- * @param {array} channelDetails - Contains the external channelDetails details
+ * @param {object} channelDetails - Contains the external channelDetails details
  *
  * @private
  */
@@ -97,7 +97,7 @@ function _removeAllCRUDListeners(channelDetails) {
  * Emits the passed message as an internal Registration events
  *
  * @param {object} message - The message that will be emitted
- * @param {array} channelDetails - Contains the external channelDetails details
+ * @param {object} channelDetails - Contains the external channelDetails details
  */
 function emitRegistrationEvents(message, channelDetails) {
 
@@ -126,7 +126,7 @@ function emitRegistrationEvents(message, channelDetails) {
  *
  * @param {object} request - The original Registration request object
  * @param {object} response - The Registration response object
- * @param {array} channelDetails - Contains the external channelDetails details
+ * @param {object} channelDetails - Contains the external channelDetails details
  * @param {string} action - The Registration action that was specified on the request
  *
  * @private
@@ -150,7 +150,7 @@ function _sendRegistrationCompleted(request, response, channelDetails, action) {
 /**
  * Removed the internal event listeners
  *
- * @param {array} channelDetails - Contains the external channelDetails details
+ * @param {object} channelDetails - Contains the external channelDetails details
  *
  * @private
  */

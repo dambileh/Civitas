@@ -38,6 +38,23 @@ module.exports = {
       "GetAllEvent": "CompanyGetAllEvent"
     }
   },
+  "Community": {
+    "External": {
+      "Event": "CommunityEvent",
+      "CompletedEvent": "CommunityCompletedEvent"
+    },
+    "Internal": {
+      "CreateEvent": "CommunityCreateEvent",
+      "CreateCompletedEvent": "CommunityCreateCompletedEvent",
+      "UpdateEvent": "CommunityUpdateEvent",
+      "UpdateCompletedEvent": "CommunityUpdateCompletedEvent",
+      "DeleteEvent": "CommunityDeleteEvent",
+      "DeleteCompletedEvent": "CommunityDeleteCompletedEvent",
+      "GetSingleEvent": "CommunityGetSingleEvent",
+      "GetSingleCompletedEvent": "CommunityGetSingleCompletedEvent",
+      "GetAllEvent": "CommunityGetAllEvent"
+    }
+  },
   "Registration": {
     "External": {
       "Event": "RegistrationEvent",
