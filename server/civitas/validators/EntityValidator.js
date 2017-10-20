@@ -144,6 +144,7 @@ module.exports = {
    */
   validate: async function validate(entities) {
     let that = this;
+
     return await new validationChain()
       .add(
         that.entityHasPrimaryPhoneValidator,
@@ -255,7 +256,7 @@ module.exports = {
             [
               {
                 code: errors.Person.DUPLICATE_EMAIL_FOUND,
-                message: `Persons email address must be unique`,
+                message: `Entity persons email address must be unique`,
                 path: ['entities', 'representatives', 'email']
               }
             ]

@@ -1,6 +1,7 @@
 'use strict';
 var chai = require('chai');
 var ZSchema = require('z-schema');
+const assert = require('assert');
 var customFormats = module.exports = function(zSchema) {
   // Placeholder file for all custom-formats in known to swagger.json
   // as found on

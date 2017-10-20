@@ -40,7 +40,7 @@ module.exports = {
       );
     }
 
-    // Validate the representatives
+    //Validate the representatives
     let personValidationResult = await personValidator.validate(request.representatives);
     if (personValidationResult) {
       return internalEventEmitter.emit(
