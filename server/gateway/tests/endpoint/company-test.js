@@ -830,6 +830,240 @@ describe('/company', function() {
       });
     });
 
+    it('should respond with 400 Validation Error. Company already exists', function(done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the company"
+          },
+          "branch": {
+            "type": "string",
+            "description": "The name of the branch"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ar"
+            ],
+            "description": "The type of the company"
+          },
+          "addresses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "detail": {
+                  "type": "object",
+                  "required": [
+                    "line1",
+                    "city",
+                    "country",
+                    "postalCode",
+                    "type"
+                  ],
+                  "properties": {
+                    "line1": {
+                      "type": "string",
+                      "maxLength": 128,
+                      "description": "The first line of address"
+                    },
+                    "line2": {
+                      "type": "string",
+                      "maxLength": 128,
+                      "description": "The second line of address"
+                    },
+                    "city": {
+                      "type": "string",
+                      "maxLength": 128,
+                      "description": "The city"
+                    },
+                    "state": {
+                      "type": "string",
+                      "maxLength": 128,
+                      "description": "The state"
+                    },
+                    "province": {
+                      "type": "string",
+                      "maxLength": 128,
+                      "description": "The province"
+                    },
+                    "country": {
+                      "type": "string",
+                      "maxLength": 128,
+                      "description": "The country"
+                    },
+                    "postalCode": {
+                      "type": "string",
+                      "maxLength": 128,
+                      "description": "The postal code"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "physical",
+                        "postal"
+                      ],
+                      "description": "The type of the address"
+                    }
+                  }
+                },
+                "location": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "coordinates"
+                  ],
+                  "properties": {
+                    "coordinates": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "description": "The ids of the AR companies that service the user"
+                      }
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "Point"
+                      ],
+                      "description": "The longitude and latitude of the location"
+                    }
+                  }
+                },
+                "isPrimary": {
+                  "type": "boolean",
+                  "description": "Indicates if this is the primary address"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "The created date"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "description": "The updated date"
+                }
+              }
+            }
+          },
+          "phoneNumbers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "number"
+              ],
+              "properties": {
+                "number": {
+                  "type": "string",
+                  "description": "The user's phone number"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "personal",
+                    "business",
+                    "home"
+                  ],
+                  "description": "The type of the landline number"
+                },
+                "isPrimary": {
+                  "type": "boolean",
+                  "description": "Indicates if this is the primary phone number"
+                }
+              }
+            }
+          },
+          "representatives": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The name of the person"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "minLength": 6,
+                  "maxLength": 128
+                },
+                "phoneNumbers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "type",
+                      "number"
+                    ],
+                    "properties": {
+                      "number": {
+                        "type": "string",
+                        "description": "The user's phone number"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "personal",
+                          "business",
+                          "home"
+                        ],
+                        "description": "The type of the landline number"
+                      },
+                      "isPrimary": {
+                        "type": "boolean",
+                        "description": "Indicates if this is the primary phone number"
+                      }
+                    }
+                  }
+                },
+                "isPrimary": {
+                  "type": "boolean",
+                  "description": "Indicates if this is the primary person"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.post('/v1/company')
+        .set('Content-Type', 'application/json')
+        .set({
+          'context': 'user',
+          'context-id': createdUser._id
+        })
+        .send(companyOneBody)
+        .expect(400)
+        .end(function(err, res) {
+          if (err) return done(err);
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse =     {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 600000,
+                "message": "A company with the same name and primary phone number already exists.",
+                "path": ["name"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+          done();
+        });
+
+    });
+
     it('should respond with 400 Validation Error. Exactly one primary address must be set for company. Two Addresses', function(done) {
       /*eslint-disable*/
       var schema = {
@@ -2190,6 +2424,7 @@ describe('/company', function() {
             "message": "Some validation errors occurred.",
             "results": {
               "errors": [{
+                "code": 700001,
                 "message": "Persons email address must be unique",
                 "path": ["representatives", "email"]
               }]

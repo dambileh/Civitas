@@ -37,7 +37,6 @@ const customFormats = function (zSchema) {
   });
 
   const uuidPattern = /^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/;
-  ;
 
   /** Validates uuid */
   zSchema.registerFormat('uuid', function (val) {
@@ -278,7 +277,7 @@ describe('/user/{id}', function () {
           const expectedResponse = {
             "name": "ResourceNotFound",
             "message": "Resource not found.",
-            "exception_message": `No user with id [${randomId}] was found`,
+            "exceptionMessage": `No user with id [${randomId}] was found`,
             "status": 404
           };
 

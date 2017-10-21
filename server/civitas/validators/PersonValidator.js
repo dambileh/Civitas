@@ -154,7 +154,7 @@ module.exports = {
             'Some validation errors occurred.',
             [
               {
-                code: errors.PhoneNumber.DUPLICATE_EMAIL_FOUND,
+                code: errors.Person.DUPLICATE_EMAIL_FOUND,
                 message: `Persons email address must be unique`,
                 path: ['representatives', 'email']
               }

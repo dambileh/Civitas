@@ -188,6 +188,11 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          404:
+            description: "Resource Not Found"
+            schema:
+              $ref: "#/definitions/resourceNotFoundErrorModel"
+
           default:
             description: "unexpected error"
             schema:
@@ -450,6 +455,7 @@ paths:
           description: "Unauthorized Access"
           schema:
             $ref: "#/definitions/authorizationErrorModel"
+
         default:
           description: "unexpected error"
           schema:
@@ -491,6 +497,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          400:
+            description: "Validation Error. Usually caused by a missing or invalid parameter."
+            schema:
+              $ref: "#/definitions/validationErrorModel"
           401:
             description: "Unauthorized Access"
             schema:
@@ -534,6 +544,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          404:
+            description: "Resource Not Found"
+            schema:
+              $ref: "#/definitions/resourceNotFoundErrorModel"
           401:
             description: "Unauthorized Access"
             schema:
@@ -761,6 +775,11 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          404:
+            description: "Resource Not Found"
+            schema:
+              $ref: "#/definitions/resourceNotFoundErrorModel"
+
           401:
             description: "Unauthorized Access"
             schema:
@@ -992,6 +1011,11 @@ paths:
             description: "Unauthorized Access"
             schema:
               $ref: "#/definitions/authorizationErrorModel"
+          404:
+            description: "Resource Not Found"
+            schema:
+              $ref: "#/definitions/resourceNotFoundErrorModel"
+
           default:
             description: "unexpected error"
             schema:
@@ -1282,6 +1306,11 @@ paths:
             description: "Unauthorized Access"
             schema:
               $ref: "#/definitions/authorizationErrorModel"
+          404:
+            description: "Resource Not Found"
+            schema:
+              $ref: "#/definitions/resourceNotFoundErrorModel"
+
           default:
             description: "unexpected error"
             schema:
@@ -1633,7 +1662,7 @@ definitions:
       representatives:
         type: array
         items:
-          $ref: "#/definitions/personRequest"
+          $ref: "#/definitions/personUpdateRequest"
 
   companyResponse:
     type: "object"
@@ -1668,6 +1697,7 @@ definitions:
     - "name"
     - "address"
     - "entities"
+    - "representatives"
     properties:
       name:
         type: "string"
@@ -1678,20 +1708,25 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/entityRequest"
+      representatives:
+        type: array
+        items:
+          $ref: "#/definitions/personResponse"
 
   communityUpdateRequest:
     additionalProperties: false
     type: "object"
     properties:
-      name:
-        type: "string"
-        description: "The name of the community"
       address:
         $ref: "#/definitions/addressRequest"
       entities:
         type: array
         items:
           $ref: "#/definitions/entityUpdateRequest"
+      representatives:
+        type: array
+        items:
+          $ref: "#/definitions/personUpdateRequest"
 
   communityResponse:
     type: "object"
@@ -1705,6 +1740,10 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/entityResponse"
+      representatives:
+        type: array
+        items:
+          $ref: "#/definitions/personResponse"
 
   chatRequest:
     additionalProperties: false
@@ -1856,6 +1895,7 @@ definitions:
     - "addresses"
     - "phoneNumbers"
     - "branch"
+    - "representatives"
     properties:
       name:
         type: "string"
@@ -1928,6 +1968,26 @@ definitions:
     - "name"
     - "phoneNumbers"
     - "email"
+    properties:
+      name:
+        type: "string"
+        description: "The name of the person"
+      email:
+        type: "string"
+        format: "email"
+        minLength: 6
+        maxLength: 128
+      phoneNumbers:
+        type: array
+        items:
+          $ref: "#/definitions/phoneNumberRequest"
+      isPrimary:
+        type: "boolean"
+        description: "Indicates if this is the primary person"
+
+  personUpdateRequest:
+    additionalProperties: false
+    type: "object"
     properties:
       name:
         type: "string"
@@ -2099,6 +2159,19 @@ definitions:
       name:
         type: "string"
       message:
+        type: "string"
+  resourceNotFoundErrorModel:
+    type: "object"
+    required:
+    - "name"
+    - "message"
+    - "execptionMessage"
+    properties:
+      name:
+        type: "string"
+      message:
+        type: "string"
+      execptionMessage:
         type: "string"
 
   validationErrorModel:

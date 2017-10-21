@@ -701,6 +701,88 @@ describe('/company/{id}', function () {
         });
 
     });
+
+    it('should respond with 400 Validation Error. Company not found', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      api.put(`/v1/company/${createdUser._id}`)
+        .set('Content-Type', 'application/json')
+        .set({
+          'context': 'user',
+          'context-id': createdUser._id
+        })
+        .send({
+          "addresses": []
+        })
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 600001,
+                "message": `No company with id [${createdUser._id}] was found.`,
+                "path": ["id"]
+              }]
+            },
+            "status": 400
+          }
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+
+    });
+
     it('should respond with 400 Validation Error. Exactly one primary address must be set for company. No Address', function (done) {
       /*eslint-disable*/
       var schema = {
@@ -1718,6 +1800,7 @@ describe('/company/{id}', function () {
             "message": "Some validation errors occurred.",
             "results": {
               "errors": [{
+                "code": 700001,
                 "message": "Persons email address must be unique",
                 "path": ["representatives", "email"]
               }]
@@ -1937,7 +2020,7 @@ describe('/company/{id}', function () {
 
     });
 
-    it('should respond with 200 Deleted company', function (done) {
+    it('should respond with 200 return single company', function (done) {
       /*eslint-disable*/
       var schema = {
         "type": "object",
@@ -2153,6 +2236,52 @@ describe('/company/{id}', function () {
         });
     });
 
+    it('should respond with 404 Not Found', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "name",
+          "message",
+          "exceptionMessage"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "exceptionMessage": {
+            "type": "string"
+          }
+        }
+      };
+
+      api.get(`/v1/company/${createdUser._id}`)
+        .set('Content-Type', 'application/json')
+        .set({
+          'context': 'user',
+          'context-id': createdUser._id
+        })
+        .expect(404)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+            const expectedResponse = {
+              "name": "ResourceNotFound",
+              "message": "Resource not found.",
+              "exceptionMessage": `No company with id [${createdUser._id}] was found`,
+              "status": 404
+            };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+          
+          done();
+        });
+    });
 
   });
 
@@ -2314,6 +2443,87 @@ describe('/company/{id}', function () {
         });
 
     });
+    it('should respond with 400 Validation Error. Company not found', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      api.del(`/v1/company/${createdUser._id}`)
+        .set('Content-Type', 'application/json')
+        .set({
+          'context': 'user',
+          'context-id': createdUser._id
+        })
+        .send({
+          "branch": "bellville"
+        })
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 600001,
+                "message": `No company with id [${createdUser._id}] was found.`,
+                "path": ["id"]
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+
+          done();
+        });
+
+    });
+
     it('should respond with 401 Validation Error. Owner has no access', function (done) {
       /*eslint-disable*/
       var schema = {

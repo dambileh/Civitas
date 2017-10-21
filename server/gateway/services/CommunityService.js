@@ -5,67 +5,66 @@ var pubSub = require('../../libs/PubSub/PubSubAdapter');
 var Message = require('../../libs/PubSub/Message');
 var constants = require('../../Constants');
 var pubSubChannels = require('../../PubSubChannels');
-
 /**
- * The Company Service module
+ * The Community Service module
  */
 module.exports = {
 
   /**
-   * Creates a company
+   * Creates a community
    *
    * @param {object} args - The request arguments passed in from the controller
    * @param {IncomingMessage} response - The http response object
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
-  createCompany: async function createCompany(args, response, next) {
-    let companyRequest = args.company.value;
+  createCommunity: async function createCommunity(args, response, next) {
+    let communityRequest = args.community.value;
 
-    companyRequest.owner = {
+    communityRequest.owner = {
       kind: args.context.value,
       item: args['context-id'].value
     };
 
     let request = new Message(
-      pubSubChannels.Company.External.Event,
+      pubSubChannels.Community.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.create,
-      companyRequest
+      communityRequest
     );
 
     try {
-      let companyEventCompleted =
+      let communityEventCompleted =
         await pubSub.publishAndWaitForResponse(
-          pubSubChannels.Company.External.Event,
-          pubSubChannels.Company.External.CompletedEvent,
+          pubSubChannels.Community.External.Event,
+          pubSubChannels.Community.External.CompletedEvent,
           {
             subscriberType: constants.pubSub.recipients.gateway
           },
           request
         );
 
-      response.statusCode = companyEventCompleted.payload.statusCode;
+      response.statusCode = communityEventCompleted.payload.statusCode;
       response.setHeader('Content-Type', 'application/json');
-      return response.end(JSON.stringify(companyEventCompleted.payload.body));
+      return response.end(JSON.stringify(communityEventCompleted.payload.body));
 
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to publish to channel [${pubSubChannels.Company.External.CompletedEvent}]`, err);
+        `Failed to publish to channel [${pubSubChannels.Community.External.CompletedEvent}]`, err);
       return next(err);
     }
   },
 
   /**
-   * Returns all companies
+   * Returns all communities
    *
    * @param {object} args - The request arguments passed in from the controller
    * @param {IncomingMessage} response - The http response object
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
-  getAllCompanies: async function getAllCompanies(args, response, next) {
+  getAllCommunities: async function getAllCommunities(args, response, next) {
 
-    let companyRequest = {
+    let communityRequest = {
       owner: {
         kind: args.context.value,
         item: args['context-id'].value
@@ -73,17 +72,17 @@ module.exports = {
     };
 
     let request = new Message(
-      pubSubChannels.Company.External.Event,
+      pubSubChannels.Community.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.getAll,
-      companyRequest
+      communityRequest
     );
 
     try {
       let completed =
         await pubSub.publishAndWaitForResponse(
-          pubSubChannels.Company.External.Event,
-          pubSubChannels.Company.External.CompletedEvent,
+          pubSubChannels.Community.External.Event,
+          pubSubChannels.Community.External.CompletedEvent,
           {
             subscriberType: constants.pubSub.recipients.gateway
           },
@@ -102,21 +101,21 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to publish to channel [${pubSubChannels.Company.External.CompletedEvent}]`, err);
+        `Failed to publish to channel [${pubSubChannels.Community.External.CompletedEvent}]`, err);
       return next(err);
     }
   },
 
   /**
-   * Returns a single company
+   * Returns a single community
    *
    * @param {object} args - The request arguments passed in from the controller
    * @param {IncomingMessage} response - The http response object
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
-  getSingleCompany: async function getSingleCompany(args, response, next) {
+  getSingleCommunity: async function getSingleCommunity(args, response, next) {
 
-    let companyRequest = {
+    let communityRequest = {
       id: args.id.value,
       owner: {
         kind: args.context.value,
@@ -125,17 +124,17 @@ module.exports = {
     };
 
     let request = new Message(
-      pubSubChannels.Company.External.Event,
+      pubSubChannels.Community.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.getSingle,
-      companyRequest
+      communityRequest
     );
 
     try {
       let completed =
         await pubSub.publishAndWaitForResponse(
-          pubSubChannels.Company.External.Event,
-          pubSubChannels.Company.External.CompletedEvent,
+          pubSubChannels.Community.External.Event,
+          pubSubChannels.Community.External.CompletedEvent,
           {
             subscriberType: constants.pubSub.recipients.gateway
           },
@@ -149,21 +148,21 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to publish to channel [${pubSubChannels.Company.External.CompletedEvent}]`, err);
+        `Failed to publish to channel [${pubSubChannels.Community.External.CompletedEvent}]`, err);
       return next(err);
     }
 
   },
   /**
-   * Deletes a company
+   * Deletes a community
    *
    * @param {object} args - The request arguments passed in from the controller
    * @param {IncomingMessage} response - The http response object
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
-  deleteCompany: async function deleteCompany(args, response, next) {
+  deleteCommunity: async function deleteCommunity(args, response, next) {
 
-    let companyRequest = {
+    let communityRequest = {
       id: args.id.value,
       owner: {
         kind: args.context.value,
@@ -172,17 +171,17 @@ module.exports = {
     };
 
     let request = new Message(
-      pubSubChannels.Company.External.Event,
+      pubSubChannels.Community.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.delete,
-      companyRequest
+      communityRequest
     );
 
     try {
       let completed =
         await pubSub.publishAndWaitForResponse(
-          pubSubChannels.Company.External.Event,
-          pubSubChannels.Company.External.CompletedEvent,
+          pubSubChannels.Community.External.Event,
+          pubSubChannels.Community.External.CompletedEvent,
           {
             subscriberType: constants.pubSub.recipients.gateway
           },
@@ -196,39 +195,39 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to publish to channel [${pubSubChannels.Company.External.CompletedEvent}]`, err);
+        `Failed to publish to channel [${pubSubChannels.Community.External.CompletedEvent}]`, err);
       return next(err);
     }
   },
 
   /**
-   * Updates a company
+   * Updates a community
    *
    * @param {object} args - The request arguments passed in from the controller
    * @param {IncomingMessage} response - The http response object
    * @param {function} next - The callback used to pass control to the next action/middleware
    */
-  updateCompany: async function updateCompany(args, response, next) {
+  updateCommunity: async function updateCommunity(args, response, next) {
 
-    let companyRequest = args.company.value;
-    companyRequest.id = args.id.value;
-    companyRequest.owner = {
+    let communityRequest = args.community.value;
+    communityRequest.id = args.id.value;
+    communityRequest.owner = {
       kind: args.context.value,
       item: args['context-id'].value
     };
 
     let request = new Message(
-      pubSubChannels.Company.External.Event,
+      pubSubChannels.Community.External.Event,
       constants.pubSub.messageType.crud,
       constants.pubSub.messageAction.update,
-      companyRequest
+      communityRequest
     );
 
     try {
       let completed =
         await pubSub.publishAndWaitForResponse(
-          pubSubChannels.Company.External.Event,
-          pubSubChannels.Company.External.CompletedEvent,
+          pubSubChannels.Community.External.Event,
+          pubSubChannels.Community.External.CompletedEvent,
           {
             subscriberType: constants.pubSub.recipients.gateway
           },
@@ -241,7 +240,7 @@ module.exports = {
     } catch (err) {
       logging.logAction(
         logging.logLevels.ERROR,
-        `Failed to publish to channel [${pubSubChannels.Company.External.CompletedEvent}]`, err);
+        `Failed to publish to channel [${pubSubChannels.Community.External.CompletedEvent}]`, err);
       return next(err);
     }
   }

@@ -8,7 +8,7 @@ var deref = require('json-schema-deref');
 var config = {
   assertionFormat: 'should',
   testModule: 'supertest',
-  pathName: ['/company', '/company/{id}'],
+  pathName: ['/community', '/community/{id}'],
 //  loadTest: [{pathName:'/user', operation:'get', load:{requests: 1000, concurrent: 100}}, { /* ... */ }],
   maxLen: 80
 };

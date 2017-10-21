@@ -45,7 +45,7 @@ module.exports = function Message(channel, type, action, payload, id = uuidV1())
   /**
    * Validates the message object properties
    *
-   * @returns {boolean} - True if thee are no validation errors, otherwise False
+   * @returns {boolean} - True if there are no validation errors, otherwise False
    */
   this.tryValidate = function tryValidate() {
     var errors = [];

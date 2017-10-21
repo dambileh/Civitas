@@ -19,6 +19,7 @@ module.exports = {
       gateway: "gateway",
       user: "user",
       company: "company",
+      community: "community",
       registration: "registration"
     },
     channelStore: {
@@ -35,6 +36,7 @@ module.exports = {
   address: {
     ownerType: {
       company: "company",
+      community: "community",
       user: "user",
       person: "person"
     }
