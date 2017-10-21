@@ -8,3 +8,6 @@ node_modules/
 
 .idea/
 /server/registration/config/testing.json
+
+client/mobile/node_modules/
+client/mobile/www/
