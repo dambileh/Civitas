@@ -188,6 +188,11 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          404:
+            description: "Resource Not Found"
+            schema:
+              $ref: "#/definitions/resourceNotFoundErrorModel"
+
           default:
             description: "unexpected error"
             schema:
@@ -450,6 +455,7 @@ paths:
           description: "Unauthorized Access"
           schema:
             $ref: "#/definitions/authorizationErrorModel"
+
         default:
           description: "unexpected error"
           schema:
@@ -491,6 +497,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          400:
+            description: "Validation Error. Usually caused by a missing or invalid parameter."
+            schema:
+              $ref: "#/definitions/validationErrorModel"
           401:
             description: "Unauthorized Access"
             schema:
@@ -534,6 +544,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          404:
+            description: "Resource Not Found"
+            schema:
+              $ref: "#/definitions/resourceNotFoundErrorModel"
           401:
             description: "Unauthorized Access"
             schema:
@@ -761,6 +775,11 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          404:
+            description: "Resource Not Found"
+            schema:
+              $ref: "#/definitions/resourceNotFoundErrorModel"
+
           401:
             description: "Unauthorized Access"
             schema:
@@ -992,6 +1011,11 @@ paths:
             description: "Unauthorized Access"
             schema:
               $ref: "#/definitions/authorizationErrorModel"
+          404:
+            description: "Resource Not Found"
+            schema:
+              $ref: "#/definitions/resourceNotFoundErrorModel"
+
           default:
             description: "unexpected error"
             schema:
@@ -1282,6 +1306,11 @@ paths:
             description: "Unauthorized Access"
             schema:
               $ref: "#/definitions/authorizationErrorModel"
+          404:
+            description: "Resource Not Found"
+            schema:
+              $ref: "#/definitions/resourceNotFoundErrorModel"
+
           default:
             description: "unexpected error"
             schema:
@@ -2130,6 +2159,19 @@ definitions:
       name:
         type: "string"
       message:
+        type: "string"
+  resourceNotFoundErrorModel:
+    type: "object"
+    required:
+    - "name"
+    - "message"
+    - "execptionMessage"
+    properties:
+      name:
+        type: "string"
+      message:
+        type: "string"
+      execptionMessage:
         type: "string"
 
   validationErrorModel:

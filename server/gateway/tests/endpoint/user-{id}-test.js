@@ -278,7 +278,7 @@ describe('/user/{id}', function () {
           const expectedResponse = {
             "name": "ResourceNotFound",
             "message": "Resource not found.",
-            "exception_message": `No user with id [${randomId}] was found`,
+            "exceptionMessage": `No user with id [${randomId}] was found`,
             "status": 404
           };
 

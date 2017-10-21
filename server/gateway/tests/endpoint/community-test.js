@@ -1851,7 +1851,6 @@ describe('/community', function () {
             "status": 400
           };
 
-
           assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
 
           done();
@@ -3004,7 +3003,6 @@ describe('/community', function () {
             "status": 400
           };
 
-
           assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
 
           done();
@@ -3547,8 +3545,6 @@ describe('/community', function () {
     });
 
   });
-
-
 
   describe('get', function() {
     it('should respond with 200 An array of communities', function(done) {

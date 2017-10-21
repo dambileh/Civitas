@@ -21,7 +21,7 @@ module.exports = function ResourceNotFound(message, exceptionMessage) {
 
   this.name = this.constructor.name;
   this.message = message;
-  this.exception_message = exceptionMessage;
+  this.exceptionMessage = exceptionMessage;
   this.status = 404;
 };
 

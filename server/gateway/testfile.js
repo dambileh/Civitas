@@ -28,7 +28,6 @@ var testDir = './tests/';
 var excludedDir = ['endpoint'];
 // To run only specific unit tests add your class here in as 'endpoint/user-test.js'
 var customDir = [
-  'endpoint/community-test.js'
 ];
 
 // Add excluded directories that need to run last
