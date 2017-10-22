@@ -38,5 +38,9 @@ module.exports = {
   Community: {
     COMMUNITY_ALREADY_EXISTS: 900000,
     COMMUNITY_NOT_FOUND: 900001
+  },
+  Chat: {
+    CHAT_ALREADY_EXISTS: 1000000,
+    PARTICIPANT_NOT_AVAILABLE: 1000001
   }
 };

@@ -10,27 +10,36 @@ module.exports = {
    * Address detail validator
    * 
    * @param {array} addresses - the address entities that will be validated
-
-   * @returns {boolean} - If the validation was successful
+   * 
+   * @returns {Object|null} - Error
    */
   addressEitherLocationOrDetailValidator: function addressEitherLocationOrDetailValidator(addresses) {
 
     for (let address of addresses) {
       // Either location or address property needs to be set
       if (!(address.location || address.detail)) {
-        return false;
+        return new validationError(
+          'Some validation errors occurred.',
+          [
+            {
+              code: errors.Address.EITHER_DETAIL_OR_LOCATION_MUST_BE_SET,
+              message: `Either [detail] or [location] property needs to be set for all addresses.`,
+              path: ['addresses']
+            }
+          ]
+        );
       }
     }
 
-    return true;
+    return null;
   },
 
   /**
    * Address detail state or province validator
    *
    * @param {array} addresses - the address entities that will be validated
-
-   * @returns {boolean} - If the validation was successful
+   * 
+   * @returns {Object|null} - Error
    */
   addressDetailEitherProvinceOrStateValidator: function addressDetailEitherProvinceOrStateValidator(addresses) {
 
@@ -38,21 +47,30 @@ module.exports = {
       if (address.detail) {
         // Either state or province property needs to be set
         if (!(address.detail.province || address.detail.state)) {
-          return false;
+          return new validationError(
+            'Some validation errors occurred.',
+            [
+              {
+                code: errors.Address.EITHER_STATE_OR_PROVINCE_MUST_BE_SET,
+                message: `Either [state] or [province] property needs to be set for all addresses.`,
+                path: ['addresses', 'detail']
+              }
+            ]
+          );
         }
       }
 
     }
 
-    return true;
+    return null;
   },
 
   /**
    * Address detail state or province validator
    *
    * @param {array} addresses - the address entities that will be validated
-
-   * @returns {boolean} - If the validation was successful
+   * 
+   * @returns {Object|null} - Error
    */
   addressDetailOnlyProvinceOrStateValidator: function addressDetailOnlyProvinceOrStateValidator(addresses) {
 
@@ -60,20 +78,29 @@ module.exports = {
       if (address.detail) {
         // Only one of the state or province property must be set
         if ((address.detail.province && address.detail.state)) {
-          return false;
+          return new validationError(
+            'Some validation errors occurred.',
+            [
+              {
+                code: errors.Address.ONLY_ONE_Of_STATE_OR_PROVINCE_MUST_BE_SET,
+                message: `Only one of the [state] or [province] property must be set for all addresses.`,
+                path: ['addresses', 'detail']
+              }
+            ]
+          );
         }
       }
     }
 
-    return true;
+    return null;
   },
 
   /**
    * Primary address validator
    *
    * @param {array} addresses - the address entities that will be validated
-
-   * @returns {boolean} - If the validation was successful
+   * 
+   * @returns {Object|null} - Error
    */
   hasPrimaryValidator: function hasPrimaryValidator(addresses) {
 
@@ -85,7 +112,20 @@ module.exports = {
       }
     }
 
-    return (primaryCounter === 1);
+    if (primaryCounter !== 1) {
+      return new validationError(
+        'Some validation errors occurred.',
+        [
+          {
+            code: errors.Address.EXACTLY_ONE_PRIMARY_ADDRESS_MUST_BE_SET,
+            message: `Exactly one primary address must be set. [${primaryCounter}] found instead.`,
+            path: ['addresses']
+          }
+        ]
+      );
+    }
+
+    return null;
   },
 
   /**
@@ -93,14 +133,23 @@ module.exports = {
    *
    * @param {array} addresses - the address entities that will be validated
    *
-   * @returns {boolean} - If the validation was successful
+   * @returns {Object|null} - Error
    */
   locationValidator: function locationValidator(addresses) {
 
     for (let address of addresses) {
       if (address.location) {
         if (address.location.coordinates.length !== 2) {
-          return false;
+          return new validationError(
+            'Some validation errors occurred.',
+            [
+              {
+                code: errors.Address.INCORRECT_COORDINATE_FORMAT,
+                message: `Incorrect coordinates format. Both [longitude] and [latitude] must be set`,
+                path: ['addresses', 'location', 'coordinates']
+              }
+            ]
+          );
         } else {
           // https://docs.mongodb.com/manual/reference/geojson/
           // Valid longitude values are between -180 and 180, both inclusive.
@@ -109,18 +158,36 @@ module.exports = {
           const latitude = address.location.coordinates[1];
 
           if ((longitude < -180) || (longitude > 180)) {
-            return false;
+            return new validationError(
+              'Some validation errors occurred.',
+              [
+                {
+                  code: errors.Address.INCORRECT_COORDINATE_FORMAT,
+                  message: `Incorrect coordinates format. Longitude [${longitude}] is not within allowed range`,
+                  path: ['addresses', 'location', 'coordinates']
+                }
+              ]
+            );
           }
 
           if ((latitude < -90) || (latitude > 90)) {
-            return false;
+            return new validationError(
+              'Some validation errors occurred.',
+              [
+                {
+                  code: errors.Address.INCORRECT_COORDINATE_FORMAT,
+                  message: `Incorrect coordinates format. Latitude [${latitude}] is not within allowed range`,
+                  path: ['addresses', 'location', 'coordinates']
+                }
+              ]
+            );
           }
 
         }
       }
     }
 
-    return true;
+    return null;
   },
 
   /**
@@ -136,84 +203,34 @@ module.exports = {
       .add(
         that.addressEitherLocationOrDetailValidator,
         {
-          parameters: [addresses],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Address.EITHER_DETAIL_OR_LOCATION_MUST_BE_SET,
-                message: `Either [detail] or [location] property needs to be set for all addresses.`,
-                path: ['addresses']
-              }
-            ]
-          )
+          parameters: [addresses]
         }
       )
       .add(
         that.hasPrimaryValidator,
         {
-          parameters: [addresses],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Address.EXACTLY_ONE_PRIMARY_ADDRESS_MUST_BE_SET,
-                message: `Exactly one primary address must be set`,
-                path: ['addresses']
-              }
-            ]
-          )
+          parameters: [addresses]
         }
       )
       .add(
         that.locationValidator,
         {
           parameters: [addresses],
-          async: true,
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Address.INCORRECT_COORDINATE_FORMAT,
-                message: `The passed in coordinates are not in correct format`,
-                path: ['addresses', 'location', 'coordinates']
-              }
-            ]
-          )
+          async: true
         }
       )
       .add(
         that.addressDetailEitherProvinceOrStateValidator,
         {
           parameters: [addresses],
-          async: true,
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Address.EITHER_STATE_OR_PROVINCE_MUST_BE_SET,
-                message: `Either [state] or [province] property needs to be set for all addresses.`,
-                path: ['addresses', 'detail']
-              }
-            ]
-          )
+          async: true
         }
       )
       .add(
         that.addressDetailOnlyProvinceOrStateValidator,
         {
           parameters: [addresses],
-          async: true,
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Address.ONLY_ONE_Of_STATE_OR_PROVINCE_MUST_BE_SET,
-                message: `Only one of the [state] or [province] property must be set for all addresses.`,
-                path: ['addresses', 'detail']
-              }
-            ]
-          )
+          async: true
         }
       )
       .validate({mode: validationChain.modes.EXIT_ON_ERROR});
@@ -232,84 +249,34 @@ module.exports = {
       .add(
         that.addressEitherLocationOrDetailValidator,
         {
-          parameters: [addresses],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Address.EITHER_DETAIL_OR_LOCATION_MUST_BE_SET,
-                message: `Either [detail] or [location] property needs to be set for all addresses.`,
-                path: ['addresses']
-              }
-            ]
-          )
+          parameters: [addresses]
         }
       )
       .add(
         that.hasPrimaryValidator,
         {
-          parameters: [addresses],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Address.EXACTLY_ONE_PRIMARY_ADDRESS_MUST_BE_SET,
-                message: `Exactly one primary address must be set`,
-                path: ['addresses']
-              }
-            ]
-          )
+          parameters: [addresses]
         }
       )
       .add(
         that.locationValidator,
         {
           parameters: [addresses],
-          async: true,
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Address.INCORRECT_COORDINATE_FORMAT,
-                message: `The passed in coordinates are not in correct format`,
-                path: ['addresses', 'location', 'coordinates']
-              }
-            ]
-          )
+          async: true
         }
       )
       .add(
         that.addressDetailEitherProvinceOrStateValidator,
         {
           parameters: [addresses],
-          async: true,
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Address.EITHER_STATE_OR_PROVINCE_MUST_BE_SET,
-                message: `Either [state] or [province] property needs to be set for all addresses.`,
-                path: ['addresses', 'detail']
-              }
-            ]
-          )
+          async: true
         }
       )
       .add(
         that.addressDetailOnlyProvinceOrStateValidator,
         {
           parameters: [addresses],
-          async: true,
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Address.ONLY_ONE_Of_STATE_OR_PROVINCE_MUST_BE_SET,
-                message: `Only one of the [state] or [province] property must be set for all addresses.`,
-                path: ['addresses', 'detail']
-              }
-            ]
-          )
+          async: true
         }
       )
       .validate({mode: validationChain.modes.EXIT_ON_ERROR});

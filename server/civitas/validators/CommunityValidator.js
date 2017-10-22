@@ -12,7 +12,7 @@ module.exports = {
    *
    * @param {string} name - The name of the community that will be validated
    *
-   * @returns {boolean} - If the validation was successful
+   * @returns {Object|null} - Error
    */
   newCommunityValidator: async function newCommunityValidator(name) {
     let community = null;
@@ -23,21 +23,49 @@ module.exports = {
         }
       );
     } catch (err) {
-      return false;
+      return err;
     }
 
-    return !(community);
+    if (community) {
+      return new validationError(
+        'Some validation errors occurred.',
+        [
+          {
+            code: errors.Community.COMMUNITY_ALREADY_EXISTS,
+            message: `A community with the same name [${name}] already exists.`,
+            path: ['name']
+          }
+        ]
+      )
+    }
+
+    return null;
   },
 
   /**
    * Validates the community already exist
    *
    * @param {Object} community - The community entity that will be validated
+   * @param {Object} request - The new user entity that will be validated
    *
-   * @returns {boolean} - If the validation was successful
+   * @returns {Object|null} - Error
    */
-  existingCommunityValidator: function existingCommunityValidator(community) {
-    return (community ? true : false);
+  existingCommunityValidator: function existingCommunityValidator(community, request) {
+
+    if (!community) {
+      return new validationError(
+        'Some validation errors occurred.',
+        [
+          {
+            code: errors.Community.COMMUNITY_NOT_FOUND,
+            message: `No community with id [${request.id}] was found.`,
+            path: ['id']
+          }
+        ]
+      )
+    }
+
+    return null;
   },
 
   /**
@@ -55,16 +83,6 @@ module.exports = {
         that.newCommunityValidator,
         {
           parameters: [request.name],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Community.COMMUNITY_ALREADY_EXISTS,
-                message: `A community with the same name already exists.`,
-                path: ['name']
-              }
-            ]
-          ),
           async: true
         }
       )
@@ -85,17 +103,7 @@ module.exports = {
       .add(
         that.existingCommunityValidator,
         {
-          parameters: [community],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Community.COMMUNITY_NOT_FOUND,
-                message: `No community with id [${request.id}] was found.`,
-                path: ['id']
-              }
-            ]
-          )
+          parameters: [community, request]
         }
       ).validate({mode: validationChain.modes.EXIT_ON_ERROR});
 

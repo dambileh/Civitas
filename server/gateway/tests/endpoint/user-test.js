@@ -421,7 +421,7 @@ describe('/user', function () {
             "results": {
               "errors": [{
                 "code": 200005,
-                "message": "Exactly one primary address must be set",
+                "message": "Exactly one primary address must be set. [2] found instead.",
                 "path": ["addresses"]
               }]
             },
@@ -684,6 +684,8 @@ describe('/user', function () {
         }
       };
 
+      const invalidLongitude = 181;
+
       /*eslint-enable*/
       api.post('/v1/user')
         .set('Content-Type', 'application/json')
@@ -705,7 +707,7 @@ describe('/user', function () {
                 },
                 "location": {
                   "type": "Point",
-                  "coordinates": [181, 90]
+                  "coordinates": [invalidLongitude, 90]
                 }
               }
             ]
@@ -725,7 +727,7 @@ describe('/user', function () {
             "results": {
               "errors": [{
                 "code": 200002,
-                "message": "The passed in coordinates are not in correct format",
+                "message": `Incorrect coordinates format. Longitude [${invalidLongitude}] is not within allowed range`,
                 "path": ["addresses", "location", "coordinates"]
               }]
             },
@@ -784,6 +786,7 @@ describe('/user', function () {
         }
       };
 
+      const invalidLongitude = -181;
       /*eslint-enable*/
       api.post('/v1/user')
         .set('Content-Type', 'application/json')
@@ -805,7 +808,7 @@ describe('/user', function () {
                 },
                 "location": {
                   "type": "Point",
-                  "coordinates": [-181, 90]
+                  "coordinates": [invalidLongitude, 90]
                 }
               }
             ]
@@ -825,7 +828,7 @@ describe('/user', function () {
             "results": {
               "errors": [{
                 "code": 200002,
-                "message": "The passed in coordinates are not in correct format",
+                "message": `Incorrect coordinates format. Longitude [${invalidLongitude}] is not within allowed range`,
                 "path": ["addresses", "location", "coordinates"]
               }]
             },
@@ -884,6 +887,8 @@ describe('/user', function () {
         }
       };
 
+      const invalidLatitude = 91;
+
       /*eslint-enable*/
       api.post('/v1/user')
         .set('Content-Type', 'application/json')
@@ -905,7 +910,7 @@ describe('/user', function () {
                 },
                 "location": {
                   "type": "Point",
-                  "coordinates": [150, 91]
+                  "coordinates": [150, invalidLatitude]
                 }
               }
             ]
@@ -925,7 +930,7 @@ describe('/user', function () {
             "results": {
               "errors": [{
                 "code": 200002,
-                "message": "The passed in coordinates are not in correct format",
+                "message": `Incorrect coordinates format. Latitude [${invalidLatitude}] is not within allowed range`,
                 "path": ["addresses", "location", "coordinates"]
               }]
             },
@@ -984,6 +989,7 @@ describe('/user', function () {
         }
       };
 
+      const invalidLatitude = -95;
       /*eslint-enable*/
       api.post('/v1/user')
         .set('Content-Type', 'application/json')
@@ -1005,7 +1011,7 @@ describe('/user', function () {
                 },
                 "location": {
                   "type": "Point",
-                  "coordinates": [150, -95]
+                  "coordinates": [150, invalidLatitude]
                 }
               }
             ]
@@ -1025,7 +1031,7 @@ describe('/user', function () {
             "results": {
               "errors": [{
                 "code": 200002,
-                "message": "The passed in coordinates are not in correct format",
+                "message": `Incorrect coordinates format. Latitude [${invalidLatitude}] is not within allowed range`,
                 "path": ["addresses", "location", "coordinates"]
               }]
             },

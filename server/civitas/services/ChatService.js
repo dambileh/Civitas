@@ -1,6 +1,6 @@
 'use strict';
 
-const Community = require('../models/Community');
+const Chat = require('../models/Chat');
 const resourceNotFoundError = require('../../libs/error/ResourceNotFoundError');
 const validationError = require('../../libs/error/ValidationError');
 const appUtil = require('../../libs/AppUtil');
@@ -8,32 +8,31 @@ const logging = require('../utilities/Logging');
 const config = require('config');
 const internalEventEmitter = require('../../libs/InternalEventEmitter');
 const addressManager = require('../managers/AddressManager');
-const communityChannels = require('../../PubSubChannels').Community;
+const chatChannels = require('../../PubSubChannels').Chat;
 const errors = require('../../ErrorCodes');
 const constants = require('../../Constants');
 const ownerValidator = require('../validators/OwnerValidator');
-const communityValidator = require('../validators/CommunityValidator');
+const chatValidator = require('../validators/ChatValidator');
 const personValidator = require('../validators/PersonValidator');
 const entityValidator = require('../validators/EntityValidator');
 
 /**
- * The Community Service module
+ * The Chat Service module
  */
 module.exports = {
 
   /**
-   * Creates a community
+   * Creates a chat
    *
    * @param {object} request - The request that was sent from the controller
    */
-  createCommunity: async function createCommunity(request) {
-
+  createChat: async function createChat(request) {
     //Validate the owner
-    let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user']);
-    
+    let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user', 'community']);
+
     if (ownerValidationResult) {
       return internalEventEmitter.emit(
-        communityChannels.Internal.CreateCompletedEvent,
+        chatChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
           body: ownerValidationResult
@@ -41,61 +40,26 @@ module.exports = {
       );
     }
 
-    //Validate the representatives
-    let personValidationResult = await personValidator.validate(request.representatives);
-
-    if (personValidationResult) {
-      return internalEventEmitter.emit(
-        communityChannels.Internal.CreateCompletedEvent,
-        {
-          statusCode: 400,
-          body: personValidationResult
-        }
-      );
-    }
-
-    // Validate the entities
-    var entityValidationResult = await entityValidator.validate(request.entities);
-
-    if (entityValidationResult) {
-      return internalEventEmitter.emit(
-        communityChannels.Internal.CreateCompletedEvent,
-        {
-          statusCode: 400,
-          body: entityValidationResult
-        }
-      );
-    }
-    
     // Validate the request
-    var communityValidationResult = await communityValidator.validateCreate(request);
+    var chatValidationResult = await chatValidator.validateCreate(request);
 
-    if (communityValidationResult) {
+    if (chatValidationResult) {
       return internalEventEmitter.emit(
-        communityChannels.Internal.CreateCompletedEvent,
+        chatChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
-          body: communityValidationResult
+          body: chatValidationResult
         }
       );
     }
 
-    // get address from the request and unset it so that we can create the Community model
-    // Otherwise it will fail the Array of Ids schema validation
-
-    // Set it to true since there is only one address
-    request.address.isPrimary = true;
-    let requestAddresses = [request.address];
-
-    request.address = null;
-
-    let communityModel = null;
+    let chatModel = null;
 
     try {
-      communityModel = new Community(request);
+      chatModel = new Chat(request);
     } catch (error) {
       return internalEventEmitter.emit(
-        communityChannels.Internal.CreateCompletedEvent,
+        chatChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 500,
           body: error
@@ -105,73 +69,31 @@ module.exports = {
 
     logging.logAction(
       logging.logLevels.INFO,
-      'Attempting to save a new Community document'
+      'Attempting to save a new Chat document'
     );
 
-
-
-    await communityModel.save();
-
-    let communityAddresses = null;
-
-    try {
-      communityAddresses = await addressManager.createAddresses(
-        requestAddresses,
-        communityModel.id,
-        constants.address.ownerType.community
-      );
-    } catch (error) {
-
-      let statusCode = 500;
-
-      if (error.status === 400) {
-        statusCode = 400;
-      }
-
-      // If there is an error creating the address, we should remove the community record as well
-      await communityModel.remove();
-
-      return internalEventEmitter.emit(
-        communityChannels.Internal.CreateCompletedEvent,
-        {
-          statusCode: statusCode,
-          body: error
-        }
-      );
-    }
-
-    // Now that we have created the address, we should set them on the user record
-    // We only save the ids
-    communityModel.address = communityAddresses.map((address) => {
-      return address.id;
-    })[0];
-
-    await communityModel.save();
-
-    // Set the address objects back on for display
-    communityModel.address = communityAddresses[0];
+    await chatModel.save();
 
     return internalEventEmitter.emit(
-      communityChannels.Internal.CreateCompletedEvent,
+      chatChannels.Internal.CreateCompletedEvent,
       {
         statusCode: 201,
-        body: communityModel
+        body: chatModel
       }
     );
   },
 
   /**
-   * Returns all communities
+   * Returns all chats
    *
    * @param {object} request - The request arguments passed in from the controller
    */
-  getAllCommunities: async function getAllCommunites(request) {
+  getAllChats: async function getAllCommunites(request) {
     //Validate the owner
     let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user']);
-
     if (ownerValidationResult) {
       return internalEventEmitter.emit(
-        communityChannels.Internal.CreateCompletedEvent,
+        chatChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
           body: ownerValidationResult
@@ -181,20 +103,20 @@ module.exports = {
 
     logging.logAction(
       logging.logLevels.INFO,
-      'Attempting to retrieve all communities'
+      'Attempting to retrieve all chats'
     );
 
-    let communities = null;
+    let chats = null;
 
     try {
-      communities = await Community
+      chats = await Chat
         .find({'owner.item': request.owner.item})
         .populate('address')
         .populate('owner.item');
 
     } catch (err) {
       return internalEventEmitter.emit(
-        communityChannels.Internal.GetAllCompletedEvent,
+        chatChannels.Internal.GetAllCompletedEvent,
         {
           statusCode: 500,
           body: err
@@ -205,33 +127,33 @@ module.exports = {
     let statusCode = 200;
 
     // If the array is empty we need to return a 204 response.
-    if (appUtil.isArrayEmpty(communities)) {
+    if (appUtil.isArrayEmpty(chats)) {
       statusCode = 204;
     }
 
     return internalEventEmitter.emit(
-      communityChannels.Internal.GetAllCompletedEvent,
+      chatChannels.Internal.GetAllCompletedEvent,
       {
         statusCode: statusCode,
         header: {
-          resultCount: communities.length
+          resultCount: chats.length
         },
-        body: communities
+        body: chats
       }
     );
   },
 
   /**
-   * Returns a single community
+   * Returns a single chat
    *
    * @param {object} request - The request that was sent from the controller
    */
-  getSingleCommunity: async function getSingleCommunity(request) {
+  getSingleChat: async function getSingleChat(request) {
     //Validate the owner
     let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user']);
     if (ownerValidationResult) {
       return internalEventEmitter.emit(
-        communityChannels.Internal.CreateCompletedEvent,
+        chatChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
           body: ownerValidationResult
@@ -241,20 +163,20 @@ module.exports = {
 
     logging.logAction(
       logging.logLevels.INFO,
-      'Attempting to get a single community'
+      'Attempting to get a single chat'
     );
 
-    let community = null;
+    let chat = null;
 
     try {
-      community = await Community
+      chat = await Chat
         .findById(request.id)
         .populate('address')
         .populate('owner.item');
 
     } catch (err) {
       return internalEventEmitter.emit(
-        communityChannels.Internal.GetSingleCompletedEvent,
+        chatChannels.Internal.GetSingleCompletedEvent,
         {
           statusCode: 500,
           body: err
@@ -262,15 +184,15 @@ module.exports = {
       );
     }
 
-    if (appUtil.isNullOrUndefined(community)) {
+    if (appUtil.isNullOrUndefined(chat)) {
 
       var notFoundError = new resourceNotFoundError(
         'Resource not found.',
-        `No community with id [${request.id}] was found`
+        `No chat with id [${request.id}] was found`
       );
 
       return internalEventEmitter.emit(
-        communityChannels.Internal.GetSingleCompletedEvent,
+        chatChannels.Internal.GetSingleCompletedEvent,
         {
           statusCode: 404,
           body: notFoundError
@@ -281,12 +203,12 @@ module.exports = {
     // Validate the existing owner
     let existingOwnerValidationResult = await ownerValidator.validateExisting(
       request.owner.item,
-      community.owner.item._id
+      chat.owner.item._id
     );
 
     if (existingOwnerValidationResult) {
       return internalEventEmitter.emit(
-        communityChannels.Internal.CreateCompletedEvent,
+        chatChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 401,
           body: existingOwnerValidationResult
@@ -295,25 +217,25 @@ module.exports = {
     }
 
     return internalEventEmitter.emit(
-      communityChannels.Internal.GetSingleCompletedEvent,
+      chatChannels.Internal.GetSingleCompletedEvent,
       {
         statusCode: 200,
-        body: community
+        body: chat
       }
     );
   },
 
   /**
-   * Deletes a community
+   * Deletes a chat
    *
    * @param {object} request - The request arguments passed in from the controller
    */
-  deleteCommunity: async function deleteCommunity(request) {
+  deleteChat: async function deleteChat(request) {
     //Validate the owner
     let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user']);
     if (ownerValidationResult) {
       return internalEventEmitter.emit(
-        communityChannels.Internal.CreateCompletedEvent,
+        chatChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
           body: ownerValidationResult
@@ -321,16 +243,16 @@ module.exports = {
       );
     }
 
-    let community = null;
+    let chat = null;
     try {
-      community = await Community
+      chat = await Chat
         .findById(request.id)
         .populate('address')
         .populate('owner.item');
 
     } catch (err) {
       return internalEventEmitter.emit(
-        communityChannels.Internal.DeleteCompletedEvent,
+        chatChannels.Internal.DeleteCompletedEvent,
         {
           statusCode: 500,
           body: err
@@ -338,20 +260,20 @@ module.exports = {
       );
     }
 
-    if (appUtil.isNullOrUndefined(community)) {
+    if (appUtil.isNullOrUndefined(chat)) {
       var modelValidationError = new validationError(
         'Some validation errors occurred.',
         [
           {
-            code: errors.Community.COMMUNITY_NOT_FOUND,
-            message: `No community with id [${request.id}] was found.`,
+            code: errors.Chat.COMMUNITY_NOT_FOUND,
+            message: `No chat with id [${request.id}] was found.`,
             path: ['id']
           }
         ]
       );
 
       return internalEventEmitter.emit(
-        communityChannels.Internal.DeleteCompletedEvent,
+        chatChannels.Internal.DeleteCompletedEvent,
         {
           statusCode: 400,
           body: modelValidationError
@@ -362,12 +284,12 @@ module.exports = {
     // Validate the existing owner
     let existingOwnerValidationResult = await ownerValidator.validateExisting(
       request.owner.item,
-      community.owner.item._id
+      chat.owner.item._id
     );
 
     if (existingOwnerValidationResult) {
       return internalEventEmitter.emit(
-        communityChannels.Internal.CreateCompletedEvent,
+        chatChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 401,
           body: existingOwnerValidationResult
@@ -377,14 +299,14 @@ module.exports = {
 
     logging.logAction(
       logging.logLevels.INFO,
-      'Attempting to remove a community document'
+      'Attempting to remove a chat document'
     );
 
     try {
-      await community.remove();
+      await chat.remove();
     } catch (err) {
       return internalEventEmitter.emit(
-        communityChannels.Internal.DeleteCompletedEvent,
+        chatChannels.Internal.DeleteCompletedEvent,
         {
           statusCode: 500,
           body: err
@@ -393,26 +315,25 @@ module.exports = {
     }
 
     return internalEventEmitter.emit(
-      communityChannels.Internal.DeleteCompletedEvent,
+      chatChannels.Internal.DeleteCompletedEvent,
       {
         statusCode: 200,
-        body: community
+        body: chat
       }
     );
   },
 
   /**
-   * Updates a community
+   * Updates a chat
    *
    * @param {object} request - The request arguments passed in from the controller
    */
-  updateCommunity: async function updateCommunity(request) {
+  updateChat: async function updateChat(request) {
     //Validate the owner
     let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user']);
-
     if (ownerValidationResult) {
       return internalEventEmitter.emit(
-        communityChannels.Internal.CreateCompletedEvent,
+        chatChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
           body: ownerValidationResult
@@ -420,17 +341,17 @@ module.exports = {
       );
     }
 
-    let community = null;
+    let chat = null;
 
     try {
-      community = await Community
+      chat = await Chat
         .findById(request.id)
         .populate('address')
         .populate('owner.item');
 
     } catch (err) {
       return internalEventEmitter.emit(
-        communityChannels.Internal.UpdateCompletedEvent,
+        chatChannels.Internal.UpdateCompletedEvent,
         {
           statusCode: 500,
           body: err
@@ -438,11 +359,11 @@ module.exports = {
       );
     }
 
-    var validationResult = await communityValidator.validateUpdate(community, request);
+    var validationResult = await chatValidator.validateUpdate(chat, request);
 
     if (validationResult) {
       return internalEventEmitter.emit(
-        communityChannels.Internal.CreateCompletedEvent,
+        chatChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 400,
           body: validationResult
@@ -453,12 +374,12 @@ module.exports = {
     // Validate the existing owner
     let existingOwnerValidationResult = await ownerValidator.validateExisting(
       request.owner.item,
-      community.owner.item._id
+      chat.owner.item._id
     );
 
     if (existingOwnerValidationResult) {
       return internalEventEmitter.emit(
-        communityChannels.Internal.CreateCompletedEvent,
+        chatChannels.Internal.CreateCompletedEvent,
         {
           statusCode: 401,
           body: existingOwnerValidationResult
@@ -468,10 +389,10 @@ module.exports = {
 
     logging.logAction(
       logging.logLevels.INFO,
-      `Attempting to update a community document with id [${community.id}]`
+      `Attempting to update a chat document with id [${chat.id}]`
     );
 
-    let communityAddresses = [community.address];
+    let chatAddresses = [chat.address];
 
     // First update the address
     if (request.address) {
@@ -480,11 +401,11 @@ module.exports = {
       request.address.isPrimary = true;
 
       try {
-        communityAddresses = await addressManager.updateAddresses(
+        chatAddresses = await addressManager.updateAddresses(
           [request.address],
-          [community.address],
-          community.id,
-          constants.address.ownerType.community
+          [chat.address],
+          chat.id,
+          constants.address.ownerType.chat
         );
       } catch (error) {
 
@@ -495,7 +416,7 @@ module.exports = {
         } 
         
         return internalEventEmitter.emit(
-          communityChannels.Internal.UpdateCompletedEvent,
+          chatChannels.Internal.UpdateCompletedEvent,
           {
             statusCode: statusCode,
             body: error
@@ -503,7 +424,7 @@ module.exports = {
         );
       }
 
-      community.address = communityAddresses.map((userAddress) => {
+      chat.address = chatAddresses.map((userAddress) => {
         return userAddress.id;
       })[0];
     }
@@ -514,14 +435,14 @@ module.exports = {
 
       if (entityValidationResult) {
         return internalEventEmitter.emit(
-          communityChannels.Internal.CreateCompletedEvent,
+          chatChannels.Internal.CreateCompletedEvent,
           {
             statusCode: 400,
             body: entityValidationResult
           }
         );
       }
-      community.entities = request.entities;
+      chat.entities = request.entities;
     }
 
     if (request.representatives) {
@@ -529,21 +450,21 @@ module.exports = {
       let personValidationResult = await personValidator.validate(request.representatives);
       if (personValidationResult) {
         return internalEventEmitter.emit(
-          communityChannels.Internal.CreateCompletedEvent,
+          chatChannels.Internal.CreateCompletedEvent,
           {
             statusCode: 400,
             body: personValidationResult
           }
         );
       }
-      community.representatives = request.representatives;
+      chat.representatives = request.representatives;
     }
 
     try {
-      await community.save();
+      await chat.save();
     } catch (err) {
       return internalEventEmitter.emit(
-        communityChannels.Internal.UpdateCompletedEvent,
+        chatChannels.Internal.UpdateCompletedEvent,
         {
           statusCode: 500,
           body: err
@@ -551,15 +472,15 @@ module.exports = {
       );
     }
 
-    community.updatedAt = new Date();
+    chat.updatedAt = new Date();
 
     // set the address objects back on the display response
-    community.address = communityAddresses[0];
+    chat.address = chatAddresses[0];
     return internalEventEmitter.emit(
-      communityChannels.Internal.UpdateCompletedEvent,
+      chatChannels.Internal.UpdateCompletedEvent,
       {
         statusCode: 200,
-        body: community
+        body: chat
       }
     );
   }

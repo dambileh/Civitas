@@ -828,7 +828,7 @@ describe('/community', function () {
             "results": {
               "errors": [{
                 "code": 400000,
-                "message": "The owner type [community] is not valid for this entity."
+                "message": "The owner kind [community] is not valid for this entity."
               }]
             },
             "status": 400
@@ -1250,7 +1250,7 @@ describe('/community', function () {
             "results": {
               "errors": [{
                 "code": 900000,
-                "message": "A community with the same name already exists.",
+                "message": `A community with the same name [${communityOneBody.name}] already exists.`,
                 "path": ["name"]
               }]
             },
@@ -3190,7 +3190,7 @@ describe('/community', function () {
             "results": {
               "errors": [{
                 "code": 700000,
-                "message": "Exactly one primary representative must be set",
+                "message": "Exactly one primary representative must be set. [2] found instead",
                 "path": ["representatives"]
               }]
             },
@@ -3325,7 +3325,7 @@ describe('/community', function () {
             "results": {
               "errors": [{
                 "code": 700000,
-                "message": "Exactly one primary representative must be set",
+                "message": "Exactly one primary representative must be set. [0] found instead",
                 "path": ["representatives"]
               }]
             },
@@ -3531,7 +3531,7 @@ describe('/community', function () {
             "results": {
               "errors": [{
                 "code": 700001,
-                "message": "Persons email address must be unique",
+                "message": `Found duplicate persons email address [hsh_85@yahoo.com]`,
                 "path": ["representatives", "email"]
               }]
             },
@@ -3945,7 +3945,7 @@ describe('/community', function () {
             "results": {
               "errors": [{
                 "code": 400000,
-                "message": "The owner type [community] is not valid for this entity."
+                "message": "The owner kind [community] is not valid for this entity."
               }]
             },
             "status": 400

@@ -11,8 +11,8 @@ module.exports = {
    * Validates that there is exactly one primary person
    *
    * @param {Array} persons - the persons that will be validated
-
-   * @returns {boolean} - If the validation was successful
+   * 
+   * @returns {Object|null} - Error
    */
   hasPrimaryValidator: function hasPrimaryValidator(persons) {
 
@@ -24,15 +24,28 @@ module.exports = {
       }
     }
 
-    return (primaryCounter === 1);
+    if (primaryCounter !== 1) {
+      return new validationError(
+        'Some validation errors occurred.',
+        [
+          {
+            code: errors.Person.EXACTLY_ONE_PRIMARY_PERSON_MUST_BE_SET,
+            message: `Exactly one primary representative must be set. [${primaryCounter}] found instead`,
+            path: ['representatives']
+          }
+        ]
+      )
+    }
+    
+    return null;
   },
 
   /**
    * Validates that person has unique email
    *
    * @param {Array} persons - the persons that will be validated
-
-   * @returns {boolean} - If the validation was successful
+   *
+   * @returns {Object|null} - Error
    */
   isEmailUniqueValidator: function isEmailUniqueValidator(persons) {
 
@@ -41,49 +54,77 @@ module.exports = {
     for (let person of persons) {
       if(firstEmail) {
         if(firstEmail == person.email) {
-          return false;
+          return new validationError(
+            'Some validation errors occurred.',
+            [
+              {
+                code: errors.Person.DUPLICATE_EMAIL_FOUND,
+                message: `Found duplicate persons email address [${person.email}]`,
+                path: ['representatives', 'email']
+              }
+            ]
+          );
         }
       } else {
         firstEmail = person.email;
       }
     }
 
-    return true;
+    return null;
   },
 
   /**
    * Validates that person has exactly one primary phone numbers
    *
    * @param {Array} persons - the persons that will be validated
-
-   * @returns {boolean} - If the validation was successful
+   * 
+   * @returns {Object|null} - Error
    */
   personHasPrimaryPhoneValidator: async function personHasPrimaryPhoneValidator(persons) {
     for (let person of persons) {
       let validationResult = await phoneNumberValidator.hasPrimaryValidator(person.phoneNumbers);
-      if (!validationResult) {
-        return false;
+      if (validationResult) {
+        return new validationError(
+          'Some validation errors occurred.',
+          [
+            {
+              code: errors.PhoneNumber.EXACTLY_ONE_PRIMARY_NUMBER_MUST_BE_SET,
+              message: `Exactly one primary phone number must be set for person`,
+              path: ['representatives', 'phoneNumbers']
+            }
+          ]
+        );
       }
     }
 
-    return true;
+    return null;
   },
 
   /**
    * Validates that person has unique phone numbers
    *
    * @param {Array} persons - the persons that will be validated
-
-   * @returns {boolean} - If the validation was successful
+   * 
+   * @returns {Object|null} - Error
    */
   personHasUniquePhoneValidator: async function personHasUniquePhoneValidator(persons) {
     for (let person of persons) {
       let validationResult = await phoneNumberValidator.isNumberUniqueValidator(person.phoneNumbers);
-      if (!validationResult) {
-        return false;
+      if (validationResult) {
+        return new validationError(
+          'Some validation errors occurred.',
+          [
+            {
+              code: errors.PhoneNumber.DUPLICATE_PHONE_NUMBER_FOUND,
+              message: `Persons phone numbers must be unique`,
+              path: ['representatives', 'phoneNumbers', 'number']
+            }
+          ]
+        );
       }
     }
-    return true;
+    
+    return null;
   },
 
   /**
@@ -99,33 +140,13 @@ module.exports = {
       .add(
         that.hasPrimaryValidator,
         {
-          parameters: [persons],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Person.EXACTLY_ONE_PRIMARY_PERSON_MUST_BE_SET,
-                message: `Exactly one primary representative must be set`,
-                path: ['representatives']
-              }
-            ]
-          )
+          parameters: [persons]
         }
       )
       .add(
         that.personHasPrimaryPhoneValidator,
         {
           parameters: [persons],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.PhoneNumber.EXACTLY_ONE_PRIMARY_NUMBER_MUST_BE_SET,
-                message: `Exactly one primary phone number must be set for person`,
-                path: ['representatives', 'phoneNumbers']
-              }
-            ]
-          ),
           async: true
         }
       )
@@ -133,16 +154,6 @@ module.exports = {
         that.personHasUniquePhoneValidator,
         {
           parameters: [persons],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.PhoneNumber.DUPLICATE_PHONE_NUMBER_FOUND,
-                message: `Persons phone numbers must be unique`,
-                path: ['representatives', 'phoneNumbers', 'number']
-              }
-            ]
-          ),
           async: true
         }
       )
@@ -150,16 +161,6 @@ module.exports = {
         that.isEmailUniqueValidator,
         {
           parameters: [persons],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Person.DUPLICATE_EMAIL_FOUND,
-                message: `Persons email address must be unique`,
-                path: ['representatives', 'email']
-              }
-            ]
-          ),
           async: true
         }
       )

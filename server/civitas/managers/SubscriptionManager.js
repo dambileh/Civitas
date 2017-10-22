@@ -8,6 +8,7 @@ const pubSubChannels = require('../../PubSubChannels');
 const userChannels = pubSubChannels.User;
 const companyChannels = pubSubChannels.Company;
 const communityChannels = pubSubChannels.Community;
+const chatChannels = pubSubChannels.Chat;
 const constants = require('../../Constants');
 
 module.exports = {
@@ -15,6 +16,7 @@ module.exports = {
     await _subscribeToUserChannel();
     await _subscribeToCompanyChannel();
     await _subscribeToCommunityChannel();
+    await _subscribeToChatChannel();
   }
 };
 
@@ -137,6 +139,47 @@ async function  _subscribeToCommunityChannel() {
     );
   } catch (e) {
     logging.logAction(logging.logLevels.ERROR, `Failed to subscribe to channel [${communityChannels.External.Event}]`, e);
+    throw e;
+  }
+}
+
+async function  _subscribeToChatChannel() {
+  if (appUtil.isNullOrUndefined(chatChannels)) {
+    throw new Error('[channel] is not set');
+  }
+
+  try {
+    await pubSub.subscribe(
+      chatChannels.External.Event,
+      {
+        subscriberType: constants.pubSub.recipients.chat
+      },
+      (err, message) => {
+        if (err) {
+          return;
+        }
+
+        if(!message.tryValidate()) {
+          return;
+        }
+
+        logging.logAction(
+          logging.logLevels.INFO,
+          `Message [${JSON.stringify(message)}] was received on channel [${chatChannels.External.Event}] for recipient [
+            ${message.recipient}]`
+        );
+
+        switch (message.type) {
+          case constants.pubSub.messageType.crud:
+            subscriptionHelper.emitCRUDEvents(message, chatChannels);
+            break;
+          default:
+            logging.logAction(logging.logLevels.ERROR, `Type [${message.type}] is not supported`)
+        }
+      }
+    );
+  } catch (e) {
+    logging.logAction(logging.logLevels.ERROR, `Failed to subscribe to channel [${chatChannels.External.Event}]`, e);
     throw e;
   }
 }

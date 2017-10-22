@@ -38,6 +38,23 @@ module.exports = {
       "GetAllEvent": "CompanyGetAllEvent"
     }
   },
+  "Chat": {
+    "External": {
+      "Event": "ChatEvent",
+      "CompletedEvent": "ChatCompletedEvent"
+    },
+    "Internal": {
+      "CreateEvent": "ChatCreateEvent",
+      "CreateCompletedEvent": "ChatCreateCompletedEvent",
+      "UpdateEvent": "ChatUpdateEvent",
+      "UpdateCompletedEvent": "ChatUpdateCompletedEvent",
+      "DeleteEvent": "ChatDeleteEvent",
+      "DeleteCompletedEvent": "ChatDeleteCompletedEvent",
+      "GetSingleEvent": "ChatGetSingleEvent",
+      "GetSingleCompletedEvent": "ChatGetSingleCompletedEvent",
+      "GetAllEvent": "ChatGetAllEvent"
+    }
+  },
   "Community": {
     "External": {
       "Event": "CommunityEvent",

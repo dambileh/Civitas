@@ -72,16 +72,24 @@ module.exports = {
    * @param {integer} tryCount - The number of retry attempts 
    * @param {integer} tryIntervals - The wait interval between each interval in milliseconds
    * 
-   * @returns {Promise}
+   * @returns {boolean}
    */
   retry: async function retry(fn, tryCount, tryIntervals) {
     for (let i = 0; i < tryCount; i++) {
+      let success = false;
       try {
         await fn();
+        success = true;
       } catch (err) {
         await this.wait(tryIntervals)
       }
+
+      if(success) {
+        break;
+      }
     }
+    
+    return true;
   }
 
 };

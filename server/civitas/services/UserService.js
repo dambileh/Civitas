@@ -27,21 +27,8 @@ module.exports = {
    * @param {object} request - The request that was sent from the controller
    */
   createUser: async function createUser(request) {
-    let user = null;
-    try {
-      user = await User.findOne({msisdn: request.msisdn});
-    } catch (err) {
-      return internalEventEmitter.emit(
-        userChannels.Internal.CreateCompletedEvent,
-        {
-          statusCode: 500,
-          body: err
-        }
-      );
-    }
-
-    var validationResult = await userValidator.validateCreate(user, request);
-
+    var validationResult = await userValidator.validateCreate(request);
+    
     if (validationResult) {
       return internalEventEmitter.emit(
         userChannels.Internal.CreateCompletedEvent,

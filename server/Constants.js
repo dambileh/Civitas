@@ -20,6 +20,7 @@ module.exports = {
       user: "user",
       company: "company",
       community: "community",
+      chat: "chat",
       registration: "registration"
     },
     channelStore: {
