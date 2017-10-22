@@ -40,6 +40,19 @@ module.exports = {
       );
     }
 
+    // Validate the request
+    var companyValidationResult = await companyValidator.validateCreate(request);
+
+    if (companyValidationResult) {
+      return internalEventEmitter.emit(
+        companyChannels.Internal.CreateCompletedEvent,
+        {
+          statusCode: 400,
+          body: companyValidationResult
+        }
+      );
+    }
+    
     // Validate the phone numbers
     let phoneNumberValidationResult = await phoneNumberValidator.validate(request.phoneNumbers);
 
@@ -61,19 +74,6 @@ module.exports = {
         {
           statusCode: 400,
           body: personValidationResult
-        }
-      );
-    }
-
-    // Validate the request
-    var companyValidationResult = await companyValidator.validateCreate(request);
-
-    if (companyValidationResult) {
-      return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
-        {
-          statusCode: 400,
-          body: companyValidationResult
         }
       );
     }
@@ -429,18 +429,6 @@ module.exports = {
       );
     }
 
-    var validationResult = await companyValidator.validateUpdate(company, request);
-
-    if (validationResult) {
-      return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
-        {
-          statusCode: 400,
-          body: validationResult
-        }
-      );
-    }
-
     // Validate the existing owner
     let existingOwnerValidationResult = await ownerValidator.validateExisting(
       request.owner.item,
@@ -456,44 +444,17 @@ module.exports = {
         }
       );
     }
+    
+    var validationResult = await companyValidator.validateUpdate(company, request);
 
-    logging.logAction(
-      logging.logLevels.INFO,
-      `Attempting to update a company document with id [${company.id}]`
-    );
-
-    let companyAddresses = company.addresses;
-
-    // First update the address
-    if (request.addresses) {
-
-      try {
-        companyAddresses = await addressManager.updateAddresses(
-          request.addresses,
-          company.addresses,
-          company.id,
-          constants.address.ownerType.company
-        );
-      } catch (error) {
-
-        let statusCode = 500;
-
-        if (error.status === 400) {
-          statusCode = 400;
-        } 
-        
-        return internalEventEmitter.emit(
-          companyChannels.Internal.UpdateCompletedEvent,
-          {
-            statusCode: statusCode,
-            body: error
-          }
-        );
-      }
-
-      company.addresses = companyAddresses.map((address) => {
-        return address.id;
-      });
+    if (validationResult) {
+      return internalEventEmitter.emit(
+        companyChannels.Internal.CreateCompletedEvent,
+        {
+          statusCode: 400,
+          body: validationResult
+        }
+      );
     }
 
     if (request.branch) {
@@ -535,6 +496,45 @@ module.exports = {
       }
       company.representatives = request.representatives;
     }
+    
+    let companyAddresses = company.addresses;
+
+    // First update the address
+    if (request.addresses) {
+
+      try {
+        companyAddresses = await addressManager.updateAddresses(
+          request.addresses,
+          company.addresses,
+          company.id,
+          constants.address.ownerType.company
+        );
+      } catch (error) {
+
+        let statusCode = 500;
+
+        if (error.status === 400) {
+          statusCode = 400;
+        } 
+        
+        return internalEventEmitter.emit(
+          companyChannels.Internal.UpdateCompletedEvent,
+          {
+            statusCode: statusCode,
+            body: error
+          }
+        );
+      }
+
+      company.addresses = companyAddresses.map((address) => {
+        return address.id;
+      });
+    }
+
+    logging.logAction(
+      logging.logLevels.INFO,
+      `Attempting to update a company document with id [${company.id}]`
+    );
 
     try {
       await company.save();

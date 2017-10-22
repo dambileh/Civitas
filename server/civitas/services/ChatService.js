@@ -7,14 +7,11 @@ const appUtil = require('../../libs/AppUtil');
 const logging = require('../utilities/Logging');
 const config = require('config');
 const internalEventEmitter = require('../../libs/InternalEventEmitter');
-const addressManager = require('../managers/AddressManager');
 const chatChannels = require('../../PubSubChannels').Chat;
 const errors = require('../../ErrorCodes');
-const constants = require('../../Constants');
 const ownerValidator = require('../validators/OwnerValidator');
 const chatValidator = require('../validators/ChatValidator');
-const personValidator = require('../validators/PersonValidator');
-const entityValidator = require('../validators/EntityValidator');
+const chatParticipantValidator = require('../validators/ChatParticipantValidator');
 
 /**
  * The Chat Service module
@@ -36,6 +33,19 @@ module.exports = {
         {
           statusCode: 400,
           body: ownerValidationResult
+        }
+      );
+    }
+
+    // Validate the the participants
+    var chatParticipantValidationResult = await chatParticipantValidator.validate(request);
+
+    if (chatParticipantValidationResult) {
+      return internalEventEmitter.emit(
+        chatChannels.Internal.CreateCompletedEvent,
+        {
+          statusCode: 400,
+          body: chatParticipantValidationResult
         }
       );
     }
@@ -111,7 +121,7 @@ module.exports = {
     try {
       chats = await Chat
         .find({'owner.item': request.owner.item})
-        .populate('address')
+        .populate('participants')
         .populate('owner.item');
 
     } catch (err) {
@@ -171,7 +181,7 @@ module.exports = {
     try {
       chat = await Chat
         .findById(request.id)
-        .populate('address')
+        .populate('participants')
         .populate('owner.item');
 
     } catch (err) {
@@ -247,7 +257,7 @@ module.exports = {
     try {
       chat = await Chat
         .findById(request.id)
-        .populate('address')
+        .populate('participants')
         .populate('owner.item');
 
     } catch (err) {
@@ -265,7 +275,7 @@ module.exports = {
         'Some validation errors occurred.',
         [
           {
-            code: errors.Chat.COMMUNITY_NOT_FOUND,
+            code: errors.Chat.CHAT_NOT_FOUND,
             message: `No chat with id [${request.id}] was found.`,
             path: ['id']
           }
@@ -346,7 +356,7 @@ module.exports = {
     try {
       chat = await Chat
         .findById(request.id)
-        .populate('address')
+        .populate('participants')
         .populate('owner.item');
 
     } catch (err) {
@@ -355,18 +365,6 @@ module.exports = {
         {
           statusCode: 500,
           body: err
-        }
-      );
-    }
-
-    var validationResult = await chatValidator.validateUpdate(chat, request);
-
-    if (validationResult) {
-      return internalEventEmitter.emit(
-        chatChannels.Internal.CreateCompletedEvent,
-        {
-          statusCode: 400,
-          body: validationResult
         }
       );
     }
@@ -387,78 +385,51 @@ module.exports = {
       );
     }
 
+    var validationResult = await chatValidator.validateUpdate(chat, request);
+
+    if (validationResult) {
+      return internalEventEmitter.emit(
+        chatChannels.Internal.CreateCompletedEvent,
+        {
+          statusCode: 400,
+          body: validationResult
+        }
+      );
+    }
+
+    if (request.participants) {
+      // Validate the the participants
+      var chatParticipantValidationResult = await chatParticipantValidator.validate(request);
+
+      if (chatParticipantValidationResult) {
+        return internalEventEmitter.emit(
+          chatChannels.Internal.CreateCompletedEvent,
+          {
+            statusCode: 400,
+            body: chatParticipantValidationResult
+          }
+        );
+      }
+
+      chat.participants = request.participants;
+    }
+
+    if (request.name) {
+      chat.name = request.name;
+    }
+
+    if (request.description) {
+      chat.description = request.description;
+    }
+
+    if (request.avatarId) {
+      chat.avatarId = request.avatarId;
+    }
+
     logging.logAction(
       logging.logLevels.INFO,
       `Attempting to update a chat document with id [${chat.id}]`
     );
-
-    let chatAddresses = [chat.address];
-
-    // First update the address
-    if (request.address) {
-
-      // Set it to true since there is only one address
-      request.address.isPrimary = true;
-
-      try {
-        chatAddresses = await addressManager.updateAddresses(
-          [request.address],
-          [chat.address],
-          chat.id,
-          constants.address.ownerType.chat
-        );
-      } catch (error) {
-
-        let statusCode = 500;
-
-        if (error.status === 400) {
-          statusCode = 400;
-        } 
-        
-        return internalEventEmitter.emit(
-          chatChannels.Internal.UpdateCompletedEvent,
-          {
-            statusCode: statusCode,
-            body: error
-          }
-        );
-      }
-
-      chat.address = chatAddresses.map((userAddress) => {
-        return userAddress.id;
-      })[0];
-    }
-
-    if (request.entities) {
-      // Validate the entities
-      var entityValidationResult = await entityValidator.validate(request.entities);
-
-      if (entityValidationResult) {
-        return internalEventEmitter.emit(
-          chatChannels.Internal.CreateCompletedEvent,
-          {
-            statusCode: 400,
-            body: entityValidationResult
-          }
-        );
-      }
-      chat.entities = request.entities;
-    }
-
-    if (request.representatives) {
-      // Validate the representatives
-      let personValidationResult = await personValidator.validate(request.representatives);
-      if (personValidationResult) {
-        return internalEventEmitter.emit(
-          chatChannels.Internal.CreateCompletedEvent,
-          {
-            statusCode: 400,
-            body: personValidationResult
-          }
-        );
-      }
-      chat.representatives = request.representatives;
-    }
 
     try {
       await chat.save();
@@ -475,7 +446,6 @@ module.exports = {
     chat.updatedAt = new Date();
 
     // set the address objects back on the display response
-    chat.address = chatAddresses[0];
     return internalEventEmitter.emit(
       chatChannels.Internal.UpdateCompletedEvent,
       {

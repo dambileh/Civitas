@@ -1,11 +1,9 @@
 'use strict';
 
-var validationChain = require('../../libs/ValidationChain');
-var validationError = require('../../libs/error/ValidationError');
-var errors = require('../../ErrorCodes');
-var constants = require('../../Constants');
+const validationChain = require('../../libs/ValidationChain');
+const validationError = require('../../libs/error/ValidationError');
+const errors = require('../../ErrorCodes');
 const Chat = require('../models/Chat');
-const User = require('../models/User');
 
 module.exports = {
 
@@ -14,7 +12,7 @@ module.exports = {
    *
    * @param {Object} request - The new chat request that will be validated
    *
-   * @returns {boolean} - If the validation was successful
+   * @returns {Object|null} - Error
    */
   newChatValidator: async function newChatValidator(request) {
     let chat = null;
@@ -26,44 +24,48 @@ module.exports = {
         }
       );
     } catch (err) {
-      return false;
+      return err;
+    }
+    
+    if (chat) {
+      return new validationError(
+        'Some validation errors occurred.',
+        [
+          {
+            code: errors.Chat.CHAT_ALREADY_EXISTS,
+            message: `A chat with the same name [${request.name}] and owner [${request.owner.item}] already exists.`,
+            path: ['name']
+          }
+        ]
+      );
     }
 
-    return !(chat);
-  },
-
-  /**
-   * Validates that all the participants exist and their status is active
-   *
-   * @param {Array} participants - The chat participants that will be validated
-   *
-   * @returns {boolean} - If the validation was successful
-   */
-  chatParticipantsValidator: async function chatParticipantsValidator(participants) {
-    try {
-      for (let userId of participants) {
-        let user = await User.findById(userId);
-        if(!user || user.status !== constants.user.status.active) {
-          return false;
-        }
-      }
-
-    } catch (err) {
-      return false;
-    }
-
-    return true;
+    return null;
   },
 
   /**
    * Validates the chat already exist
    *
    * @param {Object} chat - The chat entity that will be validated
-   *
-   * @returns {boolean} - If the validation was successful
+   * @param {Object} request - The new user entity that will be validated
+   * 
+   * @returns {Object|null} - Error
    */
-  existingChatValidator: function existingChatValidator(chat) {
-    return (chat ? true : false);
+  existingChatValidator: function existingChatValidator(chat, request) {
+    if (!chat) {
+      return new validationError(
+        'Some validation errors occurred.',
+        [
+          {
+            code: errors.Chat.CHAT_NOT_FOUND,
+            message: `No chat with id [${request.id}] was found.`,
+            path: ['id']
+          }
+        ]
+      );
+    }
+    
+    return null;
   },
 
   /**
@@ -81,33 +83,6 @@ module.exports = {
         that.newChatValidator,
         {
           parameters: [request],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Chat.CHAT_ALREADY_EXISTS,
-                message: `A chat with the same name and owner already exists.`,
-                path: ['name']
-              }
-            ]
-          ),
-          async: true
-        }
-      )
-      .add(
-        that.chatParticipantsValidator,
-        {
-          parameters: [request.participants],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Chat.COMMUNITY_ALREADY_EXISTS,
-                message: `A chat with the same name already exists.`,
-                path: ['name']
-              }
-            ]
-          ),
           async: true
         }
       )
@@ -124,23 +99,26 @@ module.exports = {
    */
   validateUpdate: async function validateCreate(chat, request) {
     let that = this;
-    return await new validationChain()
-      .add(
-        that.existingChatValidator,
-        {
-          parameters: [chat],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Chat.COMMUNITY_NOT_FOUND,
-                message: `No chat with id [${request.id}] was found.`,
-                path: ['id']
-              }
-            ]
-          )
-        }
-      ).validate({mode: validationChain.modes.EXIT_ON_ERROR});
+    
+    let validationChain = new validationChain();
 
+    validationChain.add(
+      that.existingChatValidator,
+      {
+        parameters: [chat, request]
+      }
+    );
+
+    if (request.name) {
+      validationChain.add(
+        that.newChatValidator,
+        {
+          parameters: [request],
+          async: true
+        }
+      )
+    }
+    
+    return await validationChain.validate({mode: validationChain.modes.EXIT_ON_ERROR});
   }
 };

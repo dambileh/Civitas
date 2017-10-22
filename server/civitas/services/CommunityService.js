@@ -41,6 +41,19 @@ module.exports = {
       );
     }
 
+    // Validate the request
+    var communityValidationResult = await communityValidator.validateCreate(request);
+
+    if (communityValidationResult) {
+      return internalEventEmitter.emit(
+        communityChannels.Internal.CreateCompletedEvent,
+        {
+          statusCode: 400,
+          body: communityValidationResult
+        }
+      );
+    }
+    
     //Validate the representatives
     let personValidationResult = await personValidator.validate(request.representatives);
 
@@ -63,19 +76,6 @@ module.exports = {
         {
           statusCode: 400,
           body: entityValidationResult
-        }
-      );
-    }
-    
-    // Validate the request
-    var communityValidationResult = await communityValidator.validateCreate(request);
-
-    if (communityValidationResult) {
-      return internalEventEmitter.emit(
-        communityChannels.Internal.CreateCompletedEvent,
-        {
-          statusCode: 400,
-          body: communityValidationResult
         }
       );
     }
@@ -107,8 +107,6 @@ module.exports = {
       logging.logLevels.INFO,
       'Attempting to save a new Community document'
     );
-
-
 
     await communityModel.save();
 
@@ -438,18 +436,6 @@ module.exports = {
       );
     }
 
-    var validationResult = await communityValidator.validateUpdate(community, request);
-
-    if (validationResult) {
-      return internalEventEmitter.emit(
-        communityChannels.Internal.CreateCompletedEvent,
-        {
-          statusCode: 400,
-          body: validationResult
-        }
-      );
-    }
-
     // Validate the existing owner
     let existingOwnerValidationResult = await ownerValidator.validateExisting(
       request.owner.item,
@@ -466,47 +452,19 @@ module.exports = {
       );
     }
 
-    logging.logAction(
-      logging.logLevels.INFO,
-      `Attempting to update a community document with id [${community.id}]`
-    );
+    var validationResult = await communityValidator.validateUpdate(community, request);
+
+    if (validationResult) {
+      return internalEventEmitter.emit(
+        communityChannels.Internal.CreateCompletedEvent,
+        {
+          statusCode: 400,
+          body: validationResult
+        }
+      );
+    }
 
     let communityAddresses = [community.address];
-
-    // First update the address
-    if (request.address) {
-
-      // Set it to true since there is only one address
-      request.address.isPrimary = true;
-
-      try {
-        communityAddresses = await addressManager.updateAddresses(
-          [request.address],
-          [community.address],
-          community.id,
-          constants.address.ownerType.community
-        );
-      } catch (error) {
-
-        let statusCode = 500;
-
-        if (error.status === 400) {
-          statusCode = 400;
-        } 
-        
-        return internalEventEmitter.emit(
-          communityChannels.Internal.UpdateCompletedEvent,
-          {
-            statusCode: statusCode,
-            body: error
-          }
-        );
-      }
-
-      community.address = communityAddresses.map((userAddress) => {
-        return userAddress.id;
-      })[0];
-    }
 
     if (request.entities) {
       // Validate the entities
@@ -538,6 +496,46 @@ module.exports = {
       }
       community.representatives = request.representatives;
     }
+
+    // First update the address
+    if (request.address) {
+
+      // Set it to true since there is only one address
+      request.address.isPrimary = true;
+
+      try {
+        communityAddresses = await addressManager.updateAddresses(
+          [request.address],
+          [community.address],
+          community.id,
+          constants.address.ownerType.community
+        );
+      } catch (error) {
+
+        let statusCode = 500;
+
+        if (error.status === 400) {
+          statusCode = 400;
+        }
+
+        return internalEventEmitter.emit(
+          communityChannels.Internal.UpdateCompletedEvent,
+          {
+            statusCode: statusCode,
+            body: error
+          }
+        );
+      }
+
+      community.address = communityAddresses.map((userAddress) => {
+        return userAddress.id;
+      })[0];
+    }
+    
+    logging.logAction(
+      logging.logLevels.INFO,
+      `Attempting to update a community document with id [${community.id}]`
+    );
 
     try {
       await community.save();

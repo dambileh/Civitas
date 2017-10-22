@@ -313,11 +313,6 @@ module.exports = {
       );
     }
 
-    logging.logAction(
-      logging.logLevels.INFO,
-      `Attempting to update a user document with id [${user.id}]`
-    );
-
     let userAddresses = user.addresses;
 
     // First update the address
@@ -364,6 +359,11 @@ module.exports = {
       user.email = request.email;
     }
 
+    logging.logAction(
+      logging.logLevels.INFO,
+      `Attempting to update a user document with id [${user.id}]`
+    );
+    
     try {
       await user.save();
     } catch (err) {
