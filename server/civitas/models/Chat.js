@@ -2,6 +2,7 @@
 
 var mongoose = require('mongoose');
 var schema = mongoose.Schema;
+const constants = require('../../Constants');
 
 let senderType = [
   'community',
@@ -37,8 +38,8 @@ let message = new schema(
 );
 
 let chatType = [
-  'friend',
-  'group'
+  constants.chat.chatTypes.friend,
+  constants.chat.chatTypes.group
 ];
 
 let chat = new schema(

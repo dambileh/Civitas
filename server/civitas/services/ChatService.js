@@ -398,6 +398,9 @@ module.exports = {
     }
 
     if (request.participants) {
+      // Set the existing chat type on the request since it is required for validation
+      request.type = chat.type;
+      
       // Validate the the participants
       var chatParticipantValidationResult = await chatParticipantValidator.validate(request);
 

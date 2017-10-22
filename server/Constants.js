@@ -42,6 +42,12 @@ module.exports = {
       person: "person"
     }
   },
+  chat: {
+    chatTypes: {
+      friend: 'friend',
+      group: 'group'
+    }
+  },
   global: {
     error: {
       strictMode: "StrictModeError"
