@@ -37,19 +37,6 @@ module.exports = {
       );
     }
 
-    // Validate the the participants
-    var chatParticipantValidationResult = await chatParticipantValidator.validate(request);
-
-    if (chatParticipantValidationResult) {
-      return internalEventEmitter.emit(
-        chatChannels.Internal.CreateCompletedEvent,
-        {
-          statusCode: 400,
-          body: chatParticipantValidationResult
-        }
-      );
-    }
-
     // Validate the request
     var chatValidationResult = await chatValidator.validateCreate(request);
 
@@ -59,6 +46,19 @@ module.exports = {
         {
           statusCode: 400,
           body: chatValidationResult
+        }
+      );
+    }
+
+    // Validate the participants
+    var chatParticipantValidationResult = await chatParticipantValidator.validate(request);
+
+    if (chatParticipantValidationResult) {
+      return internalEventEmitter.emit(
+        chatChannels.Internal.CreateCompletedEvent,
+        {
+          statusCode: 400,
+          body: chatParticipantValidationResult
         }
       );
     }

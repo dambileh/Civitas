@@ -129,11 +129,12 @@ module.exports = {
   }
 };
 
-
 function _ownerFactory(type) {
   switch (type.toLowerCase()) {
     case 'user':
       return require('../models/User');
+    case 'community':
+      return require('../models/Community');
     default:
       throw new Error(`Invalid owner type [${type}] specified`);
   }

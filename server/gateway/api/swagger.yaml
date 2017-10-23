@@ -1805,11 +1805,9 @@ definitions:
         type: "string"
         description: "The id of the chat avatar stored on user's device"
       participants:
-        type: "array"
+        type: array
         items:
-          type: "string"
-          format: "uuid"
-        description: "The ids of the users that participate in the chat"
+          $ref: "#/definitions/userResponse"
       type:
         type: "string"
         enum: ["friend", "group"]

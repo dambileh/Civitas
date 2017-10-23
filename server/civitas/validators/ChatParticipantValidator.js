@@ -145,16 +145,16 @@ module.exports = {
         }
       )
       .add(
+        that.friendChatParticipantsValidator,
+        {
+          parameters: [request]
+        }
+      )
+      .add(
         that.participantsExistValidator,
         {
           parameters: [request],
           async: true
-        }
-      )
-      .add(
-        that.friendChatParticipantsValidator,
-        {
-          parameters: [request]
         }
       )
       .validate({mode: validationChain.modes.EXIT_ON_ERROR});
