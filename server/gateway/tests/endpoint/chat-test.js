@@ -413,17 +413,6 @@ describe('/chat', function () {
         "type": "friend"
       };
 
-      const chatBodyTwo = {
-        "name": "chat two",
-        "description": "chat two description",
-        "avatarId": "some id",
-        "participants": [
-          createdUser._id,
-          createdUserTwo._id
-        ],
-        "type": "group"
-      };
-
       /*eslint-enable*/
       api.post('/v1/chat')
         .set('Content-Type', 'application/json')
@@ -437,22 +426,8 @@ describe('/chat', function () {
           if (err) return done(err);
           validator.validate(res.body, schema).should.be.true;
           createdChat = res.body;
-
-          api.post('/v1/chat')
-            .set('Content-Type', 'application/json')
-            .set({
-              'context': 'user',
-              'context-id': createdUserTwo._id
-            })
-            .send(chatBodyTwo)
-            .expect(201)
-            .end(function (err, res) {
-              if (err) return done(err);
-              validator.validate(res.body, schema).should.be.true;
-
-              createdChatTwo = res.body;
-              done();
-            });
+          done();
+          
         });
     });
     it('should respond with 201 success response. Community chat', function (done) {
@@ -826,6 +801,7 @@ describe('/chat', function () {
           done();
         });
     });
+    
     it('should respond with 400 Validation Error. Minimum participants not reached', function (done) {
       /*eslint-disable*/
       var schema = {
@@ -1174,6 +1150,159 @@ describe('/chat', function () {
   });
 
   describe('get', function() {
+
+    it('should respond with 400 Validation Error. Invalid Owner Type', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.get(`/v1/chat`)
+        .set('Content-Type', 'application/json')
+        .set({
+          'context': 'company',
+          'context-id': createdUser._id
+        })
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "code": 400000,
+                "message": "The owner kind [company] is not valid for this entity."
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+          done();
+        });
+    });
+    it('should respond with 400 Validation Error. Owner not found', function (done) {
+      /*eslint-disable*/
+      var schema = {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      /*eslint-enable*/
+      api.get(`/v1/chat`)
+        .set('Content-Type', 'application/json')
+        .set({
+          'context': 'community',
+          'context-id': createdUser._id
+        })
+        .expect(400)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          validator.validate(res.body, schema).should.be.true;
+
+          const expectedResponse = {
+            "name": "ValidationError",
+            "code": "MODEL_VALIDATION_FAILED",
+            "message": "Some validation errors occurred.",
+            "results": {
+              "errors": [{
+                "message": `An owner with id [${createdUser._id}] could not be found`
+              }]
+            },
+            "status": 400
+          };
+
+          assert.deepEqual(res.body, expectedResponse, 'the expected error body was not returned');
+          done();
+        });
+    });
+
     it('should respond with 200 An array of chats', function(done) {
       /*eslint-disable*/
       var schema = {

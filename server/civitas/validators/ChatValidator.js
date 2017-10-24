@@ -100,9 +100,9 @@ module.exports = {
   validateUpdate: async function validateCreate(chat, request) {
     let that = this;
     
-    let validationChain = new validationChain();
+    let chain = new validationChain();
 
-    validationChain.add(
+    chain.add(
       that.existingChatValidator,
       {
         parameters: [chat, request]
@@ -110,7 +110,7 @@ module.exports = {
     );
 
     if (request.name) {
-      validationChain.add(
+      chain.add(
         that.newChatValidator,
         {
           parameters: [request],
@@ -119,6 +119,6 @@ module.exports = {
       )
     }
     
-    return await validationChain.validate({mode: validationChain.modes.EXIT_ON_ERROR});
+    return await chain.validate({mode: validationChain.modes.EXIT_ON_ERROR});
   }
 };

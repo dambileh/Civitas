@@ -27,6 +27,7 @@ module.exports = {
    * @param {object} request - The request that was sent from the controller
    */
   createCompany: async function createCompany(request) {
+
     //Validate the owner
     let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user']);
 
@@ -40,6 +41,19 @@ module.exports = {
       );
     }
 
+    // Validate the phone numbers first since company validator requires the phone numbers to be set
+    let phoneNumberValidationResult = await phoneNumberValidator.validate(request.phoneNumbers);
+
+    if (phoneNumberValidationResult) {
+      return internalEventEmitter.emit(
+        companyChannels.Internal.CreateCompletedEvent,
+        {
+          statusCode: 400,
+          body: phoneNumberValidationResult
+        }
+      );
+    }
+
     // Validate the request
     var companyValidationResult = await companyValidator.validateCreate(request);
 
@@ -49,19 +63,6 @@ module.exports = {
         {
           statusCode: 400,
           body: companyValidationResult
-        }
-      );
-    }
-    
-    // Validate the phone numbers
-    let phoneNumberValidationResult = await phoneNumberValidator.validate(request.phoneNumbers);
-
-    if (phoneNumberValidationResult) {
-      return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
-        {
-          statusCode: 400,
-          body: phoneNumberValidationResult
         }
       );
     }
@@ -429,6 +430,19 @@ module.exports = {
       );
     }
 
+    // Validate the request
+    var validationResult = await companyValidator.validateUpdate(company, request);
+
+    if (validationResult) {
+      return internalEventEmitter.emit(
+        companyChannels.Internal.CreateCompletedEvent,
+        {
+          statusCode: 400,
+          body: validationResult
+        }
+      );
+    }
+
     // Validate the existing owner
     let existingOwnerValidationResult = await ownerValidator.validateExisting(
       request.owner.item,
@@ -441,18 +455,6 @@ module.exports = {
         {
           statusCode: 401,
           body: existingOwnerValidationResult
-        }
-      );
-    }
-    
-    var validationResult = await companyValidator.validateUpdate(company, request);
-
-    if (validationResult) {
-      return internalEventEmitter.emit(
-        companyChannels.Internal.CreateCompletedEvent,
-        {
-          statusCode: 400,
-          body: validationResult
         }
       );
     }

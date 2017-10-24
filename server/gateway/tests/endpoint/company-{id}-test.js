@@ -1975,7 +1975,7 @@ describe('/company/{id}', function () {
         });
 
     });
-    it('should respond with 401 Validation Error. Owner has no access', function (done) {
+    it('should respond with 401 Authorization Error. Owner has no access', function (done) {
       /*eslint-disable*/
       var schema = {
         "type": "object",

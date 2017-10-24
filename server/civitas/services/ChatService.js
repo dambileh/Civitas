@@ -100,7 +100,7 @@ module.exports = {
    */
   getAllChats: async function getAllCommunites(request) {
     //Validate the owner
-    let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user']);
+    let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user', 'community']);
     if (ownerValidationResult) {
       return internalEventEmitter.emit(
         chatChannels.Internal.CreateCompletedEvent,
@@ -160,7 +160,7 @@ module.exports = {
    */
   getSingleChat: async function getSingleChat(request) {
     //Validate the owner
-    let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user']);
+    let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user', 'community']);
     if (ownerValidationResult) {
       return internalEventEmitter.emit(
         chatChannels.Internal.CreateCompletedEvent,
@@ -242,7 +242,7 @@ module.exports = {
    */
   deleteChat: async function deleteChat(request) {
     //Validate the owner
-    let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user']);
+    let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user', 'community']);
     if (ownerValidationResult) {
       return internalEventEmitter.emit(
         chatChannels.Internal.CreateCompletedEvent,
@@ -340,7 +340,7 @@ module.exports = {
    */
   updateChat: async function updateChat(request) {
     //Validate the owner
-    let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user']);
+    let ownerValidationResult = await ownerValidator.validateRequest(request.owner, ['user', 'community']);
     if (ownerValidationResult) {
       return internalEventEmitter.emit(
         chatChannels.Internal.CreateCompletedEvent,
@@ -369,6 +369,18 @@ module.exports = {
       );
     }
 
+    var validationResult = await chatValidator.validateUpdate(chat, request);
+
+    if (validationResult) {
+      return internalEventEmitter.emit(
+        chatChannels.Internal.CreateCompletedEvent,
+        {
+          statusCode: 400,
+          body: validationResult
+        }
+      );
+    }
+
     // Validate the existing owner
     let existingOwnerValidationResult = await ownerValidator.validateExisting(
       request.owner.item,
@@ -381,18 +393,6 @@ module.exports = {
         {
           statusCode: 401,
           body: existingOwnerValidationResult
-        }
-      );
-    }
-
-    var validationResult = await chatValidator.validateUpdate(chat, request);
-
-    if (validationResult) {
-      return internalEventEmitter.emit(
-        chatChannels.Internal.CreateCompletedEvent,
-        {
-          statusCode: 400,
-          body: validationResult
         }
       );
     }

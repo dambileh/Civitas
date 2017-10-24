@@ -436,6 +436,19 @@ module.exports = {
       );
     }
 
+    // Validate the request
+    var validationResult = await communityValidator.validateUpdate(community, request);
+
+    if (validationResult) {
+      return internalEventEmitter.emit(
+        communityChannels.Internal.CreateCompletedEvent,
+        {
+          statusCode: 400,
+          body: validationResult
+        }
+      );
+    }
+    
     // Validate the existing owner
     let existingOwnerValidationResult = await ownerValidator.validateExisting(
       request.owner.item,
@@ -448,18 +461,6 @@ module.exports = {
         {
           statusCode: 401,
           body: existingOwnerValidationResult
-        }
-      );
-    }
-
-    var validationResult = await communityValidator.validateUpdate(community, request);
-
-    if (validationResult) {
-      return internalEventEmitter.emit(
-        communityChannels.Internal.CreateCompletedEvent,
-        {
-          statusCode: 400,
-          body: validationResult
         }
       );
     }

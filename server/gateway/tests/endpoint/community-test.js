@@ -163,7 +163,7 @@ describe('/community', function () {
   describe('post', function () {
 
     const communityOneBody = {
-      "name": "durbanville community",
+      "name": "durbanville community 5",
       "address": {
         "isPrimary": true,
         "detail": {
@@ -289,7 +289,7 @@ describe('/community', function () {
       ]
     };
     const communityTwoBody = {
-      "name": "Bellville community",
+      "name": "Bellville community 6",
       "address": {
         "isPrimary": true,
         "detail": {
