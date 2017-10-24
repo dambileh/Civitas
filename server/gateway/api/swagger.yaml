@@ -544,6 +544,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          400:
+            description: "Validation Error. Usually caused by a missing or invalid parameter."
+            schema:
+              $ref: "#/definitions/validationErrorModel"
           404:
             description: "Resource Not Found"
             schema:
@@ -732,6 +736,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          400:
+            description: "Validation Error. Usually caused by a missing or invalid parameter."
+            schema:
+              $ref: "#/definitions/validationErrorModel"
           401:
             description: "Unauthorized Access"
             schema:
@@ -775,6 +783,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          400:
+            description: "Validation Error. Usually caused by a missing or invalid parameter."
+            schema:
+              $ref: "#/definitions/validationErrorModel"
           404:
             description: "Resource Not Found"
             schema:
@@ -964,6 +976,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          400:
+            description: "Validation Error. Usually caused by a missing or invalid parameter."
+            schema:
+              $ref: "#/definitions/validationErrorModel"
           401:
             description: "Unauthorized Access"
             schema:
@@ -1007,6 +1023,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          400:
+            description: "Validation Error. Usually caused by a missing or invalid parameter."
+            schema:
+              $ref: "#/definitions/validationErrorModel"
           401:
             description: "Unauthorized Access"
             schema:
@@ -1120,6 +1140,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          400:
+            description: "Validation Error. Usually caused by a missing or invalid parameter."
+            schema:
+              $ref: "#/definitions/validationErrorModel"
           401:
             description: "Unauthorized Access"
             schema:
@@ -1259,6 +1283,10 @@ paths:
               \ method is used."
             schema:
               $ref: "#/definitions/clientErrorModel"
+          400:
+            description: "Validation Error. Usually caused by a missing or invalid parameter."
+            schema:
+              $ref: "#/definitions/validationErrorModel"
           401:
             description: "Unauthorized Access"
             schema:
@@ -1306,6 +1334,10 @@ paths:
             description: "Unauthorized Access"
             schema:
               $ref: "#/definitions/authorizationErrorModel"
+          400:
+            description: "Validation Error. Usually caused by a missing or invalid parameter."
+            schema:
+              $ref: "#/definitions/validationErrorModel"
           404:
             description: "Resource Not Found"
             schema:
@@ -1805,11 +1837,9 @@ definitions:
         type: "string"
         description: "The id of the chat avatar stored on user's device"
       participants:
-        type: "array"
+        type: array
         items:
-          type: "string"
-          format: "uuid"
-        description: "The ids of the users that participate in the chat"
+          $ref: "#/definitions/userResponse"
       type:
         type: "string"
         enum: ["friend", "group"]

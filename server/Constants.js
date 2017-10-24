@@ -20,6 +20,7 @@ module.exports = {
       user: "user",
       company: "company",
       community: "community",
+      chat: "chat",
       registration: "registration"
     },
     channelStore: {
@@ -39,6 +40,12 @@ module.exports = {
       community: "community",
       user: "user",
       person: "person"
+    }
+  },
+  chat: {
+    chatTypes: {
+      friend: 'friend',
+      group: 'group'
     }
   },
   global: {

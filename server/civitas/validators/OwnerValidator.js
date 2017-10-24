@@ -13,10 +13,24 @@ module.exports = {
    * @param {Object} owner - The owner that will be validated
    * @param {Array} allowedTypes - The array of allowed types
    *
-   * @returns {boolean} - If the validation was successful
+   * @returns {Object|null} - Error
    */
   typeAllowedValidator: function typeAllowedValidator(owner, allowedTypes) {
-    return allowedTypes.includes(owner.kind);
+    
+    if (!allowedTypes.includes(owner.kind)) {
+      return new validationError(
+        'Some validation errors occurred.',
+        [
+          {
+            code: errors.Owner.INVALID_OWNER_TYPE_SPECIFIED,
+            message: `The owner kind [${owner.kind}] is not valid for this entity.`
+          }
+        ]
+      );
+    }
+
+
+    return null;
   },
 
   /**
@@ -24,12 +38,26 @@ module.exports = {
    *
    * @param {Object} owner - The owner that will be validated
    *
-   * @returns {boolean} - If the validation was successful
+   * @returns {Object|null} - Error
    */
   ownerExistsValidator: async function ownerExistsValidator(owner) {
+    
     let ownerModel = _ownerFactory(owner.kind);
     let existingOwner = await ownerModel.findById(owner.item);
-    return ((existingOwner) ? true : false);
+    
+    if (!existingOwner) {
+      return new validationError(
+        'Some validation errors occurred.',
+        [
+          {
+            code: errors.User.OWNER_NOT_FOUND,
+            message: `An owner with id [${owner.item}] could not be found`
+          }
+        ]
+      );
+    }
+
+    return null;
   },
 
   /**
@@ -38,10 +66,17 @@ module.exports = {
    * @param {string} requestOwnerId - The owner that will be validated
    * @param {string} existingOwnerId - The existing owner set on the entity
    *
-   * @returns {boolean} - If the validation was successful
+   * @returns {Object|null} - Error
    */
   accessValidator: function accessValidator(requestOwnerId, existingOwnerId) {
-    return (requestOwnerId == existingOwnerId);
+    
+    if (requestOwnerId != existingOwnerId) {
+      return new authorizationError(
+        `The specified owner with id [${requestOwnerId}] does not have access to the entity.`
+      );
+    }
+    
+    return null;
   },
 
   /**
@@ -55,40 +90,21 @@ module.exports = {
   validateRequest: async function validateRequest(requestOwner, allowedTypes) {
     let that = this;
     
-    return await new validationChain()
+     return await new validationChain()
       .add(
         that.typeAllowedValidator,
         {
-          parameters: [requestOwner, allowedTypes],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Owner.INVALID_OWNER_TYPE_SPECIFIED,
-                message: `The owner type [${requestOwner.kind}] is not valid for this entity.`
-              }
-            ]
-          )
+          parameters: [requestOwner, allowedTypes]
         }
       )
       .add(
         that.ownerExistsValidator,
         {
           parameters: [requestOwner],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.User.OWNER_NOT_FOUND,
-                message: `An owner with id [${requestOwner.item}] could not be found`
-              }
-            ]
-          ),
           async: true
         }
       )
       .validate({mode: validationChain.modes.EXIT_ON_ERROR});
-
   },
 
   /**
@@ -106,21 +122,19 @@ module.exports = {
       .add(
         that.accessValidator,
         {
-          parameters: [requestOwnerId, existingOwnerId],
-          error: new authorizationError(
-            `The specified owner with id [${requestOwnerId}] does not have access to the entity.`
-          )
+          parameters: [requestOwnerId, existingOwnerId]
         }
       )
       .validate({mode: validationChain.modes.EXIT_ON_ERROR});
   }
 };
 
-
 function _ownerFactory(type) {
   switch (type.toLowerCase()) {
     case 'user':
       return require('../models/User');
+    case 'community':
+      return require('../models/Community');
     default:
       throw new Error(`Invalid owner type [${type}] specified`);
   }

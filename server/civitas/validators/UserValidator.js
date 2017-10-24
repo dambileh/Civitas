@@ -1,59 +1,86 @@
 'use strict';
 
-var validationChain = require('../../libs/ValidationChain');
-var validationError = require('../../libs/error/ValidationError');
-var errors = require('../../ErrorCodes');
+const validationChain = require('../../libs/ValidationChain');
+const validationError = require('../../libs/error/ValidationError');
+const User = require('../models/User');
+const errors = require('../../ErrorCodes');
 
 module.exports = {
 
   /**
    * New user validator
    *
-   * @param {object} user - The user entity that will be validated
+   * @param {object} request - The new user entity that will be validated
    *
-   * @returns {boolean} - If the validation was successful
+   * @returns {Object|null} - Error
    */
-  newUserValidator: function newUserValidator(user) {
-    return !(user);
+  newUserValidator: async function newUserValidator(request) {
+
+    let user = null;
+    try {
+      user = await User.findOne({msisdn: request.msisdn});
+    } catch (err) {
+      return err;
+    }
+    
+    if(user) {
+      return new validationError(
+        'Some validation errors occurred.',
+        [
+          {
+            code: errors.User.NUMBER_ALREADY_EXISTS,
+            message: `A user with number [${request.msisdn}] already exists.`,
+            path: ['msisdn']
+          }
+        ]
+      )
+    }
+    
+    return null;
   },
 
   /**
    * Existing user validator
    *
    * @param {object} user - The user entity that will be validated
-   *
-   * @returns {boolean} - If the validation was successful
+   * @param {object} request - The new user entity that will be validated
+   * 
+   * @returns {Object|null} - Error
    */
-  existingUserValidator: function existingUserValidator(user) {
-    return (user ? true: false);
+  existingUserValidator: function existingUserValidator(user, request) {
+
+    if (!user) {
+      return new validationError(
+        'Some validation errors occurred.',
+        [
+          {
+            code: errors.User.USER_NOT_FOUND,
+            message: `No user with id [${request.id}] was found.`,
+            path: ['id']
+          }
+        ]
+      );
+    }
+    
+    return null;
   },
   
   /**
    * Executes all user create validations
    *
-   * @param {user} user - The existing user
    * @param {object} request - The new user entity that will be validated
    *
    * @returns {Object|null} - Validation error
    */
-  validateCreate: async function validateCreate(user, request) {
+  validateCreate: async function validateCreate(request) {
     let that = this;
     
     return await new validationChain()
       .add(
         that.newUserValidator,
         {
-          parameters: [user],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.User.NUMBER_ALREADY_EXISTS,
-                message: `A user with number [${request.msisdn}] already exists.`,
-                path: ['msisdn']
-              }
-            ]
-          )
+          parameters: [request],
+          async: true
         }
       )
       .validate({mode: validationChain.modes.EXIT_ON_ERROR});
@@ -74,17 +101,7 @@ module.exports = {
       .add(
         that.existingUserValidator,
         {
-          parameters: [user],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.User.USER_NOT_FOUND,
-                message: `No user with id [${request.id}] was found.`,
-                path: ['id']
-              }
-            ]
-          )
+          parameters: [user, request]
         }
       )
       .validate({mode: validationChain.modes.EXIT_ON_ERROR});

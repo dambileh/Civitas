@@ -567,7 +567,7 @@ describe('/company/{id}', function () {
             "results": {
               "errors": [{
                 "code": 400000,
-                "message": "The owner type [community] is not valid for this entity."
+                "message": "The owner kind [community] is not valid for this entity."
               }]
             },
             "status": 400
@@ -850,7 +850,7 @@ describe('/company/{id}', function () {
             "results": {
               "errors": [{
                 "code": 200005,
-                "message": "Exactly one primary address must be set",
+                "message": "Exactly one primary address must be set. [0] found instead.",
                 "path": ["addresses"]
               }]
             },
@@ -961,7 +961,7 @@ describe('/company/{id}', function () {
             "results": {
               "errors": [{
                 "code": 200005,
-                "message": "Exactly one primary address must be set",
+                "message": "Exactly one primary address must be set. [2] found instead.",
                 "path": ["addresses"]
               }]
             },
@@ -1042,7 +1042,7 @@ describe('/company/{id}', function () {
             "results": {
               "errors": [{
                 "code": 500000,
-                "message": "Exactly one primary phone number must be set",
+                "message": "Exactly one primary phone number must be set. [0] found instead",
                 "path": ["phoneNumbers"]
               }]
             },
@@ -1133,7 +1133,7 @@ describe('/company/{id}', function () {
             "results": {
               "errors": [{
                 "code": 500000,
-                "message": "Exactly one primary phone number must be set",
+                "message": "Exactly one primary phone number must be set. [2] found instead",
                 "path": ["phoneNumbers"]
               }]
             },
@@ -1411,7 +1411,7 @@ describe('/company/{id}', function () {
             "results": {
               "errors": [{
                 "code": 500001,
-                "message": "Phone numbers must be unique",
+                "message": "Found duplicate phone numbers [021456966]",
                 "path": ["phoneNumbers"]
               }]
             },
@@ -1590,7 +1590,7 @@ describe('/company/{id}', function () {
             "results": {
               "errors": [{
                 "code": 700000,
-                "message": "Exactly one primary representative must be set",
+                "message": "Exactly one primary representative must be set. [0] found instead",
                 "path": ["representatives"]
               }]
             },
@@ -1695,7 +1695,7 @@ describe('/company/{id}', function () {
             "results": {
               "errors": [{
                 "code": 700000,
-                "message": "Exactly one primary representative must be set",
+                "message": "Exactly one primary representative must be set. [2] found instead",
                 "path": ["representatives"]
               }]
             },
@@ -1801,7 +1801,7 @@ describe('/company/{id}', function () {
             "results": {
               "errors": [{
                 "code": 700001,
-                "message": "Persons email address must be unique",
+                "message": "Found duplicate persons email address [hsh_85@yahoo.com]",
                 "path": ["representatives", "email"]
               }]
             },
@@ -1885,7 +1885,7 @@ describe('/company/{id}', function () {
             "results": {
               "errors": [{
                 "code": 400000,
-                "message": "The owner type [community] is not valid for this entity."
+                "message": "The owner kind [community] is not valid for this entity."
               }]
             },
             "status": 400
@@ -1975,7 +1975,7 @@ describe('/company/{id}', function () {
         });
 
     });
-    it('should respond with 401 Validation Error. Owner has no access', function (done) {
+    it('should respond with 401 Authorization Error. Owner has no access', function (done) {
       /*eslint-disable*/
       var schema = {
         "type": "object",
@@ -2353,7 +2353,7 @@ describe('/company/{id}', function () {
             "results": {
               "errors": [{
                 "code": 400000,
-                "message": "The owner type [community] is not valid for this entity."
+                "message": "The owner kind [community] is not valid for this entity."
               }]
             },
             "status": 400

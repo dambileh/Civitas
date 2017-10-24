@@ -12,8 +12,8 @@ module.exports = {
    * Validates that entity has unique name
    *
    * @param {Array} entities - The entities that will be validated
-
-   * @returns {boolean} - If the validation was successful
+   *
+   * @returns {Object|null} - Error
    */
   isNameUniqueValidator: function isNameUniqueValidator(entities) {
 
@@ -22,32 +22,50 @@ module.exports = {
     for (let entity of entities) {
       if(firstName) {
         if(firstName == entity.name) {
-          return false;
+          return new validationError(
+            'Some validation errors occurred.',
+            [
+              {
+                code: errors.Entity.DUPLICATE_NAME_FOUND,
+                message: `Found duplicate entity name [${entity.name}]`,
+                path: ['entities', 'name']
+              }
+            ]
+          );
         }
       } else {
         firstName = entity.name;
       }
     }
 
-    return true;
+    return null;
   },
 
   /**
    * Validates that entity has exactly one primary phone number
    *
    * @param {Array} entities - The entities that will be validated
-
-   * @returns {boolean} - If the validation was successful
+   *
+   * @returns {Object|null} - Error
    */
   entityHasPrimaryPhoneValidator: async function entityHasPrimaryPhoneValidator(entities) {
     for (let entity of entities) {
       let validationResult = await phoneNumberValidator.hasPrimaryValidator(entity.phoneNumbers);
-      if (!validationResult) {
-        return false;
+      if (validationResult) {
+        return new validationError(
+          'Some validation errors occurred.',
+          [
+            {
+              code: errors.PhoneNumber.EXACTLY_ONE_PRIMARY_NUMBER_MUST_BE_SET,
+              message: `Exactly one primary phone number must be set for entity`,
+              path: ['entities', 'phoneNumbers']
+            }
+          ]
+        );
       }
     }
 
-    return true;
+    return null;
   },
 
   /**
@@ -55,16 +73,26 @@ module.exports = {
    *
    * @param {Array} entities - The entities that will be validated
    *
-   * @returns {boolean} - If the validation was successful
+   * @returns {Object|null} - Error
    */
   entityHasUniquePhoneValidator: async function entityHasUniquePhoneValidator(entities) {
     for (let entity of entities) {
       let validationResult = await phoneNumberValidator.isNumberUniqueValidator(entity.phoneNumbers);
-      if (!validationResult) {
-        return false;
+      if (validationResult) {
+        return new validationError(
+          'Some validation errors occurred.',
+          [
+            {
+              code: errors.PhoneNumber.DUPLICATE_PHONE_NUMBER_FOUND,
+              message: `Entities phone numbers must be unique`,
+              path: ['entities', 'phoneNumbers', 'number']
+            }
+          ]
+        );
       }
     }
-    return true;
+
+    return null;
   },
 
   /**
@@ -72,16 +100,26 @@ module.exports = {
    *
    * @param {Array} entities - The entities that will be validated
    *
-   * @returns {boolean} - If the validation was successful
+   * @returns {Object|null} - Error
    */
   entityHasPrimaryPersonValidator: async function entityHasPrimaryPersonValidator(entities) {
     for (let entity of entities) {
       let validationResult = await personValidator.hasPrimaryValidator(entity.representatives);
-      if (!validationResult) {
-        return false;
+      if (validationResult) {
+        return new validationError(
+          'Some validation errors occurred.',
+          [
+            {
+              code: errors.Person.EXACTLY_ONE_PRIMARY_PERSON_MUST_BE_SET,
+              message: `Exactly one primary representative must be set for entity`,
+              path: ['entities', 'representatives']
+            }
+          ]
+        );
       }
     }
-    return true;
+
+    return null;
   },
 
   /**
@@ -89,16 +127,26 @@ module.exports = {
    *
    * @param {Array} entities - The entities that will be validated
    *
-   * @returns {boolean} - If the validation was successful
+   * @returns {Object|null} - Error
    */
   entityPersonHasUniquePhoneValidator: async function entityPersonHasUniquePhoneValidator(entities) {
     for (let entity of entities) {
       let validationResult = await personValidator.personHasUniquePhoneValidator(entity.representatives);
-      if (!validationResult) {
-        return false;
+      if (validationResult) {
+        return new validationError(
+          'Some validation errors occurred.',
+          [
+            {
+              code: errors.PhoneNumber.DUPLICATE_PHONE_NUMBER_FOUND,
+              message: `Entity persons phone numbers must be unique`,
+              path: ['entities', 'representatives', 'phoneNumbers', 'number']
+            }
+          ]
+        );
       }
     }
-    return true;
+    
+    return null;
   },
 
   /**
@@ -106,16 +154,25 @@ module.exports = {
    *
    * @param {Array} entities - The entities that will be validated
    *
-   * @returns {boolean} - If the validation was successful
+   * @returns {Object|null} - Error
    */
   entityPersonPrimaryPhoneValidator: async function entityPersonPrimaryPhoneValidator(entities) {
     for (let entity of entities) {
       let validationResult = await personValidator.personHasPrimaryPhoneValidator(entity.representatives);
-      if (!validationResult) {
-        return false;
+      if (validationResult) {
+        return new validationError(
+          'Some validation errors occurred.',
+          [
+            {
+              code: errors.PhoneNumber.EXACTLY_ONE_PRIMARY_NUMBER_MUST_BE_SET,
+              message: `Exactly one primary phone number must be set for entity person`,
+              path: ['entities', 'representatives', 'phoneNumbers']
+            }
+          ]
+        );
       }
     }
-    return true;
+    return null;
   },
 
   /**
@@ -123,16 +180,25 @@ module.exports = {
    *
    * @param {Array} entities - The entities that will be validated
    *
-   * @returns {boolean} - If the validation was successful
+   * @returns {Object|null} - Error
    */
   entityPersonIsEmailUniqueValidator: async function entityPersonIsEmailUniqueValidator(entities) {
     for (let entity of entities) {
       let validationResult = await personValidator.isEmailUniqueValidator(entity.representatives);
-      if (!validationResult) {
-        return false;
+      if (validationResult) {
+        return new validationError(
+          'Some validation errors occurred.',
+          [
+            {
+              code: errors.Person.DUPLICATE_EMAIL_FOUND,
+              message: `Entity persons email address must be unique`,
+              path: ['entities', 'representatives', 'email']
+            }
+          ]
+        );
       }
     }
-    return true;
+    return null;
   },
 
   /**
@@ -150,16 +216,6 @@ module.exports = {
         that.entityHasPrimaryPhoneValidator,
         {
           parameters: [entities],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.PhoneNumber.EXACTLY_ONE_PRIMARY_NUMBER_MUST_BE_SET,
-                message: `Exactly one primary phone number must be set for entity`,
-                path: ['entities', 'phoneNumbers']
-              }
-            ]
-          ),
           async: true
         }
       )
@@ -167,49 +223,19 @@ module.exports = {
         that.entityHasUniquePhoneValidator,
         {
           parameters: [entities],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.PhoneNumber.DUPLICATE_PHONE_NUMBER_FOUND,
-                message: `Entities phone numbers must be unique`,
-                path: ['entities', 'phoneNumbers', 'number']
-              }
-            ]
-          ),
           async: true
         }
       )
       .add(
         that.isNameUniqueValidator,
         {
-          parameters: [entities],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Entity.DUPLICATE_NAME_FOUND,
-                message: `Entity name must be unique`,
-                path: ['entities', 'name']
-              }
-            ]
-          )
+          parameters: [entities]
         }
       )
       .add(
         that.entityHasPrimaryPersonValidator,
         {
           parameters: [entities],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Person.EXACTLY_ONE_PRIMARY_PERSON_MUST_BE_SET,
-                message: `Exactly one primary representative must be set for entity`,
-                path: ['entities', 'representatives']
-              }
-            ]
-          ),
           async: true
         }
       )
@@ -217,16 +243,6 @@ module.exports = {
         that.entityPersonHasUniquePhoneValidator,
         {
           parameters: [entities],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.PhoneNumber.DUPLICATE_PHONE_NUMBER_FOUND,
-                message: `Entity persons phone numbers must be unique`,
-                path: ['entities', 'representatives', 'phoneNumbers', 'number']
-              }
-            ]
-          ),
           async: true
         }
       )
@@ -234,16 +250,6 @@ module.exports = {
         that.entityPersonPrimaryPhoneValidator,
         {
           parameters: [entities],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.PhoneNumber.EXACTLY_ONE_PRIMARY_NUMBER_MUST_BE_SET,
-                message: `Exactly one primary phone number must be set for entity person`,
-                path: ['entities', 'representatives', 'phoneNumbers']
-              }
-            ]
-          ),
           async: true
         }
       )
@@ -251,16 +257,6 @@ module.exports = {
         that.entityPersonIsEmailUniqueValidator,
         {
           parameters: [entities],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Person.DUPLICATE_EMAIL_FOUND,
-                message: `Entity persons email address must be unique`,
-                path: ['entities', 'representatives', 'email']
-              }
-            ]
-          ),
           async: true
         }
       )

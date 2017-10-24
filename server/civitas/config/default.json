@@ -3,7 +3,7 @@
         {
             "name": "file",
             "level": "debug",
-            "filename": "/var/log/civitas/user/application.log"
+            "filename": "/var/log/civitas/civitas/application.log"
         }
     ],
     "mongo": {

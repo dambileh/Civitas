@@ -1,8 +1,8 @@
 'use strict';
 
-var validationChain = require('../../libs/ValidationChain');
-var validationError = require('../../libs/error/ValidationError');
-var errors = require('../../ErrorCodes');
+const validationChain = require('../../libs/ValidationChain');
+const validationError = require('../../libs/error/ValidationError');
+const errors = require('../../ErrorCodes');
 const Company = require('../models/Company');
 
 module.exports = {
@@ -13,7 +13,7 @@ module.exports = {
    * @param {string} name - The name of the company that will be validated
    * @param {Array} phoneNumbers - The array of phone numbers that will be validated
    *
-   * @returns {boolean} - If the validation was successful
+   * @returns {Object|null} - Error
    */
   newCompanyValidator: async function newCompanyValidator(name, phoneNumbers) {
 
@@ -31,21 +31,47 @@ module.exports = {
         }
       );
     } catch (err) {
-      return false;
+      return err;
     }
 
-    return !(company);
+    if (company) {
+      return new validationError(
+        'Some validation errors occurred.',
+        [
+          {
+            code: errors.Company.COMPANY_ALREADY_EXISTS,
+            message: `A company with the same name [${name}] and primary phone number [${primaryNumber.number}] already exists.`,
+            path: ['name']
+          }
+        ]
+      )
+    }
+    
+    return null;
   },
 
   /**
    * Validates the company already exist
    *
-   * @param {Object} company - The company entity that will be validated
-   *
-   * @returns {boolean} - If the validation was successful
+   * @param {Object} company - The existing company entity
+   * @param {Object} request - The new user company that will be validated
+   * 
+   * @returns {Object|null} - Error
    */
-  existingCompanyValidator: function existingCompanyValidator(company) {
-    return (company ? true : false);
+  existingCompanyValidator: function existingCompanyValidator(company, request) {
+    if (!company) {
+      return new validationError(
+        'Some validation errors occurred.',
+        [
+          {
+            code: errors.Company.COMPANY_NOT_FOUND,
+            message: `No company with id [${request.id}] was found.`,
+            path: ['id']
+          }
+        ]
+      )
+    }
+    return null;
   },
 
   /**
@@ -63,16 +89,6 @@ module.exports = {
         that.newCompanyValidator,
         {
           parameters: [request.name, request.phoneNumbers],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Company.COMPANY_ALREADY_EXISTS,
-                message: `A company with the same name and primary phone number already exists.`,
-                path: ['name']
-              }
-            ]
-          ),
           async: true
         }
       )
@@ -93,17 +109,7 @@ module.exports = {
       .add(
         that.existingCompanyValidator,
         {
-          parameters: [company],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Company.COMPANY_NOT_FOUND,
-                message: `No company with id [${request.id}] was found.`,
-                path: ['id']
-              }
-            ]
-          )
+          parameters: [company, request]
         }
       ).validate({mode: validationChain.modes.EXIT_ON_ERROR});
 

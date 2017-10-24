@@ -10,8 +10,8 @@ module.exports = {
    * Validates that there is exactly one primary phone number
    *
    * @param {Array} phoneNumbers - the phone numbers that will be validated
-
-   * @returns {boolean} - If the validation was successful
+   *
+   * @returns {Object|null} - Error
    */
   hasPrimaryValidator: function hasPrimaryValidator(phoneNumbers) {
 
@@ -23,15 +23,28 @@ module.exports = {
       }
     }
 
-    return (primaryCounter === 1);
+    if (primaryCounter !== 1) {
+      return new validationError(
+        'Some validation errors occurred.',
+        [
+          {
+            code: errors.PhoneNumber.EXACTLY_ONE_PRIMARY_NUMBER_MUST_BE_SET,
+            message: `Exactly one primary phone number must be set. [${primaryCounter}] found instead`,
+            path: ['phoneNumbers']
+          }
+        ]
+      );
+    }
+
+    return null;
   },
 
   /**
    * Validates that there are no duplicate phone numbers
    *
-   * @param {Array} phoneNumbers -Tthe phone numbers that will be validated
-
-   * @returns {boolean} - If the validation was successful
+   * @param {Array} phoneNumbers - The phone numbers that will be validated
+   *
+   * @returns {Object|null} - Error
    */
   isNumberUniqueValidator: function isNumberUniqueValidator(phoneNumbers) {
 
@@ -40,14 +53,23 @@ module.exports = {
     for (let phoneNumber of phoneNumbers) {
       if(firstNumber) {
         if(firstNumber == phoneNumber.number) {
-          return false;
+          return new validationError(
+            'Some validation errors occurred.',
+            [
+              {
+                code: errors.PhoneNumber.DUPLICATE_PHONE_NUMBER_FOUND,
+                message: `Found duplicate phone numbers [${phoneNumber.number}]`,
+                path: ['phoneNumbers']
+              }
+            ]
+          );
         }
       } else {
         firstNumber = phoneNumber.number;
       }
     }
 
-    return true;
+    return null;
   },
 
   /**
@@ -63,33 +85,13 @@ module.exports = {
       .add(
         that.hasPrimaryValidator,
         {
-          parameters: [phoneNumbers],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.PhoneNumber.EXACTLY_ONE_PRIMARY_NUMBER_MUST_BE_SET,
-                message: `Exactly one primary phone number must be set`,
-                path: ['phoneNumbers']
-              }
-            ]
-          )
+          parameters: [phoneNumbers]
         }
       )
       .add(
         that.isNumberUniqueValidator,
         {
-          parameters: [phoneNumbers],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.PhoneNumber.DUPLICATE_PHONE_NUMBER_FOUND,
-                message: `Phone numbers must be unique`,
-                path: ['phoneNumbers']
-              }
-            ]
-          )
+          parameters: [phoneNumbers]
         }
       )
       .validate({mode: validationChain.modes.EXIT_ON_ERROR});

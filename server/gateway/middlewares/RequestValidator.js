@@ -16,31 +16,13 @@ module.exports = {
       .add(
         _validateHeader,
         {
-          parameters: [req],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Global.REQUIRED_HEADER_PARAMS_NOT_SET,
-                message: `The required [context] or [context-id] header parameters not set`
-              }
-            ]
-          )
+          parameters: [req]
         }
       )
       .add(
         _validateIdInRequest,
         {
-          parameters: [req],
-          error: new validationError(
-            'Some validation errors occurred.',
-            [
-              {
-                code: errors.Global.ID_IN_REQUEST_NOT_VALID,
-                message: `Invalid [id] found in path or header`
-              }
-            ]
-          )
+          parameters: [req]
         }
       )
       .validate({mode: validationChain.modes.EXIT_ON_ERROR});
@@ -65,7 +47,7 @@ module.exports = {
  *
  * @param {Object} request - The http request object that carries the header
  *
- * @returns {boolean}
+ * @returns {Object|null} - Error
  */
 function _validateHeader(request) {
 
@@ -74,12 +56,20 @@ function _validateHeader(request) {
     // If the context is expected, ensure that it is set
     if (request.swagger.params.context) {
       if (!request.swagger.params['context-id'].value || !request.swagger.params.context.value) {
-        return false;
+        return new validationError(
+          'Some validation errors occurred.',
+          [
+            {
+              code: errors.Global.REQUIRED_HEADER_PARAMS_NOT_SET,
+              message: `The required [context] or [context-id] header parameters not set`
+            }
+          ]
+        );
       }
     }
   }
 
-  return true;
+  return null;
 }
 
 /**
@@ -87,10 +77,10 @@ function _validateHeader(request) {
  *
  * @param {Object} request - The http request object that carried the header
  *
- * @returns {boolean}
+ * @returns {Object|null} - Error
  */
 function _validateIdInRequest(request) {
-  let valid = true;
+  let error = null;
 
   if (request.swagger) {
     const uuidRegEx = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i;
@@ -99,11 +89,19 @@ function _validateIdInRequest(request) {
       // do something with key|value
       if (param.schema && param.schema.format && (param.schema.format === 'uuid')) {
         if(!uuidRegEx.test(param.value)) {
-          valid = false;
+          error = new validationError(
+            'Some validation errors occurred.',
+            [
+              {
+                code: errors.Global.ID_IN_REQUEST_NOT_VALID,
+                message: `Invalid [id] found in path or header`
+              }
+            ]
+          );
         }
       }
     }
   }
 
-  return valid;
+  return error;
 }

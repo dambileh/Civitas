@@ -10,6 +10,7 @@ function ValidatorChain() {
   }
   this._validators = [];
 }
+
 /**
  * Adds a new validator to the chain
  *
@@ -27,8 +28,7 @@ ValidatorChain.prototype.add = function (fn, options = {}) {
   this._validators.push({
     fn: fn,
     parameters: ((options.parameters) ? options.parameters : []),
-    async: options.async,
-    error: options.error
+    async: options.async
   });
   return this;
 };
@@ -65,11 +65,11 @@ ValidatorChain.prototype.validate = function (options) {
   let that = this;
 
   switch (options.mode) {
-    case 'runAll':
+    case ValidatorChain.modes.RUN_ALL:
       return _runAll(that._validators);
-    case 'exitOnError':
+    case ValidatorChain.modes.EXIT_ON_ERROR:
       return _exitOnError(that._validators);
-    case 'runAllParallel':
+    case ValidatorChain.modes.RUN_ALL_PARALLEL:
       return _runAllParallel(that._validators);
     default:
       throw new Error(`Invalid mode [${options.mode}] specified`);
@@ -79,13 +79,21 @@ ValidatorChain.prototype.validate = function (options) {
 
 function _runAll(validators) {
   return new Promise(async function (resolve, reject) {
-    let results = {};
+    let results = null;
 
     for (let validator of validators) {
+      let result = null;
       if (validator.async) {
-        results[validator.fn.name] = await validator.fn(...validator.parameters);
+        result = await validator.fn(...validator.parameters);
       } else {
-        results[validator.fn.name] = validator.fn(...validator.parameters);
+        result = validator.fn(...validator.parameters);
+      }
+
+      if(result) {
+        if(!results) {
+          results = [];
+        }
+        results.push(result);
       }
     }
     resolve(results);
@@ -97,21 +105,17 @@ function _exitOnError(validators) {
 
     for (let validator of validators) {
 
-      let result = true;
+      let result = null;
+
       if (validator.async) {
         result = await validator.fn(...validator.parameters);
       } else {
         result = validator.fn(...validator.parameters);
       }
       
-      if (!result) {
-        if (validator.error) {
-          return resolve(validator.error);
-        } else {
-          return resolve(validator.fn.name);
-        }
-
-      }
+      if (result) {
+        return resolve(result);
+      } 
     }
 
     resolve(null);
@@ -130,10 +134,15 @@ function _runAllParallel(validators) {
     }
 
     let resolves = await Promise.all(promises);
-    let results = {};
+    let results = null;
 
-    resolves.forEach(function (resolve, index) {
-      results[fnNames[index]] = resolve;
+    resolves.forEach(function (resolve) {
+      if(resolve) {
+        if(!results) {
+          results = [];
+        }
+        results.push(resolve);
+      }
     });
 
     resolve(results);

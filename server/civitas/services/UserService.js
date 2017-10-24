@@ -27,21 +27,8 @@ module.exports = {
    * @param {object} request - The request that was sent from the controller
    */
   createUser: async function createUser(request) {
-    let user = null;
-    try {
-      user = await User.findOne({msisdn: request.msisdn});
-    } catch (err) {
-      return internalEventEmitter.emit(
-        userChannels.Internal.CreateCompletedEvent,
-        {
-          statusCode: 500,
-          body: err
-        }
-      );
-    }
-
-    var validationResult = await userValidator.validateCreate(user, request);
-
+    var validationResult = await userValidator.validateCreate(request);
+    
     if (validationResult) {
       return internalEventEmitter.emit(
         userChannels.Internal.CreateCompletedEvent,
@@ -326,11 +313,6 @@ module.exports = {
       );
     }
 
-    logging.logAction(
-      logging.logLevels.INFO,
-      `Attempting to update a user document with id [${user.id}]`
-    );
-
     let userAddresses = user.addresses;
 
     // First update the address
@@ -377,6 +359,11 @@ module.exports = {
       user.email = request.email;
     }
 
+    logging.logAction(
+      logging.logLevels.INFO,
+      `Attempting to update a user document with id [${user.id}]`
+    );
+    
     try {
       await user.save();
     } catch (err) {
